@@ -70,8 +70,12 @@ tasks:
 
   dev-tools:install:
     cmds:
-      - echo "- Install dev tools"
-      - export GOBIN="{{.TOOLS_DIR}}" && go install github.com/daixiang0/gci@latest && go install mvdan.cc/gofumpt@latest
+      - echo "- Install gci"
+      - export GOBIN="{{.TOOLS_DIR}}" && go install github.com/daixiang0/gci@latest
+      - echo "- Install gofumpt"
+      - export GOBIN="{{.TOOLS_DIR}}" && go install mvdan.cc/gofumpt@latest
+      - echo "- Install options-gen"
+      - export GOBIN="{{.TOOLS_DIR}}" && go install github.com/kazhuravlev/options-gen/cmd/options-gen@latest     -
 
   generate:
     cmds:
