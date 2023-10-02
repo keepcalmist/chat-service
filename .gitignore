@@ -18,7 +18,7 @@ go.work
 .idea/
 .vscode/
 .env
-
+bin/
 *.out
 *.test
 /chat-service
