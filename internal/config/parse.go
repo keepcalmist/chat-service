@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/keepcalmist/chat-service/internal/validator"
 )
 
 func ParseAndValidate(filename string) (Config, error) {
@@ -14,6 +15,11 @@ func ParseAndValidate(filename string) (Config, error) {
 
 	cfg := Config{}
 	err = toml.Unmarshal(data, &cfg)
+	if err != nil {
+		return Config{}, err
+	}
+
+	err = validator.Validator.Struct(cfg)
 	if err != nil {
 		return Config{}, err
 	}
