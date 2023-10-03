@@ -17,9 +17,10 @@ import (
 	"time"
 	"unicode/utf8"
 
-	urn "github.com/leodido/go-urn"
 	"golang.org/x/crypto/sha3"
 	"golang.org/x/text/language"
+
+	urn "github.com/leodido/go-urn"
 )
 
 // Func accepts a FieldLevel interface for all validation needs. The return

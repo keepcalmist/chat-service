@@ -16,7 +16,7 @@ vars:
   DEV_TOOLS: |
     github.com/daixiang0/gci@v0.10.1
     mvdan.cc/gofumpt@v0.4.0
-
+    github.com/kazhuravlev/options-gen/cmd/options-gen@latest
 tasks:
   default:
     cmds:
@@ -36,11 +36,10 @@ tasks:
     - go mod vendor
 
   fmt:
-    dir: '{{.TOOLS_DIR}}'
     cmds:
     - echo "- Format"
-    - gofumpt -l -w ../..
-    - gci write -s standard -s default -s "prefix(github.com/keepcalmist/chat-service)" ../..
+    - gofumpt -l -w {{.GO_FILES}}
+    - gci write -s standard -s default -s "prefix({{.GO_MODULE}})" {{.GO_FILES}}
 
   lint:
     cmds:
@@ -71,11 +70,8 @@ tasks:
   dev-tools:install:
     cmds:
       - echo "- Install gci"
-      - export GOBIN="{{.TOOLS_DIR}}" && go install github.com/daixiang0/gci@latest
-      - echo "- Install gofumpt"
-      - export GOBIN="{{.TOOLS_DIR}}" && go install mvdan.cc/gofumpt@latest
-      - echo "- Install options-gen"
-      - export GOBIN="{{.TOOLS_DIR}}" && go install github.com/kazhuravlev/options-gen/cmd/options-gen@latest     -
+      - for: {var: DEV_TOOLS, split: ''}
+        cmd: export GOBIN="{{.TOOLS_DIR}}" && go install {{.ITEM}}
 
   generate:
     cmds:

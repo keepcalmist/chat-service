@@ -25,7 +25,7 @@ linters-settings:
     case:
       rules:
         json: camel
-        avro: snake
+        toml: snake
 
 linters:
   disable-all: true

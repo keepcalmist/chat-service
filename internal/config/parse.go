@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+
 	"github.com/keepcalmist/chat-service/internal/validator"
 )
 

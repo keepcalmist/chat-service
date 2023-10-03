@@ -3,9 +3,10 @@ package ut
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
+
+	"io"
 
 	"github.com/go-playground/locales"
 )
