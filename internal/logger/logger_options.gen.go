@@ -26,7 +26,7 @@ func NewOptions(
 	return o
 }
 
-func WithProductionMode(opt bool) OptOptionsSetter {
+func WithProductionMode(opt func() bool) OptOptionsSetter {
 	return func(o *Options) {
 		o.productionMode = opt
 	}

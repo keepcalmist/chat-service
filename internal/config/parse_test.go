@@ -22,4 +22,5 @@ func TestParseAndValidate(t *testing.T) {
 	cfg, err := config.ParseAndValidate(configExamplePath)
 	require.NoError(t, err)
 	assert.NotEmpty(t, cfg.Log.Level)
+	assert.False(t, cfg.Global.IsProduction())
 }

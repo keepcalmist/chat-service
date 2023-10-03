@@ -21,3 +21,7 @@ type ServersConfig struct {
 type DebugServerConfig struct {
 	Addr string `toml:"addr" validate:"required,hostname_port"`
 }
+
+func (c GlobalConfig) IsProduction() bool {
+	return c.Env == "prod"
+}

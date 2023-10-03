@@ -14,7 +14,7 @@ import (
 //go:generate options-gen -out-filename=logger_options.gen.go -from-struct=Options
 type Options struct {
 	level          string `option:"mandatory" validate:"required,oneof=debug info warn error"`
-	productionMode bool
+	productionMode func() bool
 }
 
 func MustInit(opts Options) {
@@ -42,7 +42,7 @@ func Init(opts Options) error {
 		EncodeTime: zapcore.ISO8601TimeEncoder,
 	}
 
-	if opts.productionMode {
+	if opts.productionMode() {
 		cfg.EncodeLevel = zapcore.CapitalLevelEncoder
 		enc = zapcore.NewJSONEncoder(cfg)
 	} else {
