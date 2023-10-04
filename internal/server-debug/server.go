@@ -1,4 +1,4 @@
-package server_debug
+package serverdebug
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/pprof"
-	_ "net/http/pprof"
 	"time"
 
 	"github.com/labstack/echo/v4"

@@ -1,4 +1,4 @@
-package server_debug
+package serverdebug
 
 import (
 	"html/template"
@@ -14,7 +14,6 @@ type page struct {
 
 type indexPage struct {
 	pages []page
-	lvl   func() string
 }
 
 func newIndexPage() *indexPage {
