@@ -17,6 +17,12 @@ vars:
     github.com/daixiang0/gci@v0.10.1
     mvdan.cc/gofumpt@v0.4.0
     github.com/kazhuravlev/options-gen/cmd/options-gen@v0.28.3
+  DOCKER_COMPOSE_PATHS: ./deploy/local/docker-compose.yml
+  DOCKER_COMPOSE_CMD:
+    sh: "which docker-compose"
+  SERVICES:
+    sh: "{{.DOCKER_COMPOSE_CMD}} -f {{.DOCKER_COMPOSE_PATHS}} config --services"
+
 tasks:
   default:
     cmds:
@@ -38,9 +44,9 @@ tasks:
   fmt:
     cmds:
       - echo "- gofumpt"
-        - {{.TOOLS_DIR}}/gofumpt -l -w {{.GO_FILES}}
+      - "{{.TOOLS_DIR}}/gofumpt -l -w {{.GO_FILES}}"
       - echo "- gci"
-        - {{.TOOLS_DIR}}/gci write -s standard -s default -s "prefix({{.GO_MODULE}})" {{.GO_FILES}}
+      - "{{.TOOLS_DIR}}/gci write -s standard -s default -s \"prefix({{.GO_MODULE}})\" {{.GO_FILES}}"
 
   lint:
     cmds:
@@ -78,3 +84,60 @@ tasks:
     cmds:
       - export PATH="${PATH}:{{.TOOLS_DIR}}" && go generate ./...
     aliases: [gen]
+
+  deps:
+    desc: Стартует контейнеры с зависимостями (можно в detached-режиме).
+    cmds:
+    - echo {{.DOCKER_COMPOSE_CMD}}
+    - echo {{.DOCKER_COMPOSE_PATHS}}
+    - "{{.DOCKER_COMPOSE_CMD}} -f {{.DOCKER_COMPOSE_PATHS}} up -d"
+  deps:cmd:
+    desc: Дать произвольную команду "docker compose"-у.
+    cmds:
+     - "{{.DOCKER_COMPOSE_CMD}} -f {{.DOCKER_COMPOSE_PATHS}} {{.CLI_ARGS}}"
+
+  deps:status:
+    desc: Показывает статус запущенных контейнеров.
+    cmds:
+    - "{{.DOCKER_COMPOSE_CMD}} -f {{.DOCKER_COMPOSE_PATHS}} ps"
+    -
+  deps:logs:
+    desc: Показывает логи всех сервисов или одного сервиса.
+    cmds:
+      - task: deps:cmd
+        vars:
+          CLI_ARGS: "logs {{.CLI_ARGS}}"
+
+  deps:stop:
+    cmds:
+      - task: deps:cmd
+        vars:
+          CLI_ARGS: "stop"
+
+  deps:reset-psql:
+    cmds:
+      - task: deps:reset
+        vars:
+          SERVICE: postgres
+
+  deps:services:
+    cmds:
+      - for: { var: SERVICES, split: '' }
+        cmd: echo {{.ITEM}}
+
+  deps:reset-all:
+    vars:
+      SERVICE: ""
+    cmds:
+      - echo "Reset all services"
+      - for: { var: SERVICES, split: '' }
+        cmd: "{{.DOCKER_COMPOSE_CMD}} -f {{.DOCKER_COMPOSE_PATHS}} rm -fsv {{.ITEM}} && 
+        {{.DOCKER_COMPOSE_CMD}} -f {{.DOCKER_COMPOSE_PATHS}} up -d {{.ITEM}}"
+
+  deps:reset:
+    requires:
+      vars: [SERVICE]
+    cmds:
+      - echo "Reset {{.SERVICE}}"
+      - "{{.DOCKER_COMPOSE_CMD}} -f {{.DOCKER_COMPOSE_PATHS}} rm -fsv {{.SERVICE}}"
+      - "{{.DOCKER_COMPOSE_CMD}} -f {{.DOCKER_COMPOSE_PATHS}} up -d {{.SERVICE}}"
