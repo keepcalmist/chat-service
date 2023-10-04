@@ -17,22 +17,23 @@ type Options struct {
 	productionMode func() bool
 }
 
-func MustInit(opts Options) {
-	if err := Init(opts); err != nil {
+func MustInit(opts Options) func(level zapcore.Level) {
+	f, err := Init(opts)
+	if err != nil {
 		panic(err)
 	}
+	return f
 }
 
-func Init(opts Options) error {
+func Init(opts Options) (func(level zapcore.Level), error) {
 	if err := opts.Validate(); err != nil {
-		return fmt.Errorf("validate options: %v", err)
+		return nil, fmt.Errorf("validate options: %v", err)
 	}
 
-	lvl, err := zapcore.ParseLevel(opts.level)
+	lvl, err := zap.ParseAtomicLevel(opts.level)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	var enc zapcore.Encoder
 	cfg := zapcore.EncoderConfig{
 		TimeKey:    "T",
@@ -56,7 +57,7 @@ func Init(opts Options) error {
 	l := zap.New(zapcore.NewTee(cores...))
 	zap.ReplaceGlobals(l)
 
-	return nil
+	return lvl.SetLevel, nil
 }
 
 func Sync() {

@@ -10,11 +10,11 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	err := logger.Init(logger.NewOptions("error", logger.WithProductionMode(func() bool {
+	setter, err := logger.Init(logger.NewOptions("error", logger.WithProductionMode(func() bool {
 		return true
 	})))
 	require.NoError(t, err)
-
+	require.NotNil(t, setter)
 	zap.L().Named("user-cache").Error("inconsistent state", zap.String("uid", "1234"))
 	// {"level":"ERROR","T":"2022-10-09T13:56:47.626+0300","component":"user-cache","msg":"inconsistent state","uid":"1234"}
 }
