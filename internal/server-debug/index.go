@@ -39,7 +39,7 @@ func (i indexPage) handler(eCtx echo.Context) error {
 	</ul>
 
 	<h2>Log Level</h2>
-	<form onSubmit="putLogLevel()">
+	<form onSubmit="putLogLevel(event)">
 		<select id="log-level-select">
 			<option value="debug" {{if eq .LogLevel "debug"}}selected{{end}}>debug</option>
 			<option value="info" {{if eq .LogLevel "info"}}selected{{end}}>info</option>
@@ -50,7 +50,8 @@ func (i indexPage) handler(eCtx echo.Context) error {
 	</form>
 	
 	<script>
-		function putLogLevel() {
+		function putLogLevel(e) {
+			e.preventDefault();
 			const req = new XMLHttpRequest();
 			req.open('PUT', '/log/level', false);
 			req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
