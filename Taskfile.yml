@@ -25,7 +25,7 @@ vars:
   DOCKER_COMPOSE_CMD:
     sh: "which docker-compose"
   SERVICES:
-    sh: "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all config --services"
+    sh: echo "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all config --services"
 
 tasks:
   print:
@@ -96,7 +96,7 @@ tasks:
   deps:
     desc: Стартует контейнеры с зависимостями (можно в detached-режиме).
     cmds:
-    - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} up -d"
+    - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all up -d"
 
   deps:cmd:
     desc: Дать произвольную команду "docker compose"-у.

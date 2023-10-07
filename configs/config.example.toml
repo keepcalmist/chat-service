@@ -1,6 +1,5 @@
 [global]
 env = "dev"
-sentry = "http://48eb3fdc9f204e45bac324d5beade5f2@localhost:8000/2"
 
 [log]
 level = "info"
@@ -9,3 +8,5 @@ level = "info"
 [servers.debug]
 addr = ":8079"
 
+[sentry]
+dsn = "DSN from Client Keys page"

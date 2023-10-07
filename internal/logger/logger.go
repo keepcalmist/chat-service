@@ -7,6 +7,8 @@ import (
 	"os"
 	"syscall"
 
+	"github.com/TheZeroSlave/zapsentry"
+	"github.com/keepcalmist/chat-service/internal/buildinfo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -15,6 +17,8 @@ import (
 type Options struct {
 	level          string `option:"mandatory" validate:"required,oneof=debug info warn error"`
 	productionMode func() bool
+	sentryDSN      string
+	env            string `option:"mandatory" validate:"required,oneof=dev stage prod"`
 }
 
 func MustInit(opts Options) func(level zapcore.Level) {
@@ -53,6 +57,22 @@ func Init(opts Options) (func(level zapcore.Level), error) {
 
 	cores := []zapcore.Core{
 		zapcore.NewCore(enc, os.Stdout, lvl),
+	}
+	if opts.sentryDSN != "" {
+		cl, err := NewSentryClient(opts.sentryDSN, opts.env, buildinfo.BuildInfo.Main.Version)
+		if err != nil {
+			return nil, fmt.Errorf("new sentry client: %v", err)
+		}
+		sentryCore, err := zapsentry.NewCore(zapsentry.Configuration{
+			Level: zap.DebugLevel,
+			//FrameMatcher: zapsentry.CombineFrameMatchers(
+			//	zapsentry.SkipFunctionPrefixFrameMatcher("go.uber.org/zap"),
+			//),
+		}, zapsentry.NewSentryClientFromClient(cl))
+		if err != nil {
+			return nil, fmt.Errorf("new sentry core: %v", err)
+		}
+		cores = append(cores, sentryCore)
 	}
 	l := zap.New(zapcore.NewTee(cores...))
 	zap.ReplaceGlobals(l)

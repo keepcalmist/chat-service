@@ -27,6 +27,12 @@ func NewOptions(
 	return o
 }
 
+func WithLogSetter(opt func(level zapcore.Level)) OptOptionsSetter {
+	return func(o *Options) {
+		o.logSetter = opt
+	}
+}
+
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
 	errs.Add(errors461e464ebed9.NewValidationError("addr", _validate_Options_addr(o)))
@@ -38,10 +44,4 @@ func _validate_Options_addr(o *Options) error {
 		return fmt461e464ebed9.Errorf("field `addr` did not pass the test: %w", err)
 	}
 	return nil
-}
-
-func SetLogLevel(f func(level zapcore.Level)) OptOptionsSetter {
-	return func(o *Options) {
-		o.logSetter = f
-	}
 }

@@ -14,7 +14,7 @@ services:
     ports:
       - "127.0.0.1:5432:5432"
     profiles:
-      - all
+      - psql
 
 volumes:
   postgresql-data:

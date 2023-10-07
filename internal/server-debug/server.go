@@ -113,7 +113,7 @@ func (s *Server) SetLogLvl(eCtx echo.Context) error {
 	old := s.lg.Level().String()
 	s.lvlSetter(lvl)
 
-	s.lg.Info("switching log lvl",
+	s.lg.Error("switching log lvl",
 		zap.String("old", old),
 		zap.String("new", s.lg.Level().String()),
 	)

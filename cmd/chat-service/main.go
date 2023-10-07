@@ -38,6 +38,8 @@ func run() (errReturned error) {
 	setLevel, err := logger.Init(
 		logger.NewOptions(cfg.Log.Level,
 			logger.WithProductionMode(cfg.Global.IsProduction),
+			logger.WithSentryDSN(cfg.Sentry.DSN),
+			logger.WithEnv(cfg.Global.Env),
 		),
 	)
 	if err != nil {
@@ -48,7 +50,7 @@ func run() (errReturned error) {
 	srvDebug, err := serverdebug.New(
 		serverdebug.NewOptions(
 			cfg.Servers.Debug.Addr,
-			serverdebug.SetLogLevel(setLevel)),
+			serverdebug.WithLogSetter(setLevel)),
 	)
 	if err != nil {
 		return fmt.Errorf("init debug server: %v", err)
