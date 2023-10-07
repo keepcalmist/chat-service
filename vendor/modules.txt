@@ -36,6 +36,9 @@ github.com/golang-jwt/jwt
 ## explicit; go 1.18
 github.com/kazhuravlev/options-gen/pkg/errors
 github.com/kazhuravlev/options-gen/pkg/validator
+# github.com/labstack/echo-contrib v0.15.0
+## explicit; go 1.18
+github.com/labstack/echo-contrib/pprof
 # github.com/labstack/echo/v4 v4.11.1
 ## explicit; go 1.17
 github.com/labstack/echo/v4

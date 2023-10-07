@@ -9,6 +9,7 @@ require (
 	github.com/getsentry/sentry-go v0.25.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/kazhuravlev/options-gen v0.28.3
+	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/stretchr/testify v1.8.2
 	go.uber.org/zap v1.26.0
