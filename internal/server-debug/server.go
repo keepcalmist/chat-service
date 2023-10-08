@@ -59,9 +59,11 @@ func New(opts Options) (*Server, error) {
 	index.addPage("/version", "Get build information")
 	index.addPage("/debug/pprof/", "Go stg profile")
 	index.addPage("/debug/pprof/profile?seconds=30", "Takes half-minute profile")
+	index.addPage("/debug/sentry", "Heap profile")
 
 	// Обработка "/log/level"
 	e.PUT("/log/level", s.SetLogLvl)
+	e.GET("/debug/sentry", s.DebugSentry)
 
 	// Обработка "/debug/pprof/" и связанных команд
 	pprof.Register(e)
@@ -108,10 +110,16 @@ func (s *Server) SetLogLvl(eCtx echo.Context) error {
 	old := s.lg.Level().String()
 	s.lvlSetter(lvl)
 
-	s.lg.Error("switching log lvl",
+	s.lg.Info("switching log lvl",
 		zap.String("old", old),
 		zap.String("new", s.lg.Level().String()),
 	)
+
+	return nil
+}
+
+func (s *Server) DebugSentry(_ echo.Context) error {
+	s.lg.Info("look for me in the Sentry")
 
 	return nil
 }

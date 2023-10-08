@@ -8,9 +8,10 @@ import (
 	"syscall"
 
 	"github.com/TheZeroSlave/zapsentry"
-	"github.com/keepcalmist/chat-service/internal/buildinfo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/keepcalmist/chat-service/internal/buildinfo"
 )
 
 //go:generate options-gen -out-filename=logger_options.gen.go -from-struct=Options
@@ -64,10 +65,10 @@ func Init(opts Options) (func(level zapcore.Level), error) {
 			return nil, fmt.Errorf("new sentry client: %v", err)
 		}
 		sentryCore, err := zapsentry.NewCore(zapsentry.Configuration{
-			Level: zap.DebugLevel,
-			//FrameMatcher: zapsentry.CombineFrameMatchers(
-			//	zapsentry.SkipFunctionPrefixFrameMatcher("go.uber.org/zap"),
-			//),
+			Level: zap.WarnLevel,
+			FrameMatcher: zapsentry.CombineFrameMatchers(
+				zapsentry.SkipFunctionPrefixFrameMatcher("go.uber.org/zap"),
+			),
 		}, zapsentry.NewSentryClientFromClient(cl))
 		if err != nil {
 			return nil, fmt.Errorf("new sentry core: %v", err)

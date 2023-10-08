@@ -25,7 +25,7 @@ vars:
   DOCKER_COMPOSE_CMD:
     sh: "which docker-compose"
   SERVICES:
-    sh: echo "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all config --services"
+    sh: "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql config --services"
 
 tasks:
   print:
@@ -119,7 +119,7 @@ tasks:
     cmds:
       - task: deps:cmd
         vars:
-          CLI_ARGS: "stop"
+          CLI_ARGS: " stop"
 
   deps:reset-psql:
     cmds:
@@ -147,5 +147,5 @@ tasks:
       vars: [SERVICE]
     cmds:
       - echo "Reset {{.SERVICE}}"
-      - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all rm -fsv {{.SERVICE}}"
-      - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all up -d {{.SERVICE}}"
+      - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql  rm -fsv {{.SERVICE}}"
+      - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql  up -d {{.SERVICE}}"

@@ -5,7 +5,7 @@ services:
     image: sentry
     platform: linux/amd64
     ports:
-      - "127.0.0.1:8000:9000"
+      - "127.0.0.1:9000:9000"
     environment:
       - SENTRY_SECRET_KEY=kekwblablabla
       - SENTRY_POSTGRES_HOST=postgres
