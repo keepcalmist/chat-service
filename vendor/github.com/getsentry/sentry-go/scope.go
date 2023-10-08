@@ -25,7 +25,6 @@ import (
 type Scope struct {
 	mu          sync.RWMutex
 	breadcrumbs []*Breadcrumb
-	attachments []*Attachment
 	user        User
 	tags        map[string]string
 	contexts    map[string]Context
@@ -49,7 +48,6 @@ type Scope struct {
 func NewScope() *Scope {
 	scope := Scope{
 		breadcrumbs: make([]*Breadcrumb, 0),
-		attachments: make([]*Attachment, 0),
 		tags:        make(map[string]string),
 		contexts:    make(map[string]Context),
 		extra:       make(map[string]interface{}),
@@ -81,22 +79,6 @@ func (scope *Scope) ClearBreadcrumbs() {
 	defer scope.mu.Unlock()
 
 	scope.breadcrumbs = []*Breadcrumb{}
-}
-
-// AddAttachment adds new attachment to the current scope.
-func (scope *Scope) AddAttachment(attachment *Attachment) {
-	scope.mu.Lock()
-	defer scope.mu.Unlock()
-
-	scope.attachments = append(scope.attachments, attachment)
-}
-
-// ClearAttachments clears all attachments from the current scope.
-func (scope *Scope) ClearAttachments() {
-	scope.mu.Lock()
-	defer scope.mu.Unlock()
-
-	scope.attachments = []*Attachment{}
 }
 
 // SetUser sets the user for the current scope.
@@ -301,13 +283,11 @@ func (scope *Scope) Clone() *Scope {
 	clone.user = scope.user
 	clone.breadcrumbs = make([]*Breadcrumb, len(scope.breadcrumbs))
 	copy(clone.breadcrumbs, scope.breadcrumbs)
-	clone.attachments = make([]*Attachment, len(scope.attachments))
-	copy(clone.attachments, scope.attachments)
 	for key, value := range scope.tags {
 		clone.tags[key] = value
 	}
 	for key, value := range scope.contexts {
-		clone.contexts[key] = cloneContext(value)
+		clone.contexts[key] = value
 	}
 	for key, value := range scope.extra {
 		clone.extra[key] = value
@@ -343,10 +323,6 @@ func (scope *Scope) ApplyToEvent(event *Event, hint *EventHint) *Event {
 		event.Breadcrumbs = append(event.Breadcrumbs, scope.breadcrumbs...)
 	}
 
-	if len(scope.attachments) > 0 {
-		event.attachments = append(event.attachments, scope.attachments...)
-	}
-
 	if len(scope.tags) > 0 {
 		if event.Tags == nil {
 			event.Tags = make(map[string]string, len(scope.tags))
@@ -374,7 +350,7 @@ func (scope *Scope) ApplyToEvent(event *Event, hint *EventHint) *Event {
 
 			// Ensure we are not overwriting event fields
 			if _, ok := event.Contexts[key]; !ok {
-				event.Contexts[key] = cloneContext(value)
+				event.Contexts[key] = value
 			}
 		}
 	}
@@ -427,17 +403,4 @@ func (scope *Scope) ApplyToEvent(event *Event, hint *EventHint) *Event {
 	}
 
 	return event
-}
-
-// cloneContext returns a new context with keys and values copied from the passed one.
-//
-// Note: a new Context (map) is returned, but the function does NOT do
-// a proper deep copy: if some context values are pointer types (e.g. maps),
-// they won't be properly copied.
-func cloneContext(c Context) Context {
-	res := Context{}
-	for k, v := range c {
-		res[k] = v
-	}
-	return res
 }
