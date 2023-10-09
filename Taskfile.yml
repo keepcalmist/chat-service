@@ -17,6 +17,7 @@ vars:
     github.com/daixiang0/gci@v0.10.1
     mvdan.cc/gofumpt@v0.4.0
     github.com/kazhuravlev/options-gen/cmd/options-gen@v0.28.3
+    entgo.io/ent/cmd/ent@v0.12.4
   DOCKER_COMPOSE_PATHS: |
     ./deploy/local/docker-compose.yml
     ./deploy/local/docker-compose.sentry.yml
@@ -26,6 +27,13 @@ vars:
     sh: "which docker-compose"
   SERVICES:
     sh: "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql config --services"
+  TYPES: |
+    ChatID
+    MessageID
+    ProblemID
+    UserID
+  TYPES_PKG: types
+  TYPES_DST: ./internal/types/types.gen.go
 
 tasks:
   print:
@@ -154,4 +162,4 @@ tasks:
   gen:types:
     cmds:
       - echo "Generate types..."
-      - go run ./cmd/gen-types types ChatID,MessageID ./internal/types/
+      - go run ./cmd/gen-types {{.TYPES_PKG}} {{ without (splitLines .TYPES) "" | join ","}} {{.TYPES_DST}}

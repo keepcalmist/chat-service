@@ -51,14 +51,13 @@ func main() {
 	}
 	pkg := os.Args[1]
 	out := os.Args[3]
-	fileName := out + pkg + "_gen.go"
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(out, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer func() {
 		if err != nil {
-			_ = os.Remove(fileName)
+			_ = os.Remove(out)
 		}
 	}()
 
@@ -68,7 +67,7 @@ func main() {
 	}
 
 	p, _ := os.Getwd()
-	fmt.Printf("%v generated\n", filepath.Join(p, fileName))
+	fmt.Printf("%v generated\n", filepath.Join(p, out))
 }
 
 func run(pkg string, types []string, output io.WriteCloser) error {
