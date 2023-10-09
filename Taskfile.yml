@@ -91,6 +91,7 @@ tasks:
   generate:
     cmds:
       - export PATH="${PATH}:{{.TOOLS_DIR}}" && go generate ./...
+      - task: gen:types
     aliases: [gen]
 
   deps:
@@ -149,3 +150,8 @@ tasks:
       - echo "Reset {{.SERVICE}}"
       - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql  rm -fsv {{.SERVICE}}"
       - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql  up -d {{.SERVICE}}"
+
+  gen:types:
+    cmds:
+      - echo "Generate types..."
+      - go run ./cmd/gen-types types ChatID,MessageID ./internal/types/

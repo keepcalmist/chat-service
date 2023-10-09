@@ -1,0 +1,43 @@
+
+type {{.NAME}} uuid.UUID
+
+var {{.NAME}}Nil = {{.NAME}}(uuid.Nil)
+
+func New{{.NAME}}() {{.NAME}} {
+	return {{.NAME}}(uuid.New())
+}
+
+func (id {{.NAME}}) String() string {
+	return uuid.UUID(id).String()
+}
+
+func (id {{.NAME}}) Value() (driver.Value, error) {
+	return uuid.UUID(id).Value()
+}
+
+func (id *{{.NAME}}) Scan(v any) error {
+	return (*uuid.UUID)(id).Scan(v)
+}
+
+func (id {{.NAME}}) MarshalText() ([]byte, error) {
+	return (uuid.UUID)(id).MarshalText()
+}
+
+func (id *{{.NAME}}) UnmarshalText(data []byte) error {
+	return (*uuid.UUID)(id).UnmarshalText(data)
+}
+
+func (id {{.NAME}}) IsZero() bool {
+	return id == {{.NAME}}Nil
+}
+
+func (id {{.NAME}}) Matches(other any) bool {
+	return id == other
+}
+
+func (id {{.NAME}}) Validate() error {
+	if id.IsZero() {
+		return ErrEmptyID
+	}
+	return nil
+}
