@@ -6,9 +6,9 @@ silent: true
 vars:
   GO_MODULE: github.com/keepcalmist/chat-service
   GO_FILES:
-    sh: find . -type f -name '*.go' -not -path "./vendor/*" -not -path "*.gen.go" | tr "\n" " "
+    sh: find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./internal/store/*" -not -path "*.gen.go" | tr "\n" " "
 
-  GOLANGCI_LINT_VERSION: v1.52.2
+  GOLANGCI_LINT_VERSION: v1.54.2
   GOLANGCI_LINT_CACHE:
     sh: echo "$HOME/Library/Caches"
   TOOLS_DIR:
@@ -34,6 +34,7 @@ vars:
     UserID
   TYPES_PKG: types
   TYPES_DST: ./internal/types/types.gen.go
+  ENT_SCHEMA: ./internal/store/schema
 
 tasks:
   print:
@@ -100,6 +101,7 @@ tasks:
     cmds:
       - export PATH="${PATH}:{{.TOOLS_DIR}}" && go generate ./...
       - task: gen:types
+        # FIXME: Добавь вызов ent:gen
     aliases: [gen]
 
   deps:
@@ -163,3 +165,14 @@ tasks:
     cmds:
       - echo "Generate types..."
       - go run ./cmd/gen-types {{.TYPES_PKG}} {{ without (splitLines .TYPES) "" | join ","}} {{.TYPES_DST}}
+
+  ent:new:
+    cmds:
+      - "{{.TOOLS_DIR}}/ent new --target {{.ENT_SCHEMA}} Chat Message Problem"
+      - task: tidy
+
+  ent:gen:
+    cmds:
+#     - FIXME
+      -
+      - task: tidy

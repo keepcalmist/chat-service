@@ -72,6 +72,7 @@ func main() {
 
 func run(pkg string, types []string, output io.WriteCloser) error {
 	defer output.Close()
+
 	tmplHeader, err := template.New("header").Funcs(template.FuncMap{
 		"join": func(sep string, list []string) string {
 			return strings.Join(list, sep)
@@ -80,6 +81,7 @@ func run(pkg string, types []string, output io.WriteCloser) error {
 	if err != nil {
 		return err
 	}
+
 	err = tmplHeader.ExecuteTemplate(output, "header", map[string]interface{}{
 		"PKG":   pkg,
 		"TYPES": types,
