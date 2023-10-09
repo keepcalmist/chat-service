@@ -51,7 +51,7 @@ func main() {
 	}
 	pkg := os.Args[1]
 	out := os.Args[3]
-	f, err := os.OpenFile(out, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(out, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
 	if err != nil {
 		log.Fatal(err)
 	}
