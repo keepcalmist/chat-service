@@ -18,10 +18,10 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:21.0.2
-    depends_on:
-      - postgres
+    volumes:
+      - ./dump.json:/opt/keycloak/data/import/Bank-realm.json
     command:
-      - start-dev
+      - start-dev --import-realm
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres

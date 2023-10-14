@@ -35,12 +35,9 @@ vars:
   TYPES_PKG: types
   TYPES_DST: ./internal/types/types.gen.go
   ENT_SCHEMA: ./internal/store/schema
+  KEYCLOAK_BIN: /opt/keycloak/bin/
 
 tasks:
-  print:
-    cmds:
-      - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} ps"
-
   default:
     cmds:
       - task: tidy
@@ -180,10 +177,20 @@ tasks:
     env:
       TEST_LOG_LEVEL: info
       TEST_KEYCLOAK_REALM: Bank
-      TEST_KEYCLOAK_CLIENT_ID:   integration-testing                # FIXME: Поменяйте на ваше значение!
-      TEST_KEYCLOAK_CLIENT_SECRET: WHlpfljPskw5CIh7g3Izr2g4SAxVgbAs # FIXME: Поменяйте на ваше значение!
-      TEST_KEYCLOAK_TEST_USER: integration-testing                    # FIXME: Поменяйте на ваше значение!
-      TEST_KEYCLOAK_TEST_PASSWORD: integration-testing                # FIXME: Поменяйте на ваше значение!
+      TEST_KEYCLOAK_CLIENT_ID:   integration-testing
+      TEST_KEYCLOAK_CLIENT_SECRET: WHlpfljPskw5CIh7g3Izr2g4SAxVgbAs
+      TEST_KEYCLOAK_TEST_USER: integration-testing
+      TEST_KEYCLOAK_TEST_PASSWORD: integration-testing
     cmds:
       - echo "- Integration tests"
       - go test -tags integration -count 1 -race ./...
+
+  kc:export:
+    cmds:
+      - echo "- Export keycloak"
+      - task: deps:cmd
+        vars:
+          CLI_ARGS: "exec keycloak {{.KEYCLOAK_BIN}}kc.sh export --file {{.KEYCLOAK_BIN}}dump.json --realm Bank"
+      - task: deps:cmd
+        vars:
+          CLI_ARGS: "cp keycloak:{{.KEYCLOAK_BIN}}dump.json ./deploy/local/dump.json"
