@@ -107,7 +107,7 @@ tasks:
   deps:
     desc: Стартует контейнеры с зависимостями (можно в detached-режиме).
     cmds:
-    - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all up -d"
+    - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql up -d"
 
   deps:cmd:
     desc: Дать произвольную команду "docker compose"-у.
@@ -175,3 +175,15 @@ tasks:
     cmds:
       - "{{.TOOLS_DIR}}/ent generate {{.ENT_SCHEMA}}"
       - task: tidy
+
+  tests:integration:
+    env:
+      TEST_LOG_LEVEL: info
+      TEST_KEYCLOAK_REALM: Bank
+      TEST_KEYCLOAK_CLIENT_ID:   integration-testing                # FIXME: Поменяйте на ваше значение!
+      TEST_KEYCLOAK_CLIENT_SECRET: WHlpfljPskw5CIh7g3Izr2g4SAxVgbAs # FIXME: Поменяйте на ваше значение!
+      TEST_KEYCLOAK_TEST_USER: integration-testing                    # FIXME: Поменяйте на ваше значение!
+      TEST_KEYCLOAK_TEST_PASSWORD: integration-testing                # FIXME: Поменяйте на ваше значение!
+    cmds:
+      - echo "- Integration tests"
+      - go test -tags integration -count 1 -race ./...

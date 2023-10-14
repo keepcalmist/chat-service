@@ -37,9 +37,9 @@ func run() (errReturned error) {
 
 	setLevel, err := logger.Init(
 		logger.NewOptions(cfg.Log.Level,
+			cfg.Global.Env,
 			logger.WithProductionMode(cfg.Global.IsProduction),
 			logger.WithSentryDSN(cfg.Sentry.DSN),
-			logger.WithEnv(cfg.Global.Env),
 		),
 	)
 	if err != nil {

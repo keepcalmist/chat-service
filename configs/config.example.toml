@@ -9,4 +9,4 @@ level = "info"
 addr = ":8079"
 
 [sentry]
-dsn = "DSN from Client Keys page"
+dsn = "http://654e05334c5f46aeb8689308b865f8c9@127.0.0.1:9000/2"

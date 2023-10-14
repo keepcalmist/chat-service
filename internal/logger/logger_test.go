@@ -10,7 +10,7 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	setter, err := logger.Init(logger.NewOptions("error", logger.WithProductionMode(func() bool {
+	setter, err := logger.Init(logger.NewOptions("error", "dev", logger.WithProductionMode(func() bool {
 		return true
 	})))
 	require.NoError(t, err)

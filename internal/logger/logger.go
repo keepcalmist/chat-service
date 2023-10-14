@@ -48,7 +48,7 @@ func Init(opts Options) (func(level zapcore.Level), error) {
 		EncodeTime: zapcore.ISO8601TimeEncoder,
 	}
 
-	if opts.productionMode() {
+	if opts.productionMode != nil && opts.productionMode() {
 		cfg.EncodeLevel = zapcore.CapitalLevelEncoder
 		enc = zapcore.NewJSONEncoder(cfg)
 	} else {
