@@ -74,8 +74,6 @@ components:
           type: array
           items:
               $ref: "#/components/schemas/Message"
-        cursor:
-          type: string
 
     Message:
       required: [ id, authorId, body, createdAt ]
