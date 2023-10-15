@@ -9,7 +9,7 @@ import (
 )
 
 type IDs interface {
-	ChatID | MessageID | ProblemID | UserID
+	ChatID | MessageID | ProblemID | UserID | RequestID
 }
 
 var ErrEmptyID = errors.New("empty id")
@@ -196,6 +196,49 @@ func (id UserID) Matches(other any) bool {
 }
 
 func (id UserID) Validate() error {
+	if id.IsZero() {
+		return ErrEmptyID
+	}
+	return nil
+}
+
+type RequestID uuid.UUID
+
+var RequestIDNil = RequestID(uuid.Nil)
+
+func NewRequestID() RequestID {
+	return RequestID(uuid.New())
+}
+
+func (id RequestID) String() string {
+	return uuid.UUID(id).String()
+}
+
+func (id RequestID) Value() (driver.Value, error) {
+	return uuid.UUID(id).Value()
+}
+
+func (id *RequestID) Scan(v any) error {
+	return (*uuid.UUID)(id).Scan(v)
+}
+
+func (id RequestID) MarshalText() ([]byte, error) {
+	return (uuid.UUID)(id).MarshalText()
+}
+
+func (id *RequestID) UnmarshalText(data []byte) error {
+	return (*uuid.UUID)(id).UnmarshalText(data)
+}
+
+func (id RequestID) IsZero() bool {
+	return id == RequestIDNil
+}
+
+func (id RequestID) Matches(other any) bool {
+	return id == other
+}
+
+func (id RequestID) Validate() error {
 	if id.IsZero() {
 		return ErrEmptyID
 	}

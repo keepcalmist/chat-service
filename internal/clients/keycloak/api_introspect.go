@@ -20,7 +20,7 @@ type IntrospectTokenResult struct {
 // IntrospectToken implements
 // https://www.keycloak.org/docs/latest/authorization_services/index.html#obtaining-information-about-an-rpt
 func (c *Client) IntrospectToken(ctx context.Context, token string) (*IntrospectTokenResult, error) {
-	//http://${host}:${port}/realms/${realm_name}/protocol/openid-connect/token/introspect
+	// http://${host}:${port}/realms/${realm_name}/protocol/openid-connect/token/introspect
 	url := fmt.Sprintf("realms/%s/protocol/openid-connect/token/introspect", c.realm)
 	var result IntrospectTokenResult
 	resp, err := c.cli.R().SetContext(ctx).

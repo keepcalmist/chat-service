@@ -18,9 +18,11 @@ vars:
     mvdan.cc/gofumpt@v0.4.0
     github.com/kazhuravlev/options-gen/cmd/options-gen@v0.28.3
     entgo.io/ent/cmd/ent@v0.12.4
+    github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0
   DOCKER_COMPOSE_PATHS: |
     ./deploy/local/docker-compose.yml
     ./deploy/local/docker-compose.sentry.yml
+    ./deploy/local/docker-compose.swagger-ui.yml
   DOCKER_COMPOSE_PATHS_WITH_FLAGS:
     sh: echo '{{range $index, $element := (without (splitList "\n" .DOCKER_COMPOSE_PATHS) "") }} -f {{$element}} {{end}}'
   DOCKER_COMPOSE_CMD:
@@ -32,10 +34,15 @@ vars:
     MessageID
     ProblemID
     UserID
+    RequestID
   TYPES_PKG: types
   TYPES_DST: ./internal/types/types.gen.go
   ENT_SCHEMA: ./internal/store/schema
   KEYCLOAK_BIN: /opt/keycloak/bin/
+  CLIENT_V1_SRC: ./api/client.v1.swagger.yml
+  CLIENT_V1_DST: ./internal/server-client/v1/server.gen.go
+  CLIENT_V1_PKG: clientv1
+
 
 tasks:
   default:
@@ -98,7 +105,7 @@ tasks:
     cmds:
       - export PATH="${PATH}:{{.TOOLS_DIR}}" && go generate ./...
       - task: gen:types
-        # FIXME: Добавь вызов ent:gen
+      - task: ent:gen
     aliases: [gen]
 
   deps:
@@ -194,3 +201,6 @@ tasks:
       - task: deps:cmd
         vars:
           CLI_ARGS: "cp keycloak:{{.KEYCLOAK_BIN}}dump.json ./deploy/local/dump.json"
+  gen:api:
+    cmds:
+      - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package clientv1 -o ./internal/server-client/v1/server.gen.go --old-config-style ./api/client.v1.swagger.yml"

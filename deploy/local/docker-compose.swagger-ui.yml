@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    profiles: [ "swagger-ui" ]
+    ports:
+      - "3011:8080"
+    volumes:
+        - ../../api/client.v1.swagger.yml:/openapi.json
+    environment:
+      SWAGGER_JSON: /openapi.json
