@@ -33,7 +33,6 @@ type GetHistoryRequest struct {
 // GetHistoryResponse defines model for GetHistoryResponse.
 type GetHistoryResponse struct {
 	Data MessagesPage `json:"data"`
-	Ok   bool         `json:"ok"`
 }
 
 // Message defines model for Message.
@@ -141,18 +140,18 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7RU3U7bTBB9lWi+79KJTblBvuNHhVSqhApVkVAuNvZgb/H+MDuOSJHfvdqxkzgEtRUS",
-	"V9Z6ZmfOnjNzXqBwxjuLlgPkL+AVKYOMJKe7b/jUYuD5xRWqEin+0xZyqPtjAlYZhBzupkPmdH4BCRA+",
-	"tZqwhJypxQRCUaNR8faDI6MYcmhbXUICvPbxfmDStoIEnqeVmw4/4yfMthDG0ak23hH3iLmGHCrNdbuc",
-	"Fc6kj4i+UI3RgdOiVjwNSCtdYKotI1nVpFIZuq7rNtjkuZfIVzqwo/XQVOqT80isUVKKloITHvaRdwl4",
-	"VeGN/oUxaNSzNq2B/CjLEjDabk7bF0csFRIIhnHj4J0NeNi5VCwM/k/4ADn8l+6ES4c3pF8xBFVhuFYV",
-	"RkjucYR06VyDykJsuBPovi8suYsugaHEYX/Vcu1oXr5Pxe8B6UMkTGDpyvWbghSEirE85T3IpWKcsjb4",
-	"N9za4Ow25nUJ6Hc+e2DzY4Z3X0ZBtBVpoGVMwkjdfkAOJDZDVNac0YR/nLfI0PBsRaTW8Wzxmd9Q5RXo",
-	"bcfhwkI2EouWNK9vYpcezRIVIZ22ka3N6fNGjS8/bmHYY5lzie7kqZl9T5e2D04waW5i5EzZx8lN66Ma",
-	"k/Na8eS80Wh5cno9hwRWSEG7aHerI9kmj1Z5DTkcz7LZMSQin+BLq+0GC62u944SQ0Hac1/lEnkSJZ3U",
-	"feYMpCapGI+LBdcu8M4LpMHOju/f1mKXkh7Ydbfo6cbAZ8OWFM4yWkGnvG90Id3TnyFCfBk59Z90PzTK",
-	"V+MYbV9+9G4mHH3Ksg8BMBimINgnfDPtk0YHnonfj8ZLGB0P1v0i8hX3bcP3frkLXGHjvIkT0mdBAi01",
-	"w4zladq4QjW1C5yfZCdZGsdm0f0OAAD//wdIjs1jBwAA",
+	"H4sIAAAAAAAC/7RUS0/kSAz+K5F3j3mxXFBuPLTQK62EBkaDhPpQJCapIfXA5bToQfnvo6pUd6dpNDNC",
+	"4hQ5dtmfv8/2K9RGWaNRs4PqFawgoZCRgnX3BZ8HdLy4uELRIPl/UkMF3WSmoIVCqOAui5HZ4gJSIHwe",
+	"JGEDFdOAKbi6QyX860dDSjBUMAyygRR4bf17xyR1Cym8ZK3J4k//cfkWwtybSWUN8YSYO6igldwND3lt",
+	"VPGEaGvRK+m4qDvBmUNayRoLqRlJi74ImWEcx3GDLbR7iXwlHRtax6IhPxmLxBJDSD2QM4GHfeRjCla0",
+	"eCN/oHcq8SLVoKA6KssUlNQba9uxx9IiQcAwL+ys0Q4PKzeCA4N/Ez5CBX8VO+GK2EPxPzonWnTXokXw",
+	"iXdC3E8JlmMKMeqwhBi4M7RoPibUV4f0KSql8GCa9buc14SCsTnlPciNYMxYKvwdbqkwv/VxYwryg21H",
+	"Nj9nPvcVDIi2IkVa5iTM1J1m4EBiFb1hkxmV+8OR8gzFtgWRWHtb4wu/o8ob0NuK8cEyLB3WA0le3/gq",
+	"E5oHFIR0Oni2Nta/GzX++3YLcVV9qcm7k6djthNdUj+agEly7z1nQj8lN4P1aiTnneDkvJeoOTm9XkAK",
+	"KyQnjb9oqyPfkrGohZVQwXFe5seQBvkCvqLdLmmg1UznoUFXk7Q8ZblETrykSTdF5hBykvB+v1hwbRzv",
+	"1j0U2F3c+/e12IUUBxd5XE50o+OzuCW10Yw6oBPW9rIO1YvvzkN8nR3jX+l+eAvfjKO/7OHHdLACR/+U",
+	"5acAiDcxINgnfDPtSS8d5+Gkz8YrMDofrPul58vv24bv/XQXuMLeWOUnZIqCFAbq44xVRdGbWvSdcVyd",
+	"lCdl4cdmOf4MAAD//98SumZGBwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -62,10 +62,8 @@ components:
           type: string
 
     GetHistoryResponse:
-      required: [ data, ok ]
+      required: [ data ]
       properties:
-        ok:
-          type: boolean
         data:
           $ref: "#/components/schemas/MessagesPage"
 

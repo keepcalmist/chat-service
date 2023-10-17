@@ -33,6 +33,5 @@ func (h Handlers) PostGetHistory(eCtx echo.Context, params PostGetHistoryParams)
 
 	return eCtx.JSON(http.StatusOK, GetHistoryResponse{
 		Data: stub,
-		Ok:   true,
 	})
 }
