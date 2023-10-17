@@ -56,11 +56,19 @@ func run() (errReturned error) {
 		return fmt.Errorf("init debug server: %v", err)
 	}
 
-	eg, ctx := errgroup.WithContext(ctx)
+	srvClient, err := initServerClient(
+		cfg.Servers.Client.Addr,
+		cfg.Servers.Client.AllowOrigins,
+		cfg.Servers.Client.SwaggerFile,
+	)
+	if err != nil {
+		return fmt.Errorf("init client server: %v", err)
+	}
 
+	eg, ctx := errgroup.WithContext(ctx)
 	// Run servers.
 	eg.Go(func() error { return srvDebug.Run(ctx) })
-
+	eg.Go(func() error { return srvClient.Run(ctx) })
 	// Run services.
 	// Ждут своего часа.
 	// ...

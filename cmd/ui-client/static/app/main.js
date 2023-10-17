@@ -54,6 +54,7 @@ class App {
     static GetLastMessages() {
         this.apiClient.getHistory(this.historyCursor)
             .then((result) => {
+                console.log("-----------",result)
                 this.historyCursor = result.next;
 
                 for (const m of result.messages.reverse()) {

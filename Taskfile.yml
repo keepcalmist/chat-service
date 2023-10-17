@@ -106,6 +106,7 @@ tasks:
       - export PATH="${PATH}:{{.TOOLS_DIR}}" && go generate ./...
       - task: gen:types
       - task: ent:gen
+      - task: gen:api
     aliases: [gen]
 
   deps:
