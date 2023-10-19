@@ -19,6 +19,7 @@ vars:
     github.com/kazhuravlev/options-gen/cmd/options-gen@v0.28.3
     entgo.io/ent/cmd/ent@v0.12.4
     github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0
+    github.com/golang/mock/mockgen@v1.6.0
   DOCKER_COMPOSE_PATHS: |
     ./deploy/local/docker-compose.yml
     ./deploy/local/docker-compose.sentry.yml
