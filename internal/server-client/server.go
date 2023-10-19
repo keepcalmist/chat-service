@@ -10,7 +10,9 @@ import (
 	oapimdlwr "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/keepcalmist/chat-service/internal/middlewares"
 	"github.com/keepcalmist/chat-service/internal/server-client/v1"
+	"github.com/keepcalmist/chat-service/internal/types"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
@@ -29,6 +31,7 @@ type Options struct {
 	allowOrigins []string                 `option:"mandatory" validate:"min=1"`
 	v1Swagger    *openapi3.T              `option:"mandatory" validate:"required"`
 	v1Handlers   clientv1.ServerInterface `option:"mandatory" validate:"required"`
+	introspector middlewares.Introspector `option:"mandatory" validate:"required"`
 }
 
 type Server struct {
@@ -41,6 +44,8 @@ func New(opts Options) (*Server, error) {
 		return nil, err
 	}
 
+	lg := zap.L().Named("server-client")
+
 	e := echo.New()
 	e.Use(
 		middleware.Recover(),
@@ -49,6 +54,45 @@ func New(opts Options) (*Server, error) {
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: opts.allowOrigins,
 			AllowMethods: []string{http.MethodPost},
+		}),
+		middleware.BodyLimit("1K"),
+		//middlewares.NewKeycloakTokenAuth(opts.introspector, "chat-service", "chat-service-user"),
+
+		middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+			Skipper: func(c echo.Context) bool {
+				return c.Request().Method == http.MethodOptions
+			},
+			LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+				userID, _ := middlewares.GetUserID(c)
+				fields := []zap.Field{
+					zap.Duration("latency", v.Latency),
+					zap.String("remote_ip", v.RemoteIP),
+					zap.String("host", v.Host),
+					zap.String("method", v.Method),
+					zap.String("uri", v.URI),
+					zap.String("request_id", v.RequestID),
+					zap.String("user_agent", v.UserAgent),
+					zap.Int("status", v.Status),
+				}
+				if userID != types.UserIDNil {
+					fields = append(fields, zap.String("user_id", userID.String()))
+				} else {
+					fields = append(fields, zap.String("user_id", ""))
+				}
+
+				lg.Debug("request",
+					fields...,
+				)
+				return nil
+			},
+			LogLatency:   true,
+			LogRemoteIP:  true,
+			LogHost:      true,
+			LogMethod:    true,
+			LogURI:       true,
+			LogRequestID: true,
+			LogUserAgent: true,
+			LogStatus:    true,
 		}),
 	)
 

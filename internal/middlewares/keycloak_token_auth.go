@@ -83,6 +83,10 @@ func MustUserID(eCtx echo.Context) types.UserID {
 	return uid
 }
 
+func GetUserID(eCtx echo.Context) (types.UserID, bool) {
+	return userID(eCtx)
+}
+
 func userID(eCtx echo.Context) (types.UserID, bool) {
 	t := eCtx.Get(tokenCtxKey)
 	if t == nil {
