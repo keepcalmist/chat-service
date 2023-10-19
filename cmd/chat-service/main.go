@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/keepcalmist/chat-service/internal/config"
@@ -56,10 +57,16 @@ func run() (errReturned error) {
 		return fmt.Errorf("init debug server: %v", err)
 	}
 
+	if cfg.Clients.Keycloak.DebugMode && cfg.Global.IsProduction() {
+		zap.L().Warn("keycloak debug mode enabled in production")
+	}
+
 	srvClient, err := initServerClient(
 		cfg.Servers.Client.Addr,
 		cfg.Servers.Client.AllowOrigins,
-		cfg.Servers.Client.SwaggerFile,
+		cfg.Servers.Client.RequiredAccess.Role,
+		cfg.Servers.Client.RequiredAccess.Resource,
+		cfg.Clients.Keycloak,
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)

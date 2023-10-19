@@ -10,8 +10,17 @@ addr = ":8079"
 [servers.client]
 addr = ":8080"
 allow_origins = ["http://localhost:3011", "http://localhost:3000"]
-swagger_file = "api/client.v1.swagger.yml"
-
+[servers.client.required_access]
+resource = "chat-ui-client"
+role = "support-chat-client"
 
 [sentry]
 dsn = "http://654e05334c5f46aeb8689308b865f8c9@127.0.0.1:9000/2"
+
+[clients]
+[clients.keycloak]
+base_path = "http://localhost:3010"
+realm = "Bank"
+client_id = "chat-service"
+client_secret = "qwerrqwerqwerqwetqwerqwer"
+debug_mode = false

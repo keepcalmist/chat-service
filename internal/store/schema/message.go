@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+
 	"github.com/keepcalmist/chat-service/internal/types"
 )
 
@@ -28,7 +29,6 @@ func (Message) Fields() []ent.Field {
 		field.Time("created_at").Immutable().Default(time.Now().UTC()),
 		field.UUID("chat_id", types.ChatID{}).Immutable(),
 	}
-
 }
 
 // Edges of the Message.

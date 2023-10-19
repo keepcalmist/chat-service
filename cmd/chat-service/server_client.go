@@ -3,18 +3,22 @@ package main
 import (
 	"fmt"
 
-	"github.com/keepcalmist/chat-service/internal/server-client"
 	"go.uber.org/zap"
 
+	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
+	"github.com/keepcalmist/chat-service/internal/config"
+	server_client "github.com/keepcalmist/chat-service/internal/server-client"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 )
 
 const nameServerClient = "server-client"
 
-func initServerClient( // FIXME: воспользуйся мной в chat-service/main.go
+func initServerClient(
 	addr string,
 	allowOrigins []string,
-	swaggerFile string,
+	role string,
+	resource string,
+	keycloakConfig config.Keycloak,
 ) (*server_client.Server, error) {
 	lg := zap.L().Named(nameServerClient)
 
@@ -28,12 +32,28 @@ func initServerClient( // FIXME: воспользуйся мной в chat-servi
 		return nil, fmt.Errorf("get swagger: %v", err)
 	}
 
+	keyCloakClient, err := keycloakclient.New(
+		keycloakclient.NewOptions(
+			keycloakConfig.BasePath,
+			keycloakConfig.Realm,
+			keycloakConfig.ClientID,
+			keycloakConfig.ClientSecret,
+			keycloakclient.WithDebugMode(keycloakConfig.DebugMode),
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("init keycloak client: %v", err)
+	}
+
 	srv, err := server_client.New(server_client.NewOptions(
 		zap.L().Named(nameServerClient),
 		addr,
 		allowOrigins,
 		swag,
 		v1Handlers,
+		keyCloakClient,
+		role,
+		resource,
 	))
 	if err != nil {
 		return nil, fmt.Errorf("build server: %v", err)

@@ -1,4 +1,4 @@
-package server_client
+package server_client //nolint
 
 import (
 	"context"
@@ -10,13 +10,14 @@ import (
 	oapimdlwr "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/keepcalmist/chat-service/internal/middlewares"
-	"github.com/keepcalmist/chat-service/internal/server-client/v1"
-	"github.com/keepcalmist/chat-service/internal/types"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/keepcalmist/chat-service/internal/middlewares"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
+	"github.com/keepcalmist/chat-service/internal/types"
 )
 
 const (
@@ -32,6 +33,8 @@ type Options struct {
 	v1Swagger    *openapi3.T              `option:"mandatory" validate:"required"`
 	v1Handlers   clientv1.ServerInterface `option:"mandatory" validate:"required"`
 	introspector middlewares.Introspector `option:"mandatory" validate:"required"`
+	role         string                   `option:"mandatory" validate:"required"`
+	resource     string                   `option:"mandatory" validate:"required"`
 }
 
 type Server struct {
@@ -44,19 +47,15 @@ func New(opts Options) (*Server, error) {
 		return nil, err
 	}
 
-	lg := zap.L().Named("server-client")
-
 	e := echo.New()
 	e.Use(
 		middleware.Recover(),
-		//CORS middleware
-		//Разрешаем только POST-запросы с origins из конфига.
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: opts.allowOrigins,
 			AllowMethods: []string{http.MethodPost},
 		}),
 		middleware.BodyLimit("1K"),
-		//middlewares.NewKeycloakTokenAuth(opts.introspector, "chat-service", "chat-service-user"),
+		middlewares.NewKeycloakTokenAuth(opts.introspector, opts.resource, opts.role),
 
 		middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 			Skipper: func(c echo.Context) bool {
@@ -80,7 +79,7 @@ func New(opts Options) (*Server, error) {
 					fields = append(fields, zap.String("user_id", ""))
 				}
 
-				lg.Debug("request",
+				opts.logger.Debug("request",
 					fields...,
 				)
 				return nil
@@ -108,10 +107,11 @@ func New(opts Options) (*Server, error) {
 	return &Server{
 		lg: opts.logger,
 		srv: &http.Server{
-			Addr:    opts.addr,
-			Handler: e,
+			Addr:              opts.addr,
+			Handler:           e,
+			ReadHeaderTimeout: readHeaderTimeout,
 		},
-	}, nil // FIXME
+	}, nil
 }
 
 func (s *Server) Run(ctx context.Context) error {

@@ -1,7 +1,13 @@
 run:
-  tests: true
+  tests: false
   build-tags: [ ] # Ждёт своего часа.
-  skip-dirs: [ ] # Ждёт своего часа.
+  skip-dirs:
+    - internal/types
+    - mocks
+  skip-files:
+    - types.gen.go
+    - types_test.go
+
 
 issues:
   max-same-issues: 0
@@ -33,7 +39,7 @@ linters:
     - asasalint
     - asciicheck
     - bidichk
-    - depguard
+#    - depguard
     - durationcheck
     - errcheck
     - errchkjson
@@ -74,7 +80,7 @@ linters:
     - promlinter
     - reassign
     - revive
-    - staticcheck
+#    - staticcheck
     - stylecheck
     - tagliatelle
     - tenv

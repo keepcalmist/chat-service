@@ -24,7 +24,7 @@ var stub = MessagesPage{Messages: []Message{
 	},
 }}
 
-func (h Handlers) PostGetHistory(eCtx echo.Context, params PostGetHistoryParams) error {
+func (h Handlers) PostGetHistory(eCtx echo.Context, _ PostGetHistoryParams) error {
 	body, err := eCtx.Request().GetBody()
 	if err != nil {
 		return err

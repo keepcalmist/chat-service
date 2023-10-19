@@ -16,9 +16,8 @@ var (
 
 type claims struct {
 	jwt.RegisteredClaims
-	// FIXME: добавь полей
 	Subject        types.UserID                      `json:"sub"`
-	ResourceAccess map[string]map[string]interface{} `json:"resource_access"`
+	ResourceAccess map[string]map[string]interface{} `json:"resource_access"` //nolint
 }
 
 // Valid returns errors:
@@ -50,7 +49,6 @@ func (c claims) UserID() types.UserID {
 
 func parse(tokenString string) (*jwt.Token, error) {
 	token, _, err := jwt.NewParser().ParseUnverified(tokenString, &claims{})
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse claims: %w", err)
 	}

@@ -5,6 +5,7 @@ type Config struct {
 	Log     LogConfig     `toml:"log"`
 	Servers ServersConfig `toml:"servers"`
 	Sentry  Sentry        `toml:"sentry"`
+	Clients Clients       `toml:"clients"`
 }
 
 type GlobalConfig struct {
@@ -21,9 +22,14 @@ type ServersConfig struct {
 }
 
 type ClientServerConfig struct {
-	Addr         string   `toml:"addr" validate:"required,hostname_port"`
-	AllowOrigins []string `toml:"allow_origins" validate:"required,dive,url"`
-	SwaggerFile  string   `toml:"swagger_file" validate:"required,filepath"`
+	Addr           string         `toml:"addr" validate:"required,hostname_port"`
+	AllowOrigins   []string       `toml:"allow_origins" validate:"required,dive,url"`
+	RequiredAccess RequiredAccess `toml:"required_access" validate:"required,dive"`
+}
+
+type RequiredAccess struct {
+	Resource string `toml:"resource" validate:"required"`
+	Role     string `toml:"role" validate:"required"`
 }
 
 type DebugServerConfig struct {
@@ -32,6 +38,18 @@ type DebugServerConfig struct {
 
 type Sentry struct {
 	DSN string `toml:"dsn" validate:"sentrydsn"`
+}
+
+type Clients struct {
+	Keycloak Keycloak `toml:"keycloak"`
+}
+
+type Keycloak struct {
+	BasePath     string `toml:"base_path" validate:"required,url"`
+	Realm        string `toml:"realm" validate:"required"`
+	ClientID     string `toml:"client_id" validate:"required"`
+	ClientSecret string `toml:"client_secret" validate:"required"`
+	DebugMode    bool   `toml:"debug_mode"`
 }
 
 func (c GlobalConfig) IsProduction() bool {

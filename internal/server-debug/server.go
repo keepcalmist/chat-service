@@ -119,7 +119,7 @@ func (s *Server) SetLogLvl(eCtx echo.Context) error {
 }
 
 func (s *Server) DebugSentry(_ echo.Context) error {
-	s.lg.Info("look for me in the Sentry")
+	s.lg.Warn("look for me in the Sentry")
 
 	return nil
 }

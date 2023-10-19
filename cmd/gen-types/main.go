@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -63,11 +62,11 @@ func main() {
 
 	types := strings.Split(os.Args[2], ",")
 	if err := run(pkg, types, f); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	p, _ := os.Getwd()
-	fmt.Printf("%v generated\n", filepath.Join(p, out))
+	log.Printf("%v generated\n", filepath.Join(p, out))
 }
 
 func run(pkg string, types []string, output io.WriteCloser) error {
@@ -86,6 +85,9 @@ func run(pkg string, types []string, output io.WriteCloser) error {
 		"PKG":   pkg,
 		"TYPES": types,
 	})
+	if err != nil {
+		return err
+	}
 
 	_, currentFile, _, _ := runtime.Caller(0)
 	fileWithTypesTemplate, err := os.ReadFile(filepath.Join(filepath.Dir(currentFile), "types.tmpl"))

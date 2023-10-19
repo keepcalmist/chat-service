@@ -3,11 +3,9 @@ package middlewares
 import (
 	"context"
 	"errors"
-	"fmt"
-
-	"github.com/labstack/echo/v4"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -31,13 +29,6 @@ func NewKeycloakTokenAuth(introspector Introspector, resource, role string) echo
 		KeyLookup:  "header:Authorization",
 		AuthScheme: "Bearer",
 		Validator: func(tokenStr string, eCtx echo.Context) (bool, error) {
-			// FIXME: Реализуй меня:
-			// FIXME:	- интроспектим токен
-			// FIXME:	- проверяем, что он Active
-			// FIXME:	- парсим токен, используя наши claims (без проверки подписи, это уже сделал Keycloak)
-			// FIXME:	- проверяем, что клеймы валидные
-			// FIXME:	- проверяем, что среди них есть нужная роль для нужного ресурса
-			// FIXME:	- сохраняем токен в контекст запроса
 			token, err := introspector.IntrospectToken(eCtx.Request().Context(), tokenStr)
 			if err != nil {
 				return false, err
@@ -60,12 +51,13 @@ func NewKeycloakTokenAuth(introspector Introspector, resource, role string) echo
 				return false, err
 			}
 
-			if roles, ok := tokenClaims.ResourceAccess[resource]; !ok {
+			roles, ok := tokenClaims.ResourceAccess[resource]
+			if !ok {
 				return false, ErrNoRequiredResourceRole
-			} else {
-				if !hasRole(roles["roles"], role) {
-					return false, ErrNoRequiredResourceRole
-				}
+			}
+
+			if !hasRole(roles["roles"], role) {
+				return false, ErrNoRequiredResourceRole
 			}
 
 			eCtx.Set(tokenCtxKey, jwtToken)
@@ -106,7 +98,6 @@ func userID(eCtx echo.Context) (types.UserID, bool) {
 }
 
 func hasRole(roles interface{}, role string) bool {
-	fmt.Printf("%T\n", roles)
 	switch t := roles.(type) {
 	case []string:
 		for _, r := range t {
