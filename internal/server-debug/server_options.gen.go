@@ -27,9 +27,9 @@ func NewOptions(
 	return o
 }
 
-func WithLogSetter(opt func(level zapcore.Level)) OptOptionsSetter {
+func WithLvlSetter(opt func(level zapcore.Level)) OptOptionsSetter {
 	return func(o *Options) {
-		o.logSetter = opt
+		o.lvlSetter = opt
 	}
 }
 

@@ -51,7 +51,7 @@ func run() (errReturned error) {
 	srvDebug, err := serverdebug.New(
 		serverdebug.NewOptions(
 			cfg.Servers.Debug.Addr,
-			serverdebug.WithLogSetter(setLevel)),
+			serverdebug.WithLvlSetter(setLevel)),
 	)
 	if err != nil {
 		return fmt.Errorf("init debug server: %v", err)

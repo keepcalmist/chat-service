@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	"github.com/labstack/echo-contrib/pprof"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -16,6 +15,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/keepcalmist/chat-service/internal/buildinfo"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 )
 
 const (
@@ -26,7 +26,7 @@ const (
 //go:generate options-gen -out-filename=server_options.gen.go -from-struct=Options
 type Options struct {
 	addr      string `option:"mandatory" validate:"required,hostname_port"`
-	logSetter func(level zapcore.Level)
+	lvlSetter func(level zapcore.Level)
 }
 
 type Server struct {
@@ -58,13 +58,12 @@ func New(opts Options) (*Server, error) {
 			Handler:           e,
 			ReadHeaderTimeout: readHeaderTimeout,
 		},
-		lvlSetter: opts.logSetter,
+		lvlSetter: opts.lvlSetter,
 	}
 	index := newIndexPage()
 
 	e.GET("/version", s.Version)
 	index.addPage("/version", "Get build information")
-	index.addPage("/debug/pprof/", "Go stg profile")
 	index.addPage("/debug/pprof/profile?seconds=30", "Takes half-minute profile")
 	index.addPage("/debug/sentry", "Heap profile")
 	index.addPage("/schema/client", "Swagger schema for client")
@@ -119,7 +118,7 @@ func (s *Server) SetLogLvl(eCtx echo.Context) error {
 	old := s.lg.Level().String()
 	s.lvlSetter(lvl)
 
-	s.lg.Info("switching log lvl",
+	s.lg.Error("switching log lvl",
 		zap.String("old", old),
 		zap.String("new", s.lg.Level().String()),
 	)
