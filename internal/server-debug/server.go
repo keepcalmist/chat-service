@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	"github.com/labstack/echo-contrib/pprof"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -42,7 +43,13 @@ func New(opts Options) (*Server, error) {
 	lg := zap.L().Named("server-debug")
 
 	e := echo.New()
-	e.Use(middleware.Recover())
+	e.Use(
+		middleware.Recover(),
+		middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{"*"},
+		}),
+		middleware.BodyLimit("1K"),
+	)
 
 	s := &Server{
 		lg: lg,
@@ -60,10 +67,12 @@ func New(opts Options) (*Server, error) {
 	index.addPage("/debug/pprof/", "Go stg profile")
 	index.addPage("/debug/pprof/profile?seconds=30", "Takes half-minute profile")
 	index.addPage("/debug/sentry", "Heap profile")
+	index.addPage("/schema/client", "Swagger schema for client")
 
 	// Обработка "/log/level"
 	e.PUT("/log/level", s.SetLogLvl)
 	e.GET("/debug/sentry", s.DebugSentry)
+	e.GET("/schema/client", s.GetSwagger)
 
 	// Обработка "/debug/pprof/" и связанных команд
 	pprof.Register(e)
@@ -120,6 +129,24 @@ func (s *Server) SetLogLvl(eCtx echo.Context) error {
 
 func (s *Server) DebugSentry(_ echo.Context) error {
 	s.lg.Warn("look for me in the Sentry")
+
+	return nil
+}
+
+func (s *Server) GetSwagger(eCtx echo.Context) error {
+	swag, err := clientv1.GetSwagger()
+	if err != nil {
+		return err
+	}
+	data, err := swag.MarshalJSON()
+	if err != nil {
+		return err
+	}
+
+	err = eCtx.String(http.StatusOK, string(data))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
