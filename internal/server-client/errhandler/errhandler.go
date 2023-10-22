@@ -3,9 +3,10 @@ package errhandler
 import (
 	"net/http"
 
-	internalErrors "github.com/keepcalmist/chat-service/internal/errors"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
+
+	internalErrors "github.com/keepcalmist/chat-service/internal/errors"
 )
 
 var _ echo.HTTPErrorHandler = Handler{}.Handle

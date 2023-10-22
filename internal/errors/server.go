@@ -27,11 +27,7 @@ func (s *ServerError) Error() string {
 }
 
 func (s *ServerError) Is(err error) bool {
-	if errors.Is(s.cause, err) {
-		return true
-	}
-
-	return false
+	return errors.Is(s.cause, err)
 }
 
 func GetServerErrorCode(err error) int {
