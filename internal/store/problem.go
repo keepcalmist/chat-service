@@ -20,7 +20,7 @@ type Problem struct {
 	// ID of the ent.
 	ID types.ProblemID `json:"id,omitempty"`
 	// ManagerID holds the value of the "manager_id" field.
-	ManagerID types.UserID `json:"manager_id,omitempty"`
+	ManagerID *types.UserID `json:"manager_id,omitempty"`
 	// ChatID holds the value of the "chat_id" field.
 	ChatID types.ChatID `json:"chat_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -71,14 +71,14 @@ func (*Problem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case problem.FieldManagerID:
+			values[i] = &sql.NullScanner{S: new(types.UserID)}
 		case problem.FieldCreatedAt, problem.FieldResolvedAt:
 			values[i] = new(sql.NullTime)
 		case problem.FieldChatID:
 			values[i] = new(types.ChatID)
 		case problem.FieldID:
 			values[i] = new(types.ProblemID)
-		case problem.FieldManagerID:
-			values[i] = new(types.UserID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -101,10 +101,11 @@ func (pr *Problem) assignValues(columns []string, values []any) error {
 				pr.ID = *value
 			}
 		case problem.FieldManagerID:
-			if value, ok := values[i].(*types.UserID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field manager_id", values[i])
-			} else if value != nil {
-				pr.ManagerID = *value
+			} else if value.Valid {
+				pr.ManagerID = new(types.UserID)
+				*pr.ManagerID = *value.S.(*types.UserID)
 			}
 		case problem.FieldChatID:
 			if value, ok := values[i].(*types.ChatID); !ok {
@@ -171,8 +172,10 @@ func (pr *Problem) String() string {
 	var builder strings.Builder
 	builder.WriteString("Problem(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pr.ID))
-	builder.WriteString("manager_id=")
-	builder.WriteString(fmt.Sprintf("%v", pr.ManagerID))
+	if v := pr.ManagerID; v != nil {
+		builder.WriteString("manager_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("chat_id=")
 	builder.WriteString(fmt.Sprintf("%v", pr.ChatID))

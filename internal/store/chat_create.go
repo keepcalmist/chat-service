@@ -123,7 +123,7 @@ func (cc *ChatCreate) ExecX(ctx context.Context) {
 // defaults sets the default values of the builder before save.
 func (cc *ChatCreate) defaults() {
 	if _, ok := cc.mutation.CreatedAt(); !ok {
-		v := chat.DefaultCreatedAt
+		v := chat.DefaultCreatedAt()
 		cc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := cc.mutation.ID(); !ok {

@@ -753,9 +753,22 @@ func (m *MessageMutation) OldAuthorID(ctx context.Context) (v types.UserID, err 
 	return oldValue.AuthorID, nil
 }
 
+// ClearAuthorID clears the value of the "author_id" field.
+func (m *MessageMutation) ClearAuthorID() {
+	m.author_id = nil
+	m.clearedFields[message.FieldAuthorID] = struct{}{}
+}
+
+// AuthorIDCleared returns if the "author_id" field was cleared in this mutation.
+func (m *MessageMutation) AuthorIDCleared() bool {
+	_, ok := m.clearedFields[message.FieldAuthorID]
+	return ok
+}
+
 // ResetAuthorID resets all changes to the "author_id" field.
 func (m *MessageMutation) ResetAuthorID() {
 	m.author_id = nil
+	delete(m.clearedFields, message.FieldAuthorID)
 }
 
 // SetIsVisibleForClient sets the "is_visible_for_client" field.
@@ -946,9 +959,22 @@ func (m *MessageMutation) OldIsBlocked(ctx context.Context) (v bool, err error) 
 	return oldValue.IsBlocked, nil
 }
 
+// ClearIsBlocked clears the value of the "is_blocked" field.
+func (m *MessageMutation) ClearIsBlocked() {
+	m.is_blocked = nil
+	m.clearedFields[message.FieldIsBlocked] = struct{}{}
+}
+
+// IsBlockedCleared returns if the "is_blocked" field was cleared in this mutation.
+func (m *MessageMutation) IsBlockedCleared() bool {
+	_, ok := m.clearedFields[message.FieldIsBlocked]
+	return ok
+}
+
 // ResetIsBlocked resets all changes to the "is_blocked" field.
 func (m *MessageMutation) ResetIsBlocked() {
 	m.is_blocked = nil
+	delete(m.clearedFields, message.FieldIsBlocked)
 }
 
 // SetIsService sets the "is_service" field.
@@ -1342,8 +1368,14 @@ func (m *MessageMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *MessageMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(message.FieldAuthorID) {
+		fields = append(fields, message.FieldAuthorID)
+	}
 	if m.FieldCleared(message.FieldCheckedAt) {
 		fields = append(fields, message.FieldCheckedAt)
+	}
+	if m.FieldCleared(message.FieldIsBlocked) {
+		fields = append(fields, message.FieldIsBlocked)
 	}
 	return fields
 }
@@ -1359,8 +1391,14 @@ func (m *MessageMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *MessageMutation) ClearField(name string) error {
 	switch name {
+	case message.FieldAuthorID:
+		m.ClearAuthorID()
+		return nil
 	case message.FieldCheckedAt:
 		m.ClearCheckedAt()
+		return nil
+	case message.FieldIsBlocked:
+		m.ClearIsBlocked()
 		return nil
 	}
 	return fmt.Errorf("unknown Message nullable field %s", name)
@@ -1634,7 +1672,7 @@ func (m *ProblemMutation) ManagerID() (r types.UserID, exists bool) {
 // OldManagerID returns the old "manager_id" field's value of the Problem entity.
 // If the Problem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProblemMutation) OldManagerID(ctx context.Context) (v types.UserID, err error) {
+func (m *ProblemMutation) OldManagerID(ctx context.Context) (v *types.UserID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldManagerID is only allowed on UpdateOne operations")
 	}
@@ -1648,9 +1686,22 @@ func (m *ProblemMutation) OldManagerID(ctx context.Context) (v types.UserID, err
 	return oldValue.ManagerID, nil
 }
 
+// ClearManagerID clears the value of the "manager_id" field.
+func (m *ProblemMutation) ClearManagerID() {
+	m.manager_id = nil
+	m.clearedFields[problem.FieldManagerID] = struct{}{}
+}
+
+// ManagerIDCleared returns if the "manager_id" field was cleared in this mutation.
+func (m *ProblemMutation) ManagerIDCleared() bool {
+	_, ok := m.clearedFields[problem.FieldManagerID]
+	return ok
+}
+
 // ResetManagerID resets all changes to the "manager_id" field.
 func (m *ProblemMutation) ResetManagerID() {
 	m.manager_id = nil
+	delete(m.clearedFields, problem.FieldManagerID)
 }
 
 // SetChatID sets the "chat_id" field.
@@ -2002,6 +2053,9 @@ func (m *ProblemMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *ProblemMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(problem.FieldManagerID) {
+		fields = append(fields, problem.FieldManagerID)
+	}
 	if m.FieldCleared(problem.FieldResolvedAt) {
 		fields = append(fields, problem.FieldResolvedAt)
 	}
@@ -2019,6 +2073,9 @@ func (m *ProblemMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ProblemMutation) ClearField(name string) error {
 	switch name {
+	case problem.FieldManagerID:
+		m.ClearManagerID()
+		return nil
 	case problem.FieldResolvedAt:
 		m.ClearResolvedAt()
 		return nil

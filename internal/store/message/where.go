@@ -141,6 +141,16 @@ func AuthorIDLTE(v types.UserID) predicate.Message {
 	return predicate.Message(sql.FieldLTE(FieldAuthorID, v))
 }
 
+// AuthorIDIsNil applies the IsNil predicate on the "author_id" field.
+func AuthorIDIsNil() predicate.Message {
+	return predicate.Message(sql.FieldIsNull(FieldAuthorID))
+}
+
+// AuthorIDNotNil applies the NotNil predicate on the "author_id" field.
+func AuthorIDNotNil() predicate.Message {
+	return predicate.Message(sql.FieldNotNull(FieldAuthorID))
+}
+
 // IsVisibleForClientEQ applies the EQ predicate on the "is_visible_for_client" field.
 func IsVisibleForClientEQ(v bool) predicate.Message {
 	return predicate.Message(sql.FieldEQ(FieldIsVisibleForClient, v))
@@ -284,6 +294,16 @@ func IsBlockedEQ(v bool) predicate.Message {
 // IsBlockedNEQ applies the NEQ predicate on the "is_blocked" field.
 func IsBlockedNEQ(v bool) predicate.Message {
 	return predicate.Message(sql.FieldNEQ(FieldIsBlocked, v))
+}
+
+// IsBlockedIsNil applies the IsNil predicate on the "is_blocked" field.
+func IsBlockedIsNil() predicate.Message {
+	return predicate.Message(sql.FieldIsNull(FieldIsBlocked))
+}
+
+// IsBlockedNotNil applies the NotNil predicate on the "is_blocked" field.
+func IsBlockedNotNil() predicate.Message {
+	return predicate.Message(sql.FieldNotNull(FieldIsBlocked))
 }
 
 // IsServiceEQ applies the EQ predicate on the "is_service" field.

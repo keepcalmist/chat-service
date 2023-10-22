@@ -19,14 +19,14 @@ type Message struct {
 func (Message) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", types.MessageID{}).Default(types.NewMessageID).Immutable(),
-		field.UUID("author_id", types.UserID{}).Immutable(),
+		field.UUID("author_id", types.UserID{}).Immutable().Optional(),
 		field.Bool("is_visible_for_client").Default(true),
 		field.Bool("is_visible_for_manager").Default(true),
 		field.Text("body").NotEmpty().Immutable().MaxLen(1024),
 		field.Time("checked_at").Nillable().Optional(),
-		field.Bool("is_blocked"),
+		field.Bool("is_blocked").Optional(),
 		field.Bool("is_service"),
-		field.Time("created_at").Immutable().Default(time.Now().UTC()),
+		field.Time("created_at").Immutable().Default(time.Now),
 		field.UUID("chat_id", types.ChatID{}).Immutable(),
 	}
 }

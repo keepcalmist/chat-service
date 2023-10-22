@@ -19,9 +19,9 @@ type Problem struct {
 func (Problem) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", types.ProblemID{}).Immutable().Default(types.NewProblemID),
-		field.UUID("manager_id", types.UserID{}).Immutable(),
+		field.UUID("manager_id", types.UserID{}).Nillable().Optional(),
 		field.UUID("chat_id", types.ChatID{}).Immutable(),
-		field.Time("created_at").Immutable().Default(time.Now().UTC()),
+		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("resolved_at").Nillable().Optional(),
 	}
 }

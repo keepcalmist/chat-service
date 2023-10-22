@@ -98,7 +98,7 @@ var (
 	// BodyValidator is a validator for the "body" field. It is called by the builders before save.
 	BodyValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt time.Time
+	DefaultCreatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() types.MessageID
 )
