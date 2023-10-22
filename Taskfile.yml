@@ -184,13 +184,7 @@ tasks:
       - task: tidy
 
   tests:integration:
-    env:
-      TEST_LOG_LEVEL: info
-      TEST_KEYCLOAK_REALM: Bank
-      TEST_KEYCLOAK_CLIENT_ID:   integration-testing
-      TEST_KEYCLOAK_CLIENT_SECRET: WHlpfljPskw5CIh7g3Izr2g4SAxVgbAs
-      TEST_KEYCLOAK_TEST_USER: integration-testing
-      TEST_KEYCLOAK_TEST_PASSWORD: integration-testing
+    dotenv: ['.env']
     cmds:
       - echo "- Integration tests"
       - go test -tags integration -count 1 -race ./...

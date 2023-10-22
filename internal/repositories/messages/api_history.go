@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+
 	"github.com/keepcalmist/chat-service/internal/store/chat"
 	"github.com/keepcalmist/chat-service/internal/store/message"
 	"github.com/keepcalmist/chat-service/internal/types"
@@ -55,12 +56,6 @@ func (r *Repo) GetClientChatMessages(
 		size = pageSize
 	}
 
-	// 1) Если указан pageSize, то валидируем, что он в пределах [10, 100] и используем его для запроса.
-
-	// 2) Если указан cursor, то используем данные из него, предварительно валидируя:
-	// pageSize аналогично пункту выше и LastCreatedAt на заполненность в принципе.
-	// FIXME: 4) Возвращаем очередную страницу сообщений в соответствии с параметрами запроса.
-	// FIXME: Первое сообщение является последним по времени своего создания (наиболее свежее).
 	qb := r.db.Message(ctx).
 		Query().
 		Unique(true).
@@ -83,13 +78,6 @@ func (r *Repo) GetClientChatMessages(
 	for _, msg := range msgs {
 		retVal = append(retVal, adaptStoreMessage(msg))
 	}
-	// FIXME: 5) Если впереди есть ещё страницы, то возвращаем курсор на следующую страницу, иначе nil.
-	//
-	// FIXME: 6) Пользуемся TEST_PSQL_DEBUG, чтобы понять, не превращает ли ent наш код в SQL-запрос, похожий на дичь.
-	//
-	// FIXME: 7) Отдельно обратите внимание на то, что
-	// FIXME: - нужно доставать сообщения из клиентского чата (чужие чаты не должны попадать в выборку);
-	// FIXME: - нужно доставать сообщения, видимые клиенту.
 	if len(retVal) > size {
 		return retVal[:size], &Cursor{
 			PageSize:      size,
