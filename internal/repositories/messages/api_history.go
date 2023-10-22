@@ -23,8 +23,8 @@ var (
 )
 
 type Cursor struct {
-	LastCreatedAt time.Time
-	PageSize      int
+	LastCreatedAt time.Time `json:"LastCreatedAt,omitempty"` //nolint:tagliatelle
+	PageSize      int       `json:"PageSize,omitempty"`      //nolint:tagliatelle
 }
 
 // GetClientChatMessages returns Nth page of messages in the chat for client side.
