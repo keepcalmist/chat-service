@@ -39,6 +39,7 @@ vars:
   TYPES_PKG: types
   TYPES_DST: ./internal/types/types.gen.go
   ENT_SCHEMA: ./internal/store/schema
+  ENT_TEMPLATES: ./internal/store/templates
   KEYCLOAK_BIN: /opt/keycloak/bin/
   CLIENT_V1_SRC: ./api/client.v1.swagger.yml
   CLIENT_V1_DST: ./internal/server-client/v1/server.gen.go
@@ -179,7 +180,7 @@ tasks:
 
   ent:gen:
     cmds:
-      - "{{.TOOLS_DIR}}/ent generate {{.ENT_SCHEMA}}"
+      - "{{.TOOLS_DIR}}/ent generate  --template {{.ENT_TEMPLATES}} {{.ENT_SCHEMA}}"
       - task: tidy
 
   tests:integration:
