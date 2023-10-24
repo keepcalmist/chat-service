@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 
 	"github.com/keepcalmist/chat-service/internal/types"
 )
@@ -36,5 +37,11 @@ func (Message) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("chat", Chat.Type).Required().Unique().Field("chat_id").Immutable(),
 		edge.To("problem", Problem.Type).Required().Unique(),
+	}
+}
+
+func (Message) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("chat_id"),
 	}
 }

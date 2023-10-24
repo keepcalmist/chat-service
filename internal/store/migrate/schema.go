@@ -53,6 +53,13 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "message_chat_id",
+				Unique:  false,
+				Columns: []*schema.Column{MessagesColumns[9]},
+			},
+		},
 	}
 	// ProblemsColumns holds the columns for the "problems" table.
 	ProblemsColumns = []*schema.Column{
