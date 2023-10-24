@@ -2,6 +2,7 @@ package clientv1
 
 import (
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/keepcalmist/chat-service/internal/middlewares"
@@ -9,6 +10,7 @@ import (
 	"github.com/keepcalmist/chat-service/pkg/pointer"
 	"github.com/labstack/echo/v4"
 
+	internalErrors "github.com/keepcalmist/chat-service/internal/errors"
 	"github.com/keepcalmist/chat-service/internal/types"
 )
 
@@ -46,13 +48,41 @@ func (h Handlers) PostGetHistory(eCtx echo.Context, req PostGetHistoryParams) er
 		Cursor:   pointer.Indirect(reqBody.Cursor),
 	})
 	if err != nil {
-		// FIXME: 3) Обработать gethistory.ErrInvalidReqeest и gethistory.ErrInvalidCursor
-		if errors.Is(err, gethistory.ErrInvalidRequest) {
-			return
+		if errors.Is(err, gethistory.ErrInvalidRequest) || errors.Is(err, gethistory.ErrInvalidCursor) {
+			return internalErrors.NewServerError(http.StatusBadRequest, "h.getHistory.Handle err", err)
 		}
 	}
 
-	// FIXME: 4) Сформировать ответ, обрабатывая возможное отсутствие автора у сообщения
+	err = eCtx.JSONPretty(http.StatusOK, adaptGetHistoryResponse(resp), "  ")
+	if err != nil {
+		return err
+	}
 
 	return nil
+}
+
+func adaptGetHistoryResponse(resp gethistory.Response) GetHistoryResponse {
+	return GetHistoryResponse{
+		Data: &MessagesPage{
+			Messages: adaptMessages(resp.Messages),
+			Next:     resp.NextCursor,
+		},
+	}
+}
+
+func adaptMessages(messages []gethistory.Message) []Message {
+	arr := make([]Message, 0, len(messages))
+	for _, msg := range messages {
+		arr = append(arr, adaptMessage(msg))
+	}
+	return arr
+}
+
+func adaptMessage(message gethistory.Message) Message {
+	return Message{
+		AuthorId:  pointer.PtrWithZeroAsNil(message.AuthorID),
+		Body:      message.Body,
+		CreatedAt: message.CreatedAt,
+		Id:        message.ID,
+	}
 }

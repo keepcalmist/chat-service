@@ -5,6 +5,7 @@ import (
 
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	"github.com/keepcalmist/chat-service/internal/store"
+	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
 	"go.uber.org/zap"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -32,8 +33,15 @@ func initServerClient(
 		return nil, fmt.Errorf("init messages repo: %v", err)
 	}
 
+	getHistoryUsecase, err := gethistory.New(
+		gethistory.NewOptions(repoMsg),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("init get history usecase: %v", err)
+	}
+
 	v1Handlers, err := clientv1.NewHandlers(
-		clientv1.NewOptions(lg, repoMsg),
+		clientv1.NewOptions(getHistoryUsecase, lg),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create v1 handlers: %v", err)
