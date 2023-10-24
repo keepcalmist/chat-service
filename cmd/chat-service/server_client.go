@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
+	"github.com/keepcalmist/chat-service/internal/store"
 	"go.uber.org/zap"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -19,10 +21,20 @@ func initServerClient(
 	role string,
 	resource string,
 	keycloakConfig config.Keycloak,
+	database *store.Database,
 ) (*server_client.Server, error) {
 	lg := zap.L().Named(nameServerClient)
 
-	v1Handlers, err := clientv1.NewHandlers(clientv1.NewOptions(lg))
+	repoMsg, err := messagesrepo.New(messagesrepo.NewOptions(
+		database,
+	))
+	if err != nil {
+		return nil, fmt.Errorf("init messages repo: %v", err)
+	}
+
+	v1Handlers, err := clientv1.NewHandlers(
+		clientv1.NewOptions(lg, repoMsg),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("create v1 handlers: %v", err)
 	}

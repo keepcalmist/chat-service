@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/keepcalmist/chat-service/internal/store"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -48,6 +49,26 @@ func run() (errReturned error) {
 	}
 	defer logger.Sync()
 
+	psqlClient, err := store.NewPSQLClient(store.NewPSQLOptions(
+		cfg.Postgres.Address,
+		cfg.Postgres.Username,
+		cfg.Postgres.Password,
+		cfg.Postgres.Database,
+		store.WithDebug(cfg.Postgres.Debug),
+	))
+	if err != nil {
+		return fmt.Errorf("init db driver: %v", err)
+	}
+	defer func() {
+		if err := psqlClient.Close(); err != nil {
+			errReturned = fmt.Errorf("close db connection: %v", err)
+		}
+	}()
+
+	if err = psqlClient.Schema.Create(ctx); err != nil {
+		return fmt.Errorf("migrate db: %v", err)
+	}
+
 	srvDebug, err := serverdebug.New(
 		serverdebug.NewOptions(
 			cfg.Servers.Debug.Addr,
@@ -67,6 +88,7 @@ func run() (errReturned error) {
 		cfg.Servers.Client.RequiredAccess.Role,
 		cfg.Servers.Client.RequiredAccess.Resource,
 		cfg.Clients.Keycloak,
+		store.NewDatabase(psqlClient),
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)

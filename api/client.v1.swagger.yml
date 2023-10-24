@@ -41,15 +41,33 @@ components:
     XRequestIDHeader:
       in: header
       name: X-Request-ID
-      required: true
       schema:
         type: string
         format: uuid
         x-go-type: types.RequestID
-        x-go-type-import:
+        x-go-import:
           path: "github.com/keepcalmist/chat-service/internal/types"
+      required: true
 
   schemas:
+    # Common.
+
+    Error:
+      required: [ message, code ]
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          type: string
+        details:
+          type: string
+
+    ErrorCode:
+      type: integer
+      description: contains HTTP error codes and specific business logic error codes (the last must be >= 1000).
+      # TODO: Конкретные коды появятся в следующем уроке.
+      minimum: 400
+
     # /getHistory
 
     GetHistoryRequest:
@@ -62,10 +80,11 @@ components:
           type: string
 
     GetHistoryResponse:
-      required: [ data ]
       properties:
         data:
           $ref: "#/components/schemas/MessagesPage"
+        error:
+          $ref: "#/components/schemas/Error"
 
     MessagesPage:
       required: [ messages, next]
@@ -78,7 +97,7 @@ components:
           type: string
 
     Message:
-      required: [ id, authorId, body, createdAt ]
+      required: [ id, body, createdAt, isReceived, isBlocked, isService ]
       properties:
         id:
           type: string
@@ -87,14 +106,14 @@ components:
           x-go-type-import:
             path: "github.com/keepcalmist/chat-service/internal/types"
         authorId:
-            type: string
-            format: uuid
-            x-go-type: types.UserID
-            x-go-type-import:
-                path: "github.com/keepcalmist/chat-service/internal/types"
+          type: string
+          format: uuid
+          x-go-type: types.UserID
+          x-go-type-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
         body:
-            type: string
+          type: string
         createdAt:
-            type: string
-            format: date-time
-            x-go-type: time.Time
+          type: string
+          format: date-time
+        # FIXME: Добавь полей

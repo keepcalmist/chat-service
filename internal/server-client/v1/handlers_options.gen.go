@@ -12,6 +12,7 @@ import (
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
+	getHistory getHistoryUseCase,
 	logger *zap.Logger,
 	options ...OptOptionsSetter,
 ) Options {
@@ -19,6 +20,7 @@ func NewOptions(
 
 	// Setting defaults from field tag (if present)
 
+	o.getHistory = getHistory
 	o.logger = logger
 
 	for _, opt := range options {
@@ -29,8 +31,16 @@ func NewOptions(
 
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
+	errs.Add(errors461e464ebed9.NewValidationError("getHistory", _validate_Options_getHistory(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("logger", _validate_Options_logger(o)))
 	return errs.AsError()
+}
+
+func _validate_Options_getHistory(o *Options) error {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.getHistory, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `getHistory` did not pass the test: %w", err)
+	}
+	return nil
 }
 
 func _validate_Options_logger(o *Options) error {

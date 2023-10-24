@@ -28,6 +28,10 @@ func NewPSQLClient(opts PSQLOptions) (*Client, error) {
 		return nil, fmt.Errorf("init db driver: %v", err)
 	}
 
+	if err = db.Ping(); err != nil {
+		return nil, fmt.Errorf("ping db: %v", err)
+	}
+
 	var clientOpts []Option
 	if opts.debug {
 		clientOpts = append(clientOpts, Debug())

@@ -2,7 +2,6 @@ package keycloakclient
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"net/http"
 
@@ -25,7 +24,7 @@ func (c *Client) IntrospectToken(ctx context.Context, token string) (*Introspect
 	var result IntrospectTokenResult
 	resp, err := c.cli.R().SetContext(ctx).
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetHeader("Authorization", "Basic "+c.basicAuth()).
+		SetBasicAuth(c.clientID, c.secret).
 		SetFormData(map[string]string{
 			"token_type_hint": "requesting_party_token",
 			"token":           token,
@@ -43,8 +42,4 @@ func (c *Client) IntrospectToken(ctx context.Context, token string) (*Introspect
 
 func (c *Client) auth(ctx context.Context) *resty.Request { //nolint
 	return c.cli.R().SetContext(ctx)
-}
-
-func (c *Client) basicAuth() string {
-	return base64.StdEncoding.EncodeToString([]byte(c.clientID + ":" + c.secret))
 }
