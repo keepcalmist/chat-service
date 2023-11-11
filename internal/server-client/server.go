@@ -10,6 +10,7 @@ import (
 	oapimdlwr "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/keepcalmist/chat-service/internal/server-client/errhandler"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
@@ -35,6 +36,7 @@ type Options struct {
 	introspector middlewares.Introspector `option:"mandatory" validate:"required"`
 	role         string                   `option:"mandatory" validate:"required"`
 	resource     string                   `option:"mandatory" validate:"required"`
+	isProduction bool                     `option:"mandatory"`
 }
 
 type Server struct {
@@ -45,6 +47,14 @@ type Server struct {
 func New(opts Options) (*Server, error) {
 	if err := opts.Validate(); err != nil {
 		return nil, err
+	}
+	errHandle, err := errhandler.New(errhandler.NewOptions(
+		opts.logger,
+		opts.isProduction,
+		errhandler.ResponseBuilder,
+	))
+	if err != nil {
+		return nil, fmt.Errorf("create err handler: %w", err)
 	}
 
 	e := echo.New()
@@ -93,6 +103,15 @@ func New(opts Options) (*Server, error) {
 			LogUserAgent: true,
 			LogStatus:    true,
 		}),
+		func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(eCtx echo.Context) error {
+				err := next(eCtx)
+				if err != nil {
+					errHandle.Handle(err, eCtx)
+				}
+				return nil
+			}
+		},
 	)
 
 	v1 := e.Group("v1", oapimdlwr.OapiRequestValidatorWithOptions(opts.v1Swagger, &oapimdlwr.Options{

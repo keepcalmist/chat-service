@@ -9,6 +9,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap"
 
 	"github.com/keepcalmist/chat-service/internal/middlewares"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
@@ -39,6 +40,7 @@ func (s *HandlersSuite) SetupTest() {
 		var err error
 		s.handlers, err = clientv1.NewHandlers(clientv1.NewOptions(
 			s.getHistoryUseCase,
+			zap.L(),
 		))
 		s.Require().NoError(err)
 	}

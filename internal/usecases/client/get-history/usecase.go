@@ -45,8 +45,8 @@ func New(opts Options) (UseCase, error) {
 }
 
 func (u UseCase) Handle(ctx context.Context, req Request) (Response, error) {
-	if req.Validate() != nil {
-		return Response{}, ErrInvalidRequest
+	if err := req.Validate(); err != nil {
+		return Response{}, err
 	}
 
 	var cur *messagesrepo.Cursor

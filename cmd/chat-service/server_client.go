@@ -23,6 +23,7 @@ func initServerClient(
 	resource string,
 	keycloakConfig config.Keycloak,
 	database *store.Database,
+	isProduction bool,
 ) (*server_client.Server, error) {
 	lg := zap.L().Named(nameServerClient)
 
@@ -74,6 +75,7 @@ func initServerClient(
 		keyCloakClient,
 		role,
 		resource,
+		isProduction,
 	))
 	if err != nil {
 		return nil, fmt.Errorf("build server: %v", err)

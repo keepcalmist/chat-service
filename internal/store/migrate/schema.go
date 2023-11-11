@@ -55,9 +55,9 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "message_chat_id",
+				Name:    "message_chat_id_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MessagesColumns[9]},
+				Columns: []*schema.Column{MessagesColumns[9], MessagesColumns[8]},
 			},
 		},
 	}

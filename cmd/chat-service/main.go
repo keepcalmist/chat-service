@@ -89,6 +89,7 @@ func run() (errReturned error) {
 		cfg.Servers.Client.RequiredAccess.Resource,
 		cfg.Clients.Keycloak,
 		store.NewDatabase(psqlClient),
+		cfg.Global.IsProduction(),
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)

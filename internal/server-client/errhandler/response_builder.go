@@ -2,6 +2,7 @@ package errhandler
 
 import (
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
+	"github.com/keepcalmist/chat-service/pkg/pointer"
 )
 
 type Response struct {
@@ -9,6 +10,9 @@ type Response struct {
 }
 
 var ResponseBuilder = func(code int, msg string, details string) any {
-	// FIXME
-	return Response{}
+	return Response{Error: clientv1.Error{
+		Code:    code,
+		Details: pointer.PtrWithZeroAsNil(details),
+		Message: msg,
+	}}
 }

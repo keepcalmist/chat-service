@@ -152,3 +152,22 @@ func (s *HandlersSuite) TestGetHistory_Usecase_Success() {
     }
 }`, msgs[0].AuthorID, msgs[0].ID, msgs[1].ID), resp.Body.String())
 }
+
+//{
+//  "data": {
+//    "messages": [
+//      {
+//        "authorId": "7448c272-3e7c-4ead-ba31-b158b3a89999",
+//        "body": "hello!",
+//        "createdAt": "1970-01-01T00:00:01.000000001Z",
+//        "id": "d8647860-3fb3-4d1b-8059-031ad1fcb40c"
+//      },
+//      {
+//        "body": "service message",
+//        "createdAt": "1970-01-01T00:00:02.000000002Z",
+//        "id": "514dba59-52c1-4531-a0af-e246299140ce"
+//      }
+//    ],
+//    "next": ""
+//  }
+//}

@@ -23,6 +23,7 @@ func NewOptions(
 	introspector middlewares.Introspector,
 	role string,
 	resource string,
+	isProduction bool,
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
@@ -37,6 +38,7 @@ func NewOptions(
 	o.introspector = introspector
 	o.role = role
 	o.resource = resource
+	o.isProduction = isProduction
 
 	for _, opt := range options {
 		opt(&o)

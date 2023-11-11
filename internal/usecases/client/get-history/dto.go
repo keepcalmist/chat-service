@@ -15,9 +15,14 @@ type Request struct {
 }
 
 func (r Request) Validate() error {
-	if r.PageSize == 0 && r.Cursor == "" || r.PageSize != 0 && r.Cursor != "" {
+	if r.PageSize == 0 && r.Cursor == "" {
 		return ErrInvalidRequest
 	}
+
+	if r.PageSize != 0 && r.Cursor != "" {
+		return ErrInvalidRequest
+	}
+
 	return validator.Validator.Struct(r)
 }
 

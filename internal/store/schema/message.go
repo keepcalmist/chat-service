@@ -42,6 +42,6 @@ func (Message) Edges() []ent.Edge {
 
 func (Message) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("chat_id"),
+		index.Fields("chat_id", "created_at"),
 	}
 }

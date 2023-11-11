@@ -31,13 +31,17 @@ var stub = MessagesPage{Messages: []Message{
 
 func (h Handlers) PostGetHistory(eCtx echo.Context, req PostGetHistoryParams) error {
 	ctx := eCtx.Request().Context()
-	clientID := middlewares.MustUserID(eCtx)
 
 	// FIXME: 1) За-bind-ить входящий запрос
 	reqBody := new(GetHistoryRequest)
 	err := eCtx.Bind(reqBody)
 	if err != nil {
 		return err
+	}
+
+	clientID, ok := middlewares.GetUserID(eCtx)
+	if !ok {
+		return internalErrors.NewServerError(http.StatusBadRequest, "cannot get clientID from context", nil)
 	}
 
 	// FIXME: 2) Вызвать соответствующий юзкейс
@@ -51,6 +55,7 @@ func (h Handlers) PostGetHistory(eCtx echo.Context, req PostGetHistoryParams) er
 		if errors.Is(err, gethistory.ErrInvalidRequest) || errors.Is(err, gethistory.ErrInvalidCursor) {
 			return internalErrors.NewServerError(http.StatusBadRequest, "h.getHistory.Handle err", err)
 		}
+		return internalErrors.NewServerError(http.StatusInternalServerError, "h.getHistory.Handle err", err)
 	}
 
 	err = eCtx.JSONPretty(http.StatusOK, adaptGetHistoryResponse(resp), "  ")
@@ -80,9 +85,12 @@ func adaptMessages(messages []gethistory.Message) []Message {
 
 func adaptMessage(message gethistory.Message) Message {
 	return Message{
-		AuthorId:  pointer.PtrWithZeroAsNil(message.AuthorID),
-		Body:      message.Body,
-		CreatedAt: message.CreatedAt,
-		Id:        message.ID,
+		AuthorId:   pointer.PtrWithZeroAsNil(message.AuthorID),
+		Body:       message.Body,
+		CreatedAt:  message.CreatedAt,
+		Id:         message.ID,
+		IsBlocked:  message.IsBlocked,
+		IsReceived: message.IsReceived,
+		IsService:  message.IsService,
 	}
 }

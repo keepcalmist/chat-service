@@ -116,4 +116,9 @@ components:
         createdAt:
           type: string
           format: date-time
-        # FIXME: Добавь полей
+        isReceived:
+          type: boolean
+        isBlocked:
+          type: boolean
+        isService:
+          type: boolean
