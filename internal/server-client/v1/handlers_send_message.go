@@ -19,7 +19,7 @@ func (h Handlers) PostSendMessage(eCtx echo.Context, params PostSendMessageParam
 	reqBody := new(SendMessageRequest)
 	err := eCtx.Bind(reqBody)
 	if err != nil {
-		return fmt.Errorf("bind request: %v", err)
+		return fmt.Errorf("bind request: %w", err)
 	}
 
 	clientID, ok := middlewares.GetUserID(eCtx)
@@ -48,7 +48,7 @@ func (h Handlers) PostSendMessage(eCtx echo.Context, params PostSendMessageParam
 
 	err = eCtx.JSONPretty(http.StatusOK, convertSendMessageResponseToMessage(resp), "  ")
 	if err != nil {
-		return err
+		return fmt.Errorf("JSONPretty: %w", err)
 	}
 
 	return nil

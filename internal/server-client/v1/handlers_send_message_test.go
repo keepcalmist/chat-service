@@ -111,7 +111,7 @@ func (s *HandlersSuite) TestSendMessage_Usecase_Success() {
 {
     "data":
     {
-        "authorID": "%s",
+        "authorId": "%s",
         "createdAt": "1970-01-01T00:00:01.000000001Z",
         "id": "%s"
     }
