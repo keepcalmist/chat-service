@@ -38,13 +38,11 @@ func GetServerErrorCode(err error) int {
 // ProcessServerError tries to retrieve from given error it's code, message and some details.
 // For example, that fields can be used to build error response for client.
 func ProcessServerError(err error) (code int, msg string, details string) {
-	serverError := &ServerError{}
-	if errors.As(err, &serverError) {
+	if serverError := new(ServerError); errors.As(err, &serverError) {
 		return serverError.Code, serverError.Message, serverError.Error()
 	}
 
-	echoErr := &echo.HTTPError{}
-	if errors.As(err, &echoErr) {
+	if echoErr := new(echo.HTTPError); errors.As(err, &echoErr) {
 		return echoErr.Code, echoErr.Message.(string), echoErr.Error()
 	}
 
