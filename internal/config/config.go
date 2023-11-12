@@ -38,7 +38,7 @@ type DebugServerConfig struct {
 }
 
 type Sentry struct {
-	DSN string `toml:"dsn" validate:"sentrydsn"`
+	DSN string `toml:"dsn" validate:"omitempty,url"`
 }
 
 type Clients struct {

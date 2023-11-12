@@ -97,7 +97,7 @@ components:
           messageBody:
             type: string
             minLength: 1
-            maxLength: 1000
+            maxLength: 3000
 
     SendMessageResponse:
       properties:

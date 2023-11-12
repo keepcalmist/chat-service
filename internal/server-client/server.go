@@ -72,7 +72,7 @@ func New(opts Options) (*Server, error) {
 			AllowOrigins: opts.allowOrigins,
 			AllowMethods: []string{http.MethodPost},
 		}),
-		middleware.BodyLimit("1K"),
+		middleware.BodyLimit("3K"),
 		middlewares.NewKeycloakTokenAuth(opts.introspector, opts.resource, opts.role),
 		middlewares.NewRequestLogger(opts.logger),
 	)
