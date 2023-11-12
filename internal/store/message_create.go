@@ -341,7 +341,7 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := mc.mutation.CheckedAt(); ok {
 		_spec.SetField(message.FieldCheckedAt, field.TypeTime, value)
-		_node.CheckedAt = &value
+		_node.CheckedAt = value
 	}
 	if value, ok := mc.mutation.IsBlocked(); ok {
 		_spec.SetField(message.FieldIsBlocked, field.TypeBool, value)
@@ -505,18 +505,6 @@ func (u *MessageUpsert) ClearIsBlocked() *MessageUpsert {
 	return u
 }
 
-// SetIsService sets the "is_service" field.
-func (u *MessageUpsert) SetIsService(v bool) *MessageUpsert {
-	u.Set(message.FieldIsService, v)
-	return u
-}
-
-// UpdateIsService sets the "is_service" field to the value that was provided on create.
-func (u *MessageUpsert) UpdateIsService() *MessageUpsert {
-	u.SetExcluded(message.FieldIsService)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -539,6 +527,9 @@ func (u *MessageUpsertOne) UpdateNewValues() *MessageUpsertOne {
 		}
 		if _, exists := u.create.mutation.Body(); exists {
 			s.SetIgnore(message.FieldBody)
+		}
+		if _, exists := u.create.mutation.IsService(); exists {
+			s.SetIgnore(message.FieldIsService)
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(message.FieldCreatedAt)
@@ -647,20 +638,6 @@ func (u *MessageUpsertOne) UpdateIsBlocked() *MessageUpsertOne {
 func (u *MessageUpsertOne) ClearIsBlocked() *MessageUpsertOne {
 	return u.Update(func(s *MessageUpsert) {
 		s.ClearIsBlocked()
-	})
-}
-
-// SetIsService sets the "is_service" field.
-func (u *MessageUpsertOne) SetIsService(v bool) *MessageUpsertOne {
-	return u.Update(func(s *MessageUpsert) {
-		s.SetIsService(v)
-	})
-}
-
-// UpdateIsService sets the "is_service" field to the value that was provided on create.
-func (u *MessageUpsertOne) UpdateIsService() *MessageUpsertOne {
-	return u.Update(func(s *MessageUpsert) {
-		s.UpdateIsService()
 	})
 }
 
@@ -853,6 +830,9 @@ func (u *MessageUpsertBulk) UpdateNewValues() *MessageUpsertBulk {
 			if _, exists := b.mutation.Body(); exists {
 				s.SetIgnore(message.FieldBody)
 			}
+			if _, exists := b.mutation.IsService(); exists {
+				s.SetIgnore(message.FieldIsService)
+			}
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(message.FieldCreatedAt)
 			}
@@ -961,20 +941,6 @@ func (u *MessageUpsertBulk) UpdateIsBlocked() *MessageUpsertBulk {
 func (u *MessageUpsertBulk) ClearIsBlocked() *MessageUpsertBulk {
 	return u.Update(func(s *MessageUpsert) {
 		s.ClearIsBlocked()
-	})
-}
-
-// SetIsService sets the "is_service" field.
-func (u *MessageUpsertBulk) SetIsService(v bool) *MessageUpsertBulk {
-	return u.Update(func(s *MessageUpsert) {
-		s.SetIsService(v)
-	})
-}
-
-// UpdateIsService sets the "is_service" field to the value that was provided on create.
-func (u *MessageUpsertBulk) UpdateIsService() *MessageUpsertBulk {
-	return u.Update(func(s *MessageUpsert) {
-		s.UpdateIsService()
 	})
 }
 

@@ -15,6 +15,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/keepcalmist/chat-service/internal/buildinfo"
+	"github.com/keepcalmist/chat-service/internal/middlewares"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 )
 
@@ -44,11 +45,10 @@ func New(opts Options) (*Server, error) {
 
 	e := echo.New()
 	e.Use(
-		middleware.Recover(),
+		middlewares.NewRecovery(lg),
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: []string{"*"},
 		}),
-		middleware.BodyLimit("1K"),
 	)
 
 	s := &Server{

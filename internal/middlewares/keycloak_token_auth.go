@@ -91,27 +91,3 @@ func userID(eCtx echo.Context) (types.UserID, bool) {
 	}
 	return userIDProvider.UserID(), true
 }
-
-func hasRole(roles interface{}, role string) bool {
-	switch t := roles.(type) {
-	case []string:
-		for _, r := range t {
-			if r == role {
-				return true
-			}
-		}
-	case string:
-		return t == role
-	case []interface{}:
-		for _, r := range t {
-			if r == role {
-				return true
-			}
-		}
-	default:
-		return false
-	}
-	return false
-}
-
-// func getRoles(resourceAccess interface{}) rol

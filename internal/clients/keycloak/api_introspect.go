@@ -40,6 +40,6 @@ func (c *Client) IntrospectToken(ctx context.Context, token string) (*Introspect
 	return &result, err
 }
 
-func (c *Client) auth(ctx context.Context) *resty.Request { //nolint
+func (c *Client) auth(ctx context.Context) *resty.Request {
 	return c.cli.R().SetContext(ctx)
 }

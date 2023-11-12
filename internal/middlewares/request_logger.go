@@ -6,6 +6,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
+
+	internalErrors "github.com/keepcalmist/chat-service/internal/errors"
 )
 
 func NewRequestLogger(lg *zap.Logger) echo.MiddlewareFunc {
@@ -30,6 +32,11 @@ func NewRequestLogger(lg *zap.Logger) echo.MiddlewareFunc {
 
 			if err := v.Error; err != nil {
 				lg = lg.With(zap.Error(err))
+			}
+
+			code := internalErrors.GetServerErrorCode(v.Error)
+			if code != 0 {
+				v.Status = code
 			}
 
 			switch s := v.Status; {

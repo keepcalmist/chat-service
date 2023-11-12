@@ -57,24 +57,16 @@ func New(opts Options) (*Server, error) {
 	}
 
 	e := echo.New()
+	e.HTTPErrorHandler = errHandle.Handle
 	e.Use(
-		middleware.Recover(),
-		func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(eCtx echo.Context) error {
-				err := next(eCtx)
-				if err != nil {
-					errHandle.Handle(err, eCtx)
-				}
-				return nil
-			}
-		},
+		middlewares.NewRecovery(opts.logger),
+		middlewares.NewRequestLogger(opts.logger),
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: opts.allowOrigins,
 			AllowMethods: []string{http.MethodPost},
 		}),
 		middleware.BodyLimit("3K"),
 		middlewares.NewKeycloakTokenAuth(opts.introspector, opts.resource, opts.role),
-		middlewares.NewRequestLogger(opts.logger),
 	)
 
 	v1 := e.Group("v1", oapimdlwr.OapiRequestValidatorWithOptions(opts.v1Swagger, &oapimdlwr.Options{

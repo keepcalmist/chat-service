@@ -14,6 +14,7 @@ var (
 	ErrSubjectNotDefined  = errors.New(`"sub" is not defined`)
 )
 
+//nolint:tagliatelle
 type claims struct {
 	jwt.RegisteredClaims
 	Subject         types.UserID   `json:"sub"`

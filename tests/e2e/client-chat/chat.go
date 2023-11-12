@@ -199,7 +199,7 @@ func (c *Chat) SendMessage(ctx context.Context, body string, opts ...SendMessage
 		IsReceived: false,
 		CreatedAt:  data.CreatedAt,
 	}
-	if uid := data.AuthorID; uid != nil {
+	if uid := data.AuthorId; uid != nil {
 		msg.AuthorID = *uid
 	}
 	c.addMessageToEnd(msg)

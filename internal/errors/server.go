@@ -31,6 +31,9 @@ func (s *ServerError) Is(err error) bool {
 }
 
 func GetServerErrorCode(err error) int {
+	if err == nil {
+		return 0
+	}
 	code, _, _ := ProcessServerError(err)
 	return code
 }

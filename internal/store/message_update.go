@@ -98,20 +98,6 @@ func (mu *MessageUpdate) ClearIsBlocked() *MessageUpdate {
 	return mu
 }
 
-// SetIsService sets the "is_service" field.
-func (mu *MessageUpdate) SetIsService(b bool) *MessageUpdate {
-	mu.mutation.SetIsService(b)
-	return mu
-}
-
-// SetNillableIsService sets the "is_service" field if the given value is not nil.
-func (mu *MessageUpdate) SetNillableIsService(b *bool) *MessageUpdate {
-	if b != nil {
-		mu.SetIsService(*b)
-	}
-	return mu
-}
-
 // SetProblemID sets the "problem" edge to the Problem entity by ID.
 func (mu *MessageUpdate) SetProblemID(id types.ProblemID) *MessageUpdate {
 	mu.mutation.SetProblemID(id)
@@ -204,9 +190,6 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if mu.mutation.IsBlockedCleared() {
 		_spec.ClearField(message.FieldIsBlocked, field.TypeBool)
-	}
-	if value, ok := mu.mutation.IsService(); ok {
-		_spec.SetField(message.FieldIsService, field.TypeBool, value)
 	}
 	if mu.mutation.ProblemCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -322,20 +305,6 @@ func (muo *MessageUpdateOne) SetNillableIsBlocked(b *bool) *MessageUpdateOne {
 // ClearIsBlocked clears the value of the "is_blocked" field.
 func (muo *MessageUpdateOne) ClearIsBlocked() *MessageUpdateOne {
 	muo.mutation.ClearIsBlocked()
-	return muo
-}
-
-// SetIsService sets the "is_service" field.
-func (muo *MessageUpdateOne) SetIsService(b bool) *MessageUpdateOne {
-	muo.mutation.SetIsService(b)
-	return muo
-}
-
-// SetNillableIsService sets the "is_service" field if the given value is not nil.
-func (muo *MessageUpdateOne) SetNillableIsService(b *bool) *MessageUpdateOne {
-	if b != nil {
-		muo.SetIsService(*b)
-	}
 	return muo
 }
 
@@ -461,9 +430,6 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 	}
 	if muo.mutation.IsBlockedCleared() {
 		_spec.ClearField(message.FieldIsBlocked, field.TypeBool)
-	}
-	if value, ok := muo.mutation.IsService(); ok {
-		_spec.SetField(message.FieldIsService, field.TypeBool, value)
 	}
 	if muo.mutation.ProblemCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -47,8 +47,8 @@ func (s *UseCaseIntegrationSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	s.uCase, err = sendmessage.New(sendmessage.NewOptions(
-		chatRepo,
 		msgRepo,
+		chatRepo,
 		problemRepo,
 		s.Database,
 	))
@@ -57,8 +57,8 @@ func (s *UseCaseIntegrationSuite) SetupSuite() {
 	s.ctrl = gomock.NewController(s.T())
 	s.msgRepoMock = sendmessagemocks.NewMockmessagesRepository(s.ctrl)
 	s.uCaseWithMsgRepoMock, err = sendmessage.New(sendmessage.NewOptions(
-		chatRepo,
 		s.msgRepoMock,
+		chatRepo,
 		problemRepo,
 		s.Database,
 	))

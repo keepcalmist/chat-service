@@ -2,6 +2,7 @@ package clientv1
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -18,7 +19,7 @@ func (h Handlers) PostSendMessage(eCtx echo.Context, params PostSendMessageParam
 	reqBody := new(SendMessageRequest)
 	err := eCtx.Bind(reqBody)
 	if err != nil {
-		return err
+		return fmt.Errorf("bind request: %v", err)
 	}
 
 	clientID, ok := middlewares.GetUserID(eCtx)

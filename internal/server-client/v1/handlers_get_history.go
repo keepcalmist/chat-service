@@ -2,32 +2,16 @@ package clientv1
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 
 	internalErrors "github.com/keepcalmist/chat-service/internal/errors"
 	"github.com/keepcalmist/chat-service/internal/middlewares"
-	"github.com/keepcalmist/chat-service/internal/types"
 	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
 	"github.com/keepcalmist/chat-service/pkg/pointer"
 )
-
-var stub = MessagesPage{Messages: []Message{
-	{
-		AuthorId:  pointer.Ptr(types.NewUserID()),
-		Body:      "Здравствуйте! Разберёмся.",
-		CreatedAt: time.Now(),
-		Id:        types.NewMessageID(),
-	},
-	{
-		AuthorId:  pointer.Ptr(types.MustParse[types.UserID]("f67e3424-ba2b-45ce-bf4e-e064f3663b78")),
-		Body:      "Привет! Не могу снять денег с карты,\nпишет 'карта заблокирована'",
-		CreatedAt: time.Now().Add(-time.Minute),
-		Id:        types.NewMessageID(),
-	},
-}}
 
 func (h Handlers) PostGetHistory(eCtx echo.Context, req PostGetHistoryParams) error {
 	ctx := eCtx.Request().Context()
@@ -35,7 +19,7 @@ func (h Handlers) PostGetHistory(eCtx echo.Context, req PostGetHistoryParams) er
 	reqBody := new(GetHistoryRequest)
 	err := eCtx.Bind(reqBody)
 	if err != nil {
-		return err
+		return fmt.Errorf("bind request: %w", err)
 	}
 
 	clientID, ok := middlewares.GetUserID(eCtx)
@@ -58,7 +42,7 @@ func (h Handlers) PostGetHistory(eCtx echo.Context, req PostGetHistoryParams) er
 
 	err = eCtx.JSONPretty(http.StatusOK, adaptGetHistoryResponse(resp), "  ")
 	if err != nil {
-		return err
+		return fmt.Errorf("JSONPretty: %w", err)
 	}
 
 	return nil
