@@ -56,7 +56,7 @@ func (h Handlers) PostSendMessage(eCtx echo.Context, params PostSendMessageParam
 func convertSendMessageResponseToMessage(resp sendmessage.Response) SendMessageResponse {
 	return SendMessageResponse{
 		Data: &MessageHeader{
-			AuthorID:  pointer.Ptr(resp.AuthorID),
+			AuthorId:  pointer.Ptr(resp.AuthorID),
 			CreatedAt: resp.CreatedAt,
 			Id:        resp.MessageID,
 		},

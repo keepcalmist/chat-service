@@ -64,7 +64,7 @@ type Message struct {
 
 // MessageHeader defines model for MessageHeader.
 type MessageHeader struct {
-	AuthorID  *types.UserID   `json:"authorID,omitempty"`
+	AuthorId  *types.UserID   `json:"authorId,omitempty"`
 	CreatedAt time.Time       `json:"createdAt"`
 	Id        types.MessageID `json:"id"`
 }

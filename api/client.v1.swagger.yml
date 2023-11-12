@@ -118,7 +118,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        authorID:
+        authorId:
           type: string
           format: uuid
           x-go-type: types.UserID
