@@ -3,6 +3,7 @@ run:
   build-tags:
     - integration
     - e2e
+    - ruleguard
   skip-dirs:
     - internal/types
     - mocks
@@ -38,6 +39,13 @@ linters-settings:
       rules:
         json: camel
         toml: snake
+
+  gocritic:
+    enabled-checks:
+      - ruleguard
+    settings:
+      ruleguard:
+        rules: "gorules/ent.go"
 
 linters:
   disable-all: true

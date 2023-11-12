@@ -21,6 +21,7 @@ func (r *Repo) CreateIfNotExists(ctx context.Context, chatID types.ChatID) (type
 
 	createdProblem, err := r.db.Problem(ctx).
 		Query().
+		Unique(false).
 		Where(
 			problem.ChatID(chatID),
 		).First(ctx)

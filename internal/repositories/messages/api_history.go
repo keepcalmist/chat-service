@@ -62,7 +62,7 @@ func (r *Repo) GetClientChatMessages(
 		Where(
 			message.HasChatWith(chat.ClientIDEQ(clientID)),
 			message.IsVisibleForClientEQ(true),
-		).
+		).Unique(false).
 		Order(message.ByCreatedAt(func(options *sql.OrderTermOptions) {
 			options.Desc = true
 		})).Limit(size + 1)

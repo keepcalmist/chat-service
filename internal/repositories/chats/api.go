@@ -26,7 +26,7 @@ func (r *Repo) CreateIfNotExists(ctx context.Context, userID types.UserID) (type
 		Query().
 		Where(
 			chat.ClientID(userID),
-		).First(ctx)
+		).Unique(false).First(ctx)
 	if err != nil {
 		return types.ChatIDNil, fmt.Errorf("get created chat: %w", err)
 	}

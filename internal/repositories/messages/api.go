@@ -19,7 +19,8 @@ func (r *Repo) GetMessageByRequestID(ctx context.Context, reqID types.RequestID)
 		Query().
 		Where(
 			message.InitialRequestIDEQ(reqID),
-		).First(ctx)
+		).Unique(false).
+		First(ctx)
 	if err != nil {
 		if store.IsNotFound(err) {
 			return nil, ErrMsgNotFound
