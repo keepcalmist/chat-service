@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"entgo.io/ent/dialect/sql"
+
 	"github.com/keepcalmist/chat-service/internal/store"
 	"github.com/keepcalmist/chat-service/internal/store/message"
 	"github.com/keepcalmist/chat-service/internal/types"
@@ -19,7 +20,6 @@ func (r *Repo) GetMessageByRequestID(ctx context.Context, reqID types.RequestID)
 		Where(
 			message.InitialRequestIDEQ(reqID),
 		).First(ctx)
-
 	if err != nil {
 		if store.IsNotFound(err) {
 			return nil, ErrMsgNotFound
@@ -48,7 +48,6 @@ func (r *Repo) CreateClientVisible(
 		SetIsVisibleForClient(true).
 		OnConflict(sql.DoNothing()).
 		Exec(ctx)
-
 	if err != nil {
 		return nil, err
 	}

@@ -9,13 +9,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/keepcalmist/chat-service/internal/store"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/keepcalmist/chat-service/internal/config"
 	"github.com/keepcalmist/chat-service/internal/logger"
 	serverdebug "github.com/keepcalmist/chat-service/internal/server-debug"
+	"github.com/keepcalmist/chat-service/internal/store"
 )
 
 var configPath = flag.String("config", "configs/config.toml", "Path to config file")

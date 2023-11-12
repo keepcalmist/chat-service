@@ -114,4 +114,4 @@ func hasRole(roles interface{}, role string) bool {
 	return false
 }
 
-//func getRoles(resourceAccess interface{}) rol
+// func getRoles(resourceAccess interface{}) rol

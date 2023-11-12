@@ -4,11 +4,12 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
+
 	internalErrors "github.com/keepcalmist/chat-service/internal/errors"
 	"github.com/keepcalmist/chat-service/internal/middlewares"
 	sendmessage "github.com/keepcalmist/chat-service/internal/usecases/client/send-message"
 	"github.com/keepcalmist/chat-service/pkg/pointer"
-	"github.com/labstack/echo/v4"
 )
 
 func (h Handlers) PostSendMessage(eCtx echo.Context, params PostSendMessageParams) error {
@@ -30,7 +31,6 @@ func (h Handlers) PostSendMessage(eCtx echo.Context, params PostSendMessageParam
 		ClientID:    clientID,
 		MessageBody: reqBody.MessageBody,
 	})
-
 	if err != nil {
 		if errors.Is(err, sendmessage.ErrInvalidRequest) {
 			return internalErrors.NewServerError(http.StatusBadRequest, "h.sendMsg.Handle err", err)

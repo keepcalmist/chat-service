@@ -10,13 +10,13 @@ import (
 	oapimdlwr "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/keepcalmist/chat-service/internal/server-client/errhandler"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/keepcalmist/chat-service/internal/middlewares"
+	"github.com/keepcalmist/chat-service/internal/server-client/errhandler"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	"github.com/keepcalmist/chat-service/internal/types"
 )

@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/keepcalmist/chat-service/internal/middlewares"
-	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
-	"github.com/keepcalmist/chat-service/pkg/pointer"
 	"github.com/labstack/echo/v4"
 
 	internalErrors "github.com/keepcalmist/chat-service/internal/errors"
+	"github.com/keepcalmist/chat-service/internal/middlewares"
 	"github.com/keepcalmist/chat-service/internal/types"
+	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
+	"github.com/keepcalmist/chat-service/pkg/pointer"
 )
 
 var stub = MessagesPage{Messages: []Message{

@@ -7,13 +7,14 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/keepcalmist/chat-service/internal/middlewares"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	clientv1mocks "github.com/keepcalmist/chat-service/internal/server-client/v1/mocks"
 	"github.com/keepcalmist/chat-service/internal/testingh"
 	"github.com/keepcalmist/chat-service/internal/types"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/suite"
 )
 
 type HandlersSuite struct {
