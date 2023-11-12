@@ -1,4 +1,4 @@
-//go:build e2e || integration
+//go:build e2e || tests
 
 package e2e_test
 

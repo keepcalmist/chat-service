@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"entgo.io/ent/dialect/sql"
-
+	"github.com/keepcalmist/chat-service/internal/store"
 	"github.com/keepcalmist/chat-service/internal/store/message"
 	"github.com/keepcalmist/chat-service/internal/types"
 	"github.com/keepcalmist/chat-service/pkg/pointer"
@@ -21,11 +21,10 @@ func (r *Repo) GetMessageByRequestID(ctx context.Context, reqID types.RequestID)
 		).First(ctx)
 
 	if err != nil {
+		if store.IsNotFound(err) {
+			return nil, ErrMsgNotFound
+		}
 		return nil, err
-	}
-
-	if msg == nil {
-		return nil, ErrMsgNotFound
 	}
 
 	return pointer.Ptr(adaptStoreMessage(msg)), nil

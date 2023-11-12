@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -31,43 +32,43 @@ var _ = Describe("Error Responses", Ordered, func() {
 		cancel()
 	})
 
-	//It("401 unauthorized", func() {
-	//	// Arrange.
-	//	invalidAuthorizator := func(ctx context.Context, req *http.Request) error {
-	//		req.Header.Set("Authorization", "Bearer invalid_token")
-	//		return nil
-	//	}
-	//	apiInvalidAccessToken, err := apiclientv1.NewClientWithResponses(
-	//		apiClientV1Endpoint,
-	//		apiclientv1.WithRequestEditorFn(invalidAuthorizator),
-	//	)
-	//	Expect(err).ShouldNot(HaveOccurred())
-	//
-	//	// Action.
-	//	resp, err := apiInvalidAccessToken.PostSendMessageWithResponse(ctx,
-	//		&apiclientv1.PostSendMessageParams{XRequestID: types.NewRequestID()},
-	//		apiclientv1.SendMessageRequest{},
-	//	)
-	//
-	//	// Assert.
-	//	Expect(err).ShouldNot(HaveOccurred())
-	//	expectSendClientMsgRespCode(resp, http.StatusUnauthorized)
-	//})
-	//
-	//It("413 bad request, too long message body", func() {
-	//	// Arrange.
-	//	tooLongMsgBody := strings.Repeat("a", 100_000)
-	//
-	//	// Action.
-	//	resp, err := apiClientV1.PostSendMessageWithResponse(ctx,
-	//		&apiclientv1.PostSendMessageParams{XRequestID: types.NewRequestID()},
-	//		apiclientv1.PostSendMessageJSONRequestBody{MessageBody: tooLongMsgBody},
-	//	)
-	//
-	//	// Assert.
-	//	Expect(err).ShouldNot(HaveOccurred())
-	//	expectSendClientMsgRespCode(resp, http.StatusRequestEntityTooLarge)
-	//})
+	It("401 unauthorized", func() {
+		// Arrange.
+		invalidAuthorizator := func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("Authorization", "Bearer invalid_token")
+			return nil
+		}
+		apiInvalidAccessToken, err := apiclientv1.NewClientWithResponses(
+			apiClientV1Endpoint,
+			apiclientv1.WithRequestEditorFn(invalidAuthorizator),
+		)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		// Action.
+		resp, err := apiInvalidAccessToken.PostSendMessageWithResponse(ctx,
+			&apiclientv1.PostSendMessageParams{XRequestID: types.NewRequestID()},
+			apiclientv1.SendMessageRequest{},
+		)
+
+		// Assert.
+		Expect(err).ShouldNot(HaveOccurred())
+		expectSendClientMsgRespCode(resp, http.StatusUnauthorized)
+	})
+
+	It("413 bad request, too long message body", func() {
+		// Arrange.
+		tooLongMsgBody := strings.Repeat("a", 100_000)
+
+		// Action.
+		resp, err := apiClientV1.PostSendMessageWithResponse(ctx,
+			&apiclientv1.PostSendMessageParams{XRequestID: types.NewRequestID()},
+			apiclientv1.PostSendMessageJSONRequestBody{MessageBody: tooLongMsgBody},
+		)
+
+		// Assert.
+		Expect(err).ShouldNot(HaveOccurred())
+		expectSendClientMsgRespCode(resp, http.StatusRequestEntityTooLarge)
+	})
 
 	It("400 bad request, message body is empty", func() {
 		// Action.

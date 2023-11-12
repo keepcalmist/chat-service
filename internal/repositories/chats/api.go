@@ -2,9 +2,12 @@ package chatsrepo
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
+	entSql "entgo.io/ent/dialect/sql"
+
 	"github.com/keepcalmist/chat-service/internal/store/chat"
 	"github.com/keepcalmist/chat-service/internal/types"
 )
@@ -13,8 +16,9 @@ func (r *Repo) CreateIfNotExists(ctx context.Context, userID types.UserID) (type
 	err := r.db.Chat(ctx).
 		Create().
 		SetClientID(userID).
-		OnConflict(sql.DoNothing()).Exec(ctx)
-	if err != nil {
+		OnConflict(entSql.DoNothing()).
+		Exec(ctx)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return types.ChatIDNil, err
 	}
 
