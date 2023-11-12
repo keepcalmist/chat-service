@@ -35,6 +35,12 @@ func (h Handlers) PostSendMessage(eCtx echo.Context, params PostSendMessageParam
 		if errors.Is(err, sendmessage.ErrInvalidRequest) {
 			return internalErrors.NewServerError(http.StatusBadRequest, "h.sendMsg.Handle err", err)
 		}
+		if errors.Is(err, sendmessage.ErrChatNotCreated) {
+			return internalErrors.NewServerError(int(ErrorCodeCreateChatError), "h.sendMsg.Handle err", err)
+		}
+		if errors.Is(err, sendmessage.ErrProblemNotCreated) {
+			return internalErrors.NewServerError(int(ErrorCodeCreateProblemError), "h.sendMsg.Handle err", err)
+		}
 
 		return internalErrors.NewServerError(http.StatusInternalServerError, "h.sendMsg.Handle err", err)
 	}

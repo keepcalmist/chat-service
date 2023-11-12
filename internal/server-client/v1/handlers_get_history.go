@@ -83,7 +83,7 @@ func adaptMessages(messages []gethistory.Message) []Message {
 
 func adaptMessage(message gethistory.Message) Message {
 	return Message{
-		AuthorId:   pointer.Ptr(message.AuthorID),
+		AuthorId:   pointer.PtrWithZeroAsNil(message.AuthorID),
 		Body:       message.Body,
 		CreatedAt:  message.CreatedAt,
 		Id:         message.ID,

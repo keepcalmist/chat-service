@@ -41,7 +41,7 @@ func (s *UseCaseSuite) SetupTest() {
 	s.txtor = sendmessagemocks.NewMocktransactor(s.ctrl)
 
 	var err error
-	s.uCase, err = sendmessage.New(sendmessage.NewOptions(s.chatRepo, s.msgRepo, s.problemRepo, s.txtor))
+	s.uCase, err = sendmessage.New(sendmessage.NewOptions(s.msgRepo, s.chatRepo, s.problemRepo, s.txtor))
 	s.Require().NoError(err)
 
 	s.ContextSuite.SetupTest()
