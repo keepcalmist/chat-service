@@ -38,6 +38,8 @@ type Message struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// ChatID holds the value of the "chat_id" field.
 	ChatID types.ChatID `json:"chat_id,omitempty"`
+	// InitialRequestID holds the value of the "initial_request_id" field.
+	InitialRequestID types.RequestID `json:"initial_request_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MessageQuery when eager-loading is set.
 	Edges           MessageEdges `json:"edges"`
@@ -97,6 +99,8 @@ func (*Message) scanValues(columns []string) ([]any, error) {
 			values[i] = new(types.ChatID)
 		case message.FieldID:
 			values[i] = new(types.MessageID)
+		case message.FieldInitialRequestID:
+			values[i] = new(types.RequestID)
 		case message.FieldAuthorID:
 			values[i] = new(types.UserID)
 		case message.ForeignKeys[0]: // message_problem
@@ -176,6 +180,12 @@ func (m *Message) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field chat_id", values[i])
 			} else if value != nil {
 				m.ChatID = *value
+			}
+		case message.FieldInitialRequestID:
+			if value, ok := values[i].(*types.RequestID); !ok {
+				return fmt.Errorf("unexpected type %T for field initial_request_id", values[i])
+			} else if value != nil {
+				m.InitialRequestID = *value
 			}
 		case message.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -258,6 +268,9 @@ func (m *Message) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("chat_id=")
 	builder.WriteString(fmt.Sprintf("%v", m.ChatID))
+	builder.WriteString(", ")
+	builder.WriteString("initial_request_id=")
+	builder.WriteString(fmt.Sprintf("%v", m.InitialRequestID))
 	builder.WriteByte(')')
 	return builder.String()
 }

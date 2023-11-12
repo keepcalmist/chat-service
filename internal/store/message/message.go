@@ -33,6 +33,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldChatID holds the string denoting the chat_id field in the database.
 	FieldChatID = "chat_id"
+	// FieldInitialRequestID holds the string denoting the initial_request_id field in the database.
+	FieldInitialRequestID = "initial_request_id"
 	// EdgeChat holds the string denoting the chat edge name in mutations.
 	EdgeChat = "chat"
 	// EdgeProblem holds the string denoting the problem edge name in mutations.
@@ -67,6 +69,7 @@ var Columns = []string{
 	FieldIsService,
 	FieldCreatedAt,
 	FieldChatID,
+	FieldInitialRequestID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "messages"
@@ -97,6 +100,10 @@ var (
 	DefaultIsVisibleForManager bool
 	// BodyValidator is a validator for the "body" field. It is called by the builders before save.
 	BodyValidator func(string) error
+	// DefaultIsBlocked holds the default value on creation for the "is_blocked" field.
+	DefaultIsBlocked bool
+	// DefaultIsService holds the default value on creation for the "is_service" field.
+	DefaultIsService bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
@@ -154,6 +161,11 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByChatID orders the results by the chat_id field.
 func ByChatID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldChatID, opts...).ToFunc()
+}
+
+// ByInitialRequestID orders the results by the initial_request_id field.
+func ByInitialRequestID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInitialRequestID, opts...).ToFunc()
 }
 
 // ByChatField orders the results by chat field.

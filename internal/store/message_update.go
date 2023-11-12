@@ -104,6 +104,14 @@ func (mu *MessageUpdate) SetIsService(b bool) *MessageUpdate {
 	return mu
 }
 
+// SetNillableIsService sets the "is_service" field if the given value is not nil.
+func (mu *MessageUpdate) SetNillableIsService(b *bool) *MessageUpdate {
+	if b != nil {
+		mu.SetIsService(*b)
+	}
+	return mu
+}
+
 // SetProblemID sets the "problem" edge to the Problem entity by ID.
 func (mu *MessageUpdate) SetProblemID(id types.ProblemID) *MessageUpdate {
 	mu.mutation.SetProblemID(id)
@@ -320,6 +328,14 @@ func (muo *MessageUpdateOne) ClearIsBlocked() *MessageUpdateOne {
 // SetIsService sets the "is_service" field.
 func (muo *MessageUpdateOne) SetIsService(b bool) *MessageUpdateOne {
 	muo.mutation.SetIsService(b)
+	return muo
+}
+
+// SetNillableIsService sets the "is_service" field if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableIsService(b *bool) *MessageUpdateOne {
+	if b != nil {
+		muo.SetIsService(*b)
+	}
 	return muo
 }
 

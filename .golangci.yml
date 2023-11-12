@@ -1,6 +1,8 @@
 run:
-  tests: false
-  build-tags: [ ] # Ждёт своего часа.
+  tests: true
+  build-tags:
+    - integration
+    - e2e
   skip-dirs:
     - internal/types
     - mocks

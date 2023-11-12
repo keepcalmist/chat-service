@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 
+	chatsrepo "github.com/keepcalmist/chat-service/internal/repositories/chats"
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
+	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
 	"github.com/keepcalmist/chat-service/internal/store"
 	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
+	sendmessage "github.com/keepcalmist/chat-service/internal/usecases/client/send-message"
 	"go.uber.org/zap"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -16,6 +19,7 @@ import (
 
 const nameServerClient = "server-client"
 
+// FIXME: Создание нового sendMessageUseCase (и его проброс в хендлеры).
 func initServerClient(
 	addr string,
 	allowOrigins []string,
@@ -25,13 +29,25 @@ func initServerClient(
 	database *store.Database,
 	isProduction bool,
 ) (*server_client.Server, error) {
-	lg := zap.L().Named(nameServerClient)
-
 	repoMsg, err := messagesrepo.New(messagesrepo.NewOptions(
 		database,
 	))
 	if err != nil {
 		return nil, fmt.Errorf("init messages repo: %v", err)
+	}
+
+	repoChat, err := chatsrepo.New(chatsrepo.NewOptions(
+		database,
+	))
+	if err != nil {
+		return nil, fmt.Errorf("init chats repo: %v", err)
+	}
+
+	repoProblems, err := problemsrepo.New(problemsrepo.NewOptions(
+		database,
+	))
+	if err != nil {
+		return nil, fmt.Errorf("init problems repo: %v", err)
 	}
 
 	getHistoryUsecase, err := gethistory.New(
@@ -41,8 +57,13 @@ func initServerClient(
 		return nil, fmt.Errorf("init get history usecase: %v", err)
 	}
 
+	sendMessageUsecase, err := sendmessage.New(sendmessage.NewOptions(repoMsg, repoChat, repoProblems, database))
+	if err != nil {
+		return nil, fmt.Errorf("init send message usecase: %v", err)
+	}
+
 	v1Handlers, err := clientv1.NewHandlers(
-		clientv1.NewOptions(getHistoryUsecase, lg),
+		clientv1.NewOptions(getHistoryUsecase, sendMessageUsecase),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create v1 handlers: %v", err)

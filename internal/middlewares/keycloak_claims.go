@@ -16,8 +16,8 @@ var (
 
 type claims struct {
 	jwt.RegisteredClaims
-	Subject        types.UserID                      `json:"sub"`
-	ResourceAccess map[string]map[string]interface{} `json:"resource_access"` //nolint
+	Subject         types.UserID   `json:"sub"`
+	ResourcesAccess resourceAccess `json:"resource_access"`
 }
 
 // Valid returns errors:
@@ -32,11 +32,11 @@ func (c claims) Valid() error {
 	if c.Subject == types.UserIDNil {
 		return ErrSubjectNotDefined
 	}
-	if len(c.ResourceAccess) == 0 {
+	if len(c.ResourcesAccess) == 0 {
 		return ErrNoAllowedResources
 	}
 
-	if len(c.ResourceAccess) == 0 {
+	if len(c.ResourcesAccess) == 0 {
 		return ErrNoAllowedResources
 	}
 
@@ -53,4 +53,22 @@ func parse(tokenString string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("failed to parse claims: %w", err)
 	}
 	return token, err
+}
+
+type resourceAccess map[string]struct {
+	Roles []string `json:"roles"`
+}
+
+func (ra resourceAccess) HasResourceRole(resource, role string) bool {
+	access, ok := ra[resource]
+	if !ok {
+		return false
+	}
+
+	for _, r := range access.Roles {
+		if r == role {
+			return true
+		}
+	}
+	return false
 }

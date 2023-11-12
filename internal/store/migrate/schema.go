@@ -24,13 +24,14 @@ var (
 	MessagesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "author_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "is_visible_for_client", Type: field.TypeBool, Default: true},
-		{Name: "is_visible_for_manager", Type: field.TypeBool, Default: true},
+		{Name: "is_visible_for_client", Type: field.TypeBool, Default: false},
+		{Name: "is_visible_for_manager", Type: field.TypeBool, Default: false},
 		{Name: "body", Type: field.TypeString, Size: 1024},
 		{Name: "checked_at", Type: field.TypeTime, Nullable: true},
-		{Name: "is_blocked", Type: field.TypeBool, Nullable: true},
-		{Name: "is_service", Type: field.TypeBool},
+		{Name: "is_blocked", Type: field.TypeBool, Nullable: true, Default: false},
+		{Name: "is_service", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "initial_request_id", Type: field.TypeUUID, Unique: true},
 		{Name: "chat_id", Type: field.TypeUUID},
 		{Name: "message_problem", Type: field.TypeUUID},
 	}
@@ -42,13 +43,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "messages_chats_chat",
-				Columns:    []*schema.Column{MessagesColumns[9]},
+				Columns:    []*schema.Column{MessagesColumns[10]},
 				RefColumns: []*schema.Column{ChatsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "messages_problems_problem",
-				Columns:    []*schema.Column{MessagesColumns[10]},
+				Columns:    []*schema.Column{MessagesColumns[11]},
 				RefColumns: []*schema.Column{ProblemsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -57,7 +58,7 @@ var (
 			{
 				Name:    "message_chat_id_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{MessagesColumns[9], MessagesColumns[8]},
+				Columns: []*schema.Column{MessagesColumns[10], MessagesColumns[8]},
 			},
 		},
 	}

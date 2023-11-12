@@ -32,7 +32,6 @@ var stub = MessagesPage{Messages: []Message{
 func (h Handlers) PostGetHistory(eCtx echo.Context, req PostGetHistoryParams) error {
 	ctx := eCtx.Request().Context()
 
-	// FIXME: 1) За-bind-ить входящий запрос
 	reqBody := new(GetHistoryRequest)
 	err := eCtx.Bind(reqBody)
 	if err != nil {
@@ -44,7 +43,6 @@ func (h Handlers) PostGetHistory(eCtx echo.Context, req PostGetHistoryParams) er
 		return internalErrors.NewServerError(http.StatusBadRequest, "cannot get clientID from context", nil)
 	}
 
-	// FIXME: 2) Вызвать соответствующий юзкейс
 	resp, err := h.getHistory.Handle(ctx, gethistory.Request{
 		ID:       req.XRequestID,
 		ClientID: clientID,
@@ -85,7 +83,7 @@ func adaptMessages(messages []gethistory.Message) []Message {
 
 func adaptMessage(message gethistory.Message) Message {
 	return Message{
-		AuthorId:   pointer.PtrWithZeroAsNil(message.AuthorID),
+		AuthorId:   pointer.Ptr(message.AuthorID),
 		Body:       message.Body,
 		CreatedAt:  message.CreatedAt,
 		Id:         message.ID,

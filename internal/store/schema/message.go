@@ -21,14 +21,15 @@ func (Message) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", types.MessageID{}).Default(types.NewMessageID).Immutable(),
 		field.UUID("author_id", types.UserID{}).Immutable().Optional(),
-		field.Bool("is_visible_for_client").Default(true),
-		field.Bool("is_visible_for_manager").Default(true),
+		field.Bool("is_visible_for_client").Default(false),
+		field.Bool("is_visible_for_manager").Default(false),
 		field.Text("body").NotEmpty().Immutable().MaxLen(1024),
 		field.Time("checked_at").Nillable().Optional(),
-		field.Bool("is_blocked").Optional(),
-		field.Bool("is_service"),
+		field.Bool("is_blocked").Default(false).Optional(),
+		field.Bool("is_service").Default(false),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.UUID("chat_id", types.ChatID{}).Immutable(),
+		field.UUID("initial_request_id", types.RequestID{}).Immutable().Unique(),
 	}
 }
 

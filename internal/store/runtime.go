@@ -54,6 +54,14 @@ func init() {
 			return nil
 		}
 	}()
+	// messageDescIsBlocked is the schema descriptor for is_blocked field.
+	messageDescIsBlocked := messageFields[6].Descriptor()
+	// message.DefaultIsBlocked holds the default value on creation for the is_blocked field.
+	message.DefaultIsBlocked = messageDescIsBlocked.Default.(bool)
+	// messageDescIsService is the schema descriptor for is_service field.
+	messageDescIsService := messageFields[7].Descriptor()
+	// message.DefaultIsService holds the default value on creation for the is_service field.
+	message.DefaultIsService = messageDescIsService.Default.(bool)
 	// messageDescCreatedAt is the schema descriptor for created_at field.
 	messageDescCreatedAt := messageFields[8].Descriptor()
 	// message.DefaultCreatedAt holds the default value on creation for the created_at field.

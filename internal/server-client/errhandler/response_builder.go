@@ -11,7 +11,7 @@ type Response struct {
 
 var ResponseBuilder = func(code int, msg string, details string) any {
 	return Response{Error: clientv1.Error{
-		Code:    code,
+		Code:    clientv1.ErrorCode(code),
 		Details: pointer.PtrWithZeroAsNil(details),
 		Message: msg,
 	}}

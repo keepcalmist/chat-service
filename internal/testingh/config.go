@@ -11,6 +11,10 @@ import (
 	"github.com/keepcalmist/chat-service/internal/validator"
 )
 
+const (
+	envPath = "/Users/kaunshch/go_proj/chat-service/.env"
+)
+
 var Config config
 
 type config struct {

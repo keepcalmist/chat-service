@@ -60,6 +60,15 @@ func New(opts Options) (*Server, error) {
 	e := echo.New()
 	e.Use(
 		middleware.Recover(),
+		func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(eCtx echo.Context) error {
+				err := next(eCtx)
+				if err != nil {
+					errHandle.Handle(err, eCtx)
+				}
+				return nil
+			}
+		},
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: opts.allowOrigins,
 			AllowMethods: []string{http.MethodPost},
@@ -103,15 +112,6 @@ func New(opts Options) (*Server, error) {
 			LogUserAgent: true,
 			LogStatus:    true,
 		}),
-		func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(eCtx echo.Context) error {
-				err := next(eCtx)
-				if err != nil {
-					errHandle.Handle(err, eCtx)
-				}
-				return nil
-			}
-		},
 	)
 
 	v1 := e.Group("v1", oapimdlwr.OapiRequestValidatorWithOptions(opts.v1Swagger, &oapimdlwr.Options{

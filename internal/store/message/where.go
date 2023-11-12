@@ -101,6 +101,11 @@ func ChatID(v types.ChatID) predicate.Message {
 	return predicate.Message(sql.FieldEQ(FieldChatID, v))
 }
 
+// InitialRequestID applies equality check predicate on the "initial_request_id" field. It's identical to InitialRequestIDEQ.
+func InitialRequestID(v types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldEQ(FieldInitialRequestID, v))
+}
+
 // AuthorIDEQ applies the EQ predicate on the "author_id" field.
 func AuthorIDEQ(v types.UserID) predicate.Message {
 	return predicate.Message(sql.FieldEQ(FieldAuthorID, v))
@@ -374,6 +379,46 @@ func ChatIDIn(vs ...types.ChatID) predicate.Message {
 // ChatIDNotIn applies the NotIn predicate on the "chat_id" field.
 func ChatIDNotIn(vs ...types.ChatID) predicate.Message {
 	return predicate.Message(sql.FieldNotIn(FieldChatID, vs...))
+}
+
+// InitialRequestIDEQ applies the EQ predicate on the "initial_request_id" field.
+func InitialRequestIDEQ(v types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldEQ(FieldInitialRequestID, v))
+}
+
+// InitialRequestIDNEQ applies the NEQ predicate on the "initial_request_id" field.
+func InitialRequestIDNEQ(v types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldNEQ(FieldInitialRequestID, v))
+}
+
+// InitialRequestIDIn applies the In predicate on the "initial_request_id" field.
+func InitialRequestIDIn(vs ...types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldIn(FieldInitialRequestID, vs...))
+}
+
+// InitialRequestIDNotIn applies the NotIn predicate on the "initial_request_id" field.
+func InitialRequestIDNotIn(vs ...types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldNotIn(FieldInitialRequestID, vs...))
+}
+
+// InitialRequestIDGT applies the GT predicate on the "initial_request_id" field.
+func InitialRequestIDGT(v types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldGT(FieldInitialRequestID, v))
+}
+
+// InitialRequestIDGTE applies the GTE predicate on the "initial_request_id" field.
+func InitialRequestIDGTE(v types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldGTE(FieldInitialRequestID, v))
+}
+
+// InitialRequestIDLT applies the LT predicate on the "initial_request_id" field.
+func InitialRequestIDLT(v types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldLT(FieldInitialRequestID, v))
+}
+
+// InitialRequestIDLTE applies the LTE predicate on the "initial_request_id" field.
+func InitialRequestIDLTE(v types.RequestID) predicate.Message {
+	return predicate.Message(sql.FieldLTE(FieldInitialRequestID, v))
 }
 
 // HasChat applies the HasEdge predicate on the "chat" edge.

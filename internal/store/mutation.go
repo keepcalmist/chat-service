@@ -608,6 +608,7 @@ type MessageMutation struct {
 	is_blocked             *bool
 	is_service             *bool
 	created_at             *time.Time
+	initial_request_id     *types.RequestID
 	clearedFields          map[string]struct{}
 	chat                   *types.ChatID
 	clearedchat            bool
@@ -1085,6 +1086,42 @@ func (m *MessageMutation) ResetChatID() {
 	m.chat = nil
 }
 
+// SetInitialRequestID sets the "initial_request_id" field.
+func (m *MessageMutation) SetInitialRequestID(ti types.RequestID) {
+	m.initial_request_id = &ti
+}
+
+// InitialRequestID returns the value of the "initial_request_id" field in the mutation.
+func (m *MessageMutation) InitialRequestID() (r types.RequestID, exists bool) {
+	v := m.initial_request_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInitialRequestID returns the old "initial_request_id" field's value of the Message entity.
+// If the Message object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessageMutation) OldInitialRequestID(ctx context.Context) (v types.RequestID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInitialRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInitialRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInitialRequestID: %w", err)
+	}
+	return oldValue.InitialRequestID, nil
+}
+
+// ResetInitialRequestID resets all changes to the "initial_request_id" field.
+func (m *MessageMutation) ResetInitialRequestID() {
+	m.initial_request_id = nil
+}
+
 // ClearChat clears the "chat" edge to the Chat entity.
 func (m *MessageMutation) ClearChat() {
 	m.clearedchat = true
@@ -1185,7 +1222,7 @@ func (m *MessageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MessageMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.author_id != nil {
 		fields = append(fields, message.FieldAuthorID)
 	}
@@ -1213,6 +1250,9 @@ func (m *MessageMutation) Fields() []string {
 	if m.chat != nil {
 		fields = append(fields, message.FieldChatID)
 	}
+	if m.initial_request_id != nil {
+		fields = append(fields, message.FieldInitialRequestID)
+	}
 	return fields
 }
 
@@ -1239,6 +1279,8 @@ func (m *MessageMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case message.FieldChatID:
 		return m.ChatID()
+	case message.FieldInitialRequestID:
+		return m.InitialRequestID()
 	}
 	return nil, false
 }
@@ -1266,6 +1308,8 @@ func (m *MessageMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCreatedAt(ctx)
 	case message.FieldChatID:
 		return m.OldChatID(ctx)
+	case message.FieldInitialRequestID:
+		return m.OldInitialRequestID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Message field %s", name)
 }
@@ -1337,6 +1381,13 @@ func (m *MessageMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetChatID(v)
+		return nil
+	case message.FieldInitialRequestID:
+		v, ok := value.(types.RequestID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInitialRequestID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Message field %s", name)
@@ -1434,6 +1485,9 @@ func (m *MessageMutation) ResetField(name string) error {
 		return nil
 	case message.FieldChatID:
 		m.ResetChatID()
+		return nil
+	case message.FieldInitialRequestID:
+		m.ResetInitialRequestID()
 		return nil
 	}
 	return fmt.Errorf("unknown Message field %s", name)
