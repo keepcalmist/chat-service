@@ -19,7 +19,6 @@ import (
 
 const nameServerClient = "server-client"
 
-// FIXME: Создание нового sendMessageUseCase (и его проброс в хендлеры).
 func initServerClient(
 	addr string,
 	allowOrigins []string,
