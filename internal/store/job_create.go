@@ -319,6 +319,24 @@ func (u *JobUpsert) AddAttempts(v int) *JobUpsert {
 	return u
 }
 
+// SetReservedUntil sets the "reserved_until" field.
+func (u *JobUpsert) SetReservedUntil(v time.Time) *JobUpsert {
+	u.Set(job.FieldReservedUntil, v)
+	return u
+}
+
+// UpdateReservedUntil sets the "reserved_until" field to the value that was provided on create.
+func (u *JobUpsert) UpdateReservedUntil() *JobUpsert {
+	u.SetExcluded(job.FieldReservedUntil)
+	return u
+}
+
+// ClearReservedUntil clears the value of the "reserved_until" field.
+func (u *JobUpsert) ClearReservedUntil() *JobUpsert {
+	u.SetNull(job.FieldReservedUntil)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -344,9 +362,6 @@ func (u *JobUpsertOne) UpdateNewValues() *JobUpsertOne {
 		}
 		if _, exists := u.create.mutation.AvailableAt(); exists {
 			s.SetIgnore(job.FieldAvailableAt)
-		}
-		if _, exists := u.create.mutation.ReservedUntil(); exists {
-			s.SetIgnore(job.FieldReservedUntil)
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(job.FieldCreatedAt)
@@ -400,6 +415,27 @@ func (u *JobUpsertOne) AddAttempts(v int) *JobUpsertOne {
 func (u *JobUpsertOne) UpdateAttempts() *JobUpsertOne {
 	return u.Update(func(s *JobUpsert) {
 		s.UpdateAttempts()
+	})
+}
+
+// SetReservedUntil sets the "reserved_until" field.
+func (u *JobUpsertOne) SetReservedUntil(v time.Time) *JobUpsertOne {
+	return u.Update(func(s *JobUpsert) {
+		s.SetReservedUntil(v)
+	})
+}
+
+// UpdateReservedUntil sets the "reserved_until" field to the value that was provided on create.
+func (u *JobUpsertOne) UpdateReservedUntil() *JobUpsertOne {
+	return u.Update(func(s *JobUpsert) {
+		s.UpdateReservedUntil()
+	})
+}
+
+// ClearReservedUntil clears the value of the "reserved_until" field.
+func (u *JobUpsertOne) ClearReservedUntil() *JobUpsertOne {
+	return u.Update(func(s *JobUpsert) {
+		s.ClearReservedUntil()
 	})
 }
 
@@ -595,9 +631,6 @@ func (u *JobUpsertBulk) UpdateNewValues() *JobUpsertBulk {
 			if _, exists := b.mutation.AvailableAt(); exists {
 				s.SetIgnore(job.FieldAvailableAt)
 			}
-			if _, exists := b.mutation.ReservedUntil(); exists {
-				s.SetIgnore(job.FieldReservedUntil)
-			}
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(job.FieldCreatedAt)
 			}
@@ -651,6 +684,27 @@ func (u *JobUpsertBulk) AddAttempts(v int) *JobUpsertBulk {
 func (u *JobUpsertBulk) UpdateAttempts() *JobUpsertBulk {
 	return u.Update(func(s *JobUpsert) {
 		s.UpdateAttempts()
+	})
+}
+
+// SetReservedUntil sets the "reserved_until" field.
+func (u *JobUpsertBulk) SetReservedUntil(v time.Time) *JobUpsertBulk {
+	return u.Update(func(s *JobUpsert) {
+		s.SetReservedUntil(v)
+	})
+}
+
+// UpdateReservedUntil sets the "reserved_until" field to the value that was provided on create.
+func (u *JobUpsertBulk) UpdateReservedUntil() *JobUpsertBulk {
+	return u.Update(func(s *JobUpsert) {
+		s.UpdateReservedUntil()
+	})
+}
+
+// ClearReservedUntil clears the value of the "reserved_until" field.
+func (u *JobUpsertBulk) ClearReservedUntil() *JobUpsertBulk {
+	return u.Update(func(s *JobUpsert) {
+		s.ClearReservedUntil()
 	})
 }
 

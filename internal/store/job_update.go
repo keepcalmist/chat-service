@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -45,6 +46,26 @@ func (ju *JobUpdate) SetNillableAttempts(i *int) *JobUpdate {
 // AddAttempts adds i to the "attempts" field.
 func (ju *JobUpdate) AddAttempts(i int) *JobUpdate {
 	ju.mutation.AddAttempts(i)
+	return ju
+}
+
+// SetReservedUntil sets the "reserved_until" field.
+func (ju *JobUpdate) SetReservedUntil(t time.Time) *JobUpdate {
+	ju.mutation.SetReservedUntil(t)
+	return ju
+}
+
+// SetNillableReservedUntil sets the "reserved_until" field if the given value is not nil.
+func (ju *JobUpdate) SetNillableReservedUntil(t *time.Time) *JobUpdate {
+	if t != nil {
+		ju.SetReservedUntil(*t)
+	}
+	return ju
+}
+
+// ClearReservedUntil clears the value of the "reserved_until" field.
+func (ju *JobUpdate) ClearReservedUntil() *JobUpdate {
+	ju.mutation.ClearReservedUntil()
 	return ju
 }
 
@@ -111,6 +132,9 @@ func (ju *JobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ju.mutation.AvailableAtCleared() {
 		_spec.ClearField(job.FieldAvailableAt, field.TypeTime)
 	}
+	if value, ok := ju.mutation.ReservedUntil(); ok {
+		_spec.SetField(job.FieldReservedUntil, field.TypeTime, value)
+	}
 	if ju.mutation.ReservedUntilCleared() {
 		_spec.ClearField(job.FieldReservedUntil, field.TypeTime)
 	}
@@ -152,6 +176,26 @@ func (juo *JobUpdateOne) SetNillableAttempts(i *int) *JobUpdateOne {
 // AddAttempts adds i to the "attempts" field.
 func (juo *JobUpdateOne) AddAttempts(i int) *JobUpdateOne {
 	juo.mutation.AddAttempts(i)
+	return juo
+}
+
+// SetReservedUntil sets the "reserved_until" field.
+func (juo *JobUpdateOne) SetReservedUntil(t time.Time) *JobUpdateOne {
+	juo.mutation.SetReservedUntil(t)
+	return juo
+}
+
+// SetNillableReservedUntil sets the "reserved_until" field if the given value is not nil.
+func (juo *JobUpdateOne) SetNillableReservedUntil(t *time.Time) *JobUpdateOne {
+	if t != nil {
+		juo.SetReservedUntil(*t)
+	}
+	return juo
+}
+
+// ClearReservedUntil clears the value of the "reserved_until" field.
+func (juo *JobUpdateOne) ClearReservedUntil() *JobUpdateOne {
+	juo.mutation.ClearReservedUntil()
 	return juo
 }
 
@@ -247,6 +291,9 @@ func (juo *JobUpdateOne) sqlSave(ctx context.Context) (_node *Job, err error) {
 	}
 	if juo.mutation.AvailableAtCleared() {
 		_spec.ClearField(job.FieldAvailableAt, field.TypeTime)
+	}
+	if value, ok := juo.mutation.ReservedUntil(); ok {
+		_spec.SetField(job.FieldReservedUntil, field.TypeTime, value)
 	}
 	if juo.mutation.ReservedUntilCleared() {
 		_spec.ClearField(job.FieldReservedUntil, field.TypeTime)

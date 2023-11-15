@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"github.com/keepcalmist/chat-service/internal/store"
 	"github.com/keepcalmist/chat-service/internal/store/job"
 	"github.com/keepcalmist/chat-service/internal/types"
 )
@@ -19,18 +21,52 @@ type Job struct {
 }
 
 func (r *Repo) FindAndReserveJob(ctx context.Context, until time.Time) (Job, error) {
-	// FIXME: Избегая гонки на уровне строчек БД, сделать следующее:
-	// FIXME: - выбрать не зарезервированную другим воркером джобу, чьё время выполнения уже настало;
-	// FIXME: - увеличить счётчик попыток выполнения на 1;
-	// FIXME: - зарезервировать джобу до `until`;
-	// FIXME: - вернуть в ответ необходимую инфу о джобе.
-	r.db.Job(ctx).Query().Select(job.FieldID).Where().Select
-	reservedJob, err :=
+	retJob := Job{}
+	err := r.db.RunInTx(ctx, func(ctx context.Context) error {
+		j, err := r.db.Job(ctx).Query().
+			Unique(false).
+			Where(
+				job.And(
+					job.AvailableAtLTE(time.Now()),
+					job.Or(
+						job.ReservedUntilIsNil(),
+						job.ReservedUntilLT(time.Now()),
+					),
+				),
+			).
+			Order(job.ByCreatedAt()).
+			ForUpdate(sql.WithLockAction(sql.SkipLocked)). // нет смысла ждать анлока записи, т.к. она уже выбрана
+			First(ctx)
+		if err != nil {
+			return err
+		}
+
+		j, err = j.Update().
+			SetAttempts(j.Attempts + 1).
+			SetReservedUntil(until).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+		retJob = Job{
+			ID:       j.ID,
+			Name:     j.Name,
+			Payload:  j.Payload,
+			Attempts: j.Attempts,
+		}
+
+		return nil
+	})
+
 	if err != nil {
+		if store.IsNotFound(err) {
+			return Job{}, ErrNoJobs
+		}
+
 		return Job{}, err
 	}
 
-	return Job{}, nil
+	return retJob, nil
 }
 
 func (r *Repo) CreateJob(ctx context.Context, name, payload string, availableAt time.Time) (types.JobID, error) {
