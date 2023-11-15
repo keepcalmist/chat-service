@@ -38,6 +38,8 @@ vars:
     ProblemID
     UserID
     RequestID
+    JobID
+    FailedJobID
   TYPES_PKG: types
   TYPES_DST: ./internal/types/types.gen.go
   ENT_SCHEMA: ./internal/store/schema
@@ -195,7 +197,7 @@ tasks:
 
   ent:gen:
     cmds:
-      - "{{.TOOLS_DIR}}/ent generate --feature sql/upsert  --template {{.ENT_TEMPLATES}} {{.ENT_SCHEMA}}"
+      - "{{.TOOLS_DIR}}/ent generate --feature sql/upsert --feature sql/lock  --template {{.ENT_TEMPLATES}} {{.ENT_SCHEMA}}"
       - task: tidy
 
   tests:integration:

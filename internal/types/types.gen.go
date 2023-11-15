@@ -9,7 +9,7 @@ import (
 )
 
 type IDs interface {
-	ChatID | MessageID | ProblemID | UserID | RequestID
+	ChatID | MessageID | ProblemID | UserID | RequestID | JobID | FailedJobID
 }
 
 var ErrEmptyID = errors.New("empty id")
@@ -239,6 +239,92 @@ func (id RequestID) Matches(other any) bool {
 }
 
 func (id RequestID) Validate() error {
+	if id.IsZero() {
+		return ErrEmptyID
+	}
+	return nil
+}
+
+type JobID uuid.UUID
+
+var JobIDNil = JobID(uuid.Nil)
+
+func NewJobID() JobID {
+	return JobID(uuid.New())
+}
+
+func (id JobID) String() string {
+	return uuid.UUID(id).String()
+}
+
+func (id JobID) Value() (driver.Value, error) {
+	return uuid.UUID(id).Value()
+}
+
+func (id *JobID) Scan(v any) error {
+	return (*uuid.UUID)(id).Scan(v)
+}
+
+func (id JobID) MarshalText() ([]byte, error) {
+	return (uuid.UUID)(id).MarshalText()
+}
+
+func (id *JobID) UnmarshalText(data []byte) error {
+	return (*uuid.UUID)(id).UnmarshalText(data)
+}
+
+func (id JobID) IsZero() bool {
+	return id == JobIDNil
+}
+
+func (id JobID) Matches(other any) bool {
+	return id == other
+}
+
+func (id JobID) Validate() error {
+	if id.IsZero() {
+		return ErrEmptyID
+	}
+	return nil
+}
+
+type FailedJobID uuid.UUID
+
+var FailedJobIDNil = FailedJobID(uuid.Nil)
+
+func NewFailedJobID() FailedJobID {
+	return FailedJobID(uuid.New())
+}
+
+func (id FailedJobID) String() string {
+	return uuid.UUID(id).String()
+}
+
+func (id FailedJobID) Value() (driver.Value, error) {
+	return uuid.UUID(id).Value()
+}
+
+func (id *FailedJobID) Scan(v any) error {
+	return (*uuid.UUID)(id).Scan(v)
+}
+
+func (id FailedJobID) MarshalText() ([]byte, error) {
+	return (uuid.UUID)(id).MarshalText()
+}
+
+func (id *FailedJobID) UnmarshalText(data []byte) error {
+	return (*uuid.UUID)(id).UnmarshalText(data)
+}
+
+func (id FailedJobID) IsZero() bool {
+	return id == FailedJobIDNil
+}
+
+func (id FailedJobID) Matches(other any) bool {
+	return id == other
+}
+
+func (id FailedJobID) Validate() error {
 	if id.IsZero() {
 		return ErrEmptyID
 	}
