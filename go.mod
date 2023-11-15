@@ -26,6 +26,7 @@ require (
 	github.com/onsi/gomega v1.29.0
 	github.com/quasilyte/go-ruleguard/dsl v0.3.22
 	github.com/stretchr/testify v1.8.4
+	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/sync v0.4.0
 )
