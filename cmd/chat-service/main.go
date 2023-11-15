@@ -9,12 +9,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/keepcalmist/chat-service/internal/config"
 	"github.com/keepcalmist/chat-service/internal/logger"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	serverdebug "github.com/keepcalmist/chat-service/internal/server-debug"
 	"github.com/keepcalmist/chat-service/internal/store"
 )
