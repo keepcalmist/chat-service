@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -69,9 +70,15 @@ func run() (errReturned error) {
 		return fmt.Errorf("migrate db: %v", err)
 	}
 
+	clientSwagger, err := clientv1.GetSwagger()
+	if err != nil {
+		return fmt.Errorf("get swagger: %v", err)
+	}
+
 	srvDebug, err := serverdebug.New(
 		serverdebug.NewOptions(
 			cfg.Servers.Debug.Addr,
+			clientSwagger,
 			serverdebug.WithLvlSetter(setLevel)),
 	)
 	if err != nil {
@@ -90,6 +97,7 @@ func run() (errReturned error) {
 		cfg.Clients.Keycloak,
 		store.NewDatabase(psqlClient),
 		cfg.Global.IsProduction(),
+		clientSwagger,
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)

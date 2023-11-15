@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo-contrib/pprof"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -16,7 +17,6 @@ import (
 
 	"github.com/keepcalmist/chat-service/internal/buildinfo"
 	"github.com/keepcalmist/chat-service/internal/middlewares"
-	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 )
 
 const (
@@ -26,8 +26,9 @@ const (
 
 //go:generate options-gen -out-filename=server_options.gen.go -from-struct=Options
 type Options struct {
-	addr      string `option:"mandatory" validate:"required,hostname_port"`
-	lvlSetter func(level zapcore.Level)
+	addr         string `option:"mandatory" validate:"required,hostname_port"`
+	lvlSetter    func(level zapcore.Level)
+	clientSchema *openapi3.T `option:"mandatory" validate:"required"`
 }
 
 type Server struct {
@@ -71,7 +72,7 @@ func New(opts Options) (*Server, error) {
 	// Обработка "/log/level"
 	e.PUT("/log/level", s.SetLogLvl)
 	e.GET("/debug/sentry", s.DebugSentry)
-	e.GET("/schema/client", s.GetSwagger)
+	e.GET("/schema/client", s.ExposeSchema(opts.clientSchema))
 
 	// Обработка "/debug/pprof/" и связанных команд
 	pprof.Register(e)
@@ -132,20 +133,27 @@ func (s *Server) DebugSentry(_ echo.Context) error {
 	return nil
 }
 
-func (s *Server) GetSwagger(eCtx echo.Context) error {
-	swag, err := clientv1.GetSwagger()
-	if err != nil {
-		return err
+func (s *Server) ExposeSchema(swagger *openapi3.T) echo.HandlerFunc {
+	return func(eCtx echo.Context) error {
+		return eCtx.JSONPretty(http.StatusOK, swagger, "  ")
 	}
-	data, err := swag.MarshalJSON()
-	if err != nil {
-		return err
-	}
-
-	err = eCtx.String(http.StatusOK, string(data))
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
+
+//
+//func (s *Server) GetSwagger(eCtx echo.Context) error {
+//	swag, err := clientv1.GetSwagger()
+//	if err != nil {
+//		return err
+//	}
+//	data, err := swag.MarshalJSON()
+//	if err != nil {
+//		return err
+//	}
+//
+//	err = eCtx.String(http.StatusOK, string(data))
+//	if err != nil {
+//		return err
+//	}
+//
+//	return nil
+//}

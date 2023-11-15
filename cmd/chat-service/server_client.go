@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"go.uber.org/zap"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -27,6 +28,7 @@ func initServerClient(
 	keycloakConfig config.Keycloak,
 	database *store.Database,
 	isProduction bool,
+	swag *openapi3.T,
 ) (*server_client.Server, error) {
 	repoMsg, err := messagesrepo.New(messagesrepo.NewOptions(
 		database,
@@ -66,11 +68,6 @@ func initServerClient(
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create v1 handlers: %v", err)
-	}
-
-	swag, err := clientv1.GetSwagger()
-	if err != nil {
-		return nil, fmt.Errorf("get swagger: %v", err)
 	}
 
 	keyCloakClient, err := keycloakclient.New(
