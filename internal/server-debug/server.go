@@ -138,22 +138,3 @@ func (s *Server) ExposeSchema(swagger *openapi3.T) echo.HandlerFunc {
 		return eCtx.JSONPretty(http.StatusOK, swagger, "  ")
 	}
 }
-
-//
-//func (s *Server) GetSwagger(eCtx echo.Context) error {
-//	swag, err := clientv1.GetSwagger()
-//	if err != nil {
-//		return err
-//	}
-//	data, err := swag.MarshalJSON()
-//	if err != nil {
-//		return err
-//	}
-//
-//	err = eCtx.String(http.StatusOK, string(data))
-//	if err != nil {
-//		return err
-//	}
-//
-//	return nil
-//}
