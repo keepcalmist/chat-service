@@ -49,6 +49,18 @@ var (
 		Name:       "jobs",
 		Columns:    JobsColumns,
 		PrimaryKey: []*schema.Column{JobsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "job_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{JobsColumns[6]},
+			},
+			{
+				Name:    "job_reserved_until_available_at",
+				Unique:  false,
+				Columns: []*schema.Column{JobsColumns[5], JobsColumns[4]},
+			},
+		},
 	}
 	// MessagesColumns holds the columns for the "messages" table.
 	MessagesColumns = []*schema.Column{

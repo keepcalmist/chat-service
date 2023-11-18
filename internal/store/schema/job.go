@@ -5,6 +5,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/keepcalmist/chat-service/internal/types"
 )
 
@@ -28,8 +29,10 @@ func (Job) Fields() []ent.Field {
 }
 
 func (Job) Indexes() []ent.Index {
-	// FIXME: Расставь индексы на основе запросов в сервисе Outbox.
-	return nil
+	return []ent.Index{
+		index.Fields("created_at"),
+		index.Fields("reserved_until", "available_at"),
+	}
 }
 
 type FailedJob struct {

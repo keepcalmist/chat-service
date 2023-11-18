@@ -75,6 +75,7 @@ func (r *Repo) CreateJob(ctx context.Context, name, payload string, availableAt 
 		SetName(name).
 		SetPayload(payload).
 		SetAvailableAt(availableAt).
+		SetReservedUntil(time.Now()).
 		Save(ctx)
 	if err != nil {
 		return types.JobIDNil, err
