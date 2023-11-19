@@ -71,34 +71,17 @@ func (s *Service) MustRegisterJob(job Job) {
 }
 
 func (s *Service) Run(ctx context.Context) error {
-	// FIXME: Обратите внимание, что мы должны получить в явном или неявном виде как минимум 3 циклических конструкции:
-	// FIXME: 1) Старт s.workers воркеров.
-	// FIXME: 2) Каждый воркер циклично разгребает джобы, пока они есть.
-	// FIXME: 3) Как только джобы кончились, спит s.idleTime и возвращается к пункту 2).
 	wg := new(sync.WaitGroup)
 	s.logger.Info("starting worker", zap.Int("worker_id", s.workers))
 	for i := 0; i < s.workers; i++ {
 		wg.Add(1)
 		go s.startWorker(ctx, wg)
 	}
-	// FIXME: Не стесняйтесь логировать!
 
-	// FIXME: Джоба должна оказаться в failed_jobs (dlq) в одном из следующих случаев:
-	// FIXME: - функции с таким именем не зарегистрировано
-	// FIXME: - превышено максимальное количество попыток выполнения джобы
-
-	// FIXME: Не забудьте про job.ExecutionTimeout :)
 	return nil
 }
 
 func (s *Service) startWorker(ctx context.Context, group *sync.WaitGroup) {
-	defer func() {
-		//group.Done()
-		//if err := recover(); err != nil {
-		//	s.logger.Error("panic in worker", zap.Error(err.(error)), zap.Stack("stack"))
-		//}
-	}()
-
 	for {
 		select {
 		case <-ctx.Done():
