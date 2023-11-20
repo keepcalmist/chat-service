@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+
 	"github.com/keepcalmist/chat-service/internal/store"
 	"github.com/keepcalmist/chat-service/internal/store/job"
 	"github.com/keepcalmist/chat-service/internal/types"
@@ -57,7 +58,6 @@ func (r *Repo) FindAndReserveJob(ctx context.Context, until time.Time) (Job, err
 
 		return nil
 	})
-
 	if err != nil {
 		if store.IsNotFound(err) {
 			return Job{}, ErrNoJobs

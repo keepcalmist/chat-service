@@ -3,12 +3,14 @@ package outbox
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
+
 	jobsrepo "github.com/keepcalmist/chat-service/internal/repositories/jobs"
 	"github.com/keepcalmist/chat-service/internal/types"
-	"go.uber.org/zap"
 )
 
 const serviceName = "outbox"
@@ -82,6 +84,10 @@ func (s *Service) Run(ctx context.Context) error {
 }
 
 func (s *Service) startWorker(ctx context.Context, group *sync.WaitGroup) {
+	defer func() {
+		group.Done()
+	}()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -110,14 +116,10 @@ func (s *Service) startWorker(ctx context.Context, group *sync.WaitGroup) {
 				s.logger.Info("job found, start processing...", zap.String("job_id", reservedJob.ID.String()))
 				j, ok := s.jobs[reservedJob.Name]
 				if !ok || j == nil {
-					if err := s.r.CreateFailedJob(ctx, reservedJob.Name, reservedJob.Payload, "job not found"); err != nil {
-						s.logger.With().Error("failed to create failed job",
-							zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
-						return err
-					}
-
-					if err := s.r.DeleteJob(ctx, reservedJob.ID); err != nil {
-						s.logger.With().Error("failed to delete job", zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
+					err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
+					if err != nil {
+						s.logger.Error("failed to create failed job", zap.Error(err),
+							zap.String("job_id", reservedJob.ID.String()))
 						return err
 					}
 
@@ -125,13 +127,10 @@ func (s *Service) startWorker(ctx context.Context, group *sync.WaitGroup) {
 				}
 
 				if reservedJob.Attempts > j.MaxAttempts() {
-					if err := s.r.CreateFailedJob(ctx, reservedJob.Name, reservedJob.Payload, "max attempts exceeded"); err != nil {
-						s.logger.With().Error("failed to create failed job",
-							zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
-						return err
-					}
-					if err := s.r.DeleteJob(ctx, reservedJob.ID); err != nil {
-						s.logger.With().Error("failed to delete job", zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
+					err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
+					if err != nil {
+						s.logger.Error("failed to create failed job", zap.Error(err),
+							zap.String("job_id", reservedJob.ID.String()))
 						return err
 					}
 					return nil
@@ -150,17 +149,15 @@ func (s *Service) startWorker(ctx context.Context, group *sync.WaitGroup) {
 				err = j.Handle(ctxWithCancel, reservedJob.Payload)
 				if err != nil {
 					s.logger.Error("failed to handle job", zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
+
 					if j.MaxAttempts() < reservedJob.Attempts {
-						if err := s.r.CreateFailedJob(ctx, reservedJob.Name, reservedJob.Payload, "max attempts exceeded"); err != nil {
-							s.logger.With().Error("failed to create failed job",
-								zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
-							return nil
+						err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
+						if err != nil {
+							s.logger.Error("failed to create failed job", zap.Error(err),
+								zap.String("job_id", reservedJob.ID.String()))
+							return err
 						}
 
-						if err := s.r.DeleteJob(ctx, reservedJob.ID); err != nil {
-							s.logger.With().Error("failed to delete job", zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
-							return nil
-						}
 						return nil
 					}
 					return nil
@@ -178,8 +175,18 @@ func (s *Service) startWorker(ctx context.Context, group *sync.WaitGroup) {
 			if err != nil {
 				s.logger.Error("failed to run transaction", zap.Error(err))
 			}
-
 		}
 	}
+}
 
+func (s *Service) CreateFailedAndDeleteMainJob(ctx context.Context, job jobsrepo.Job) error {
+	if err := s.r.CreateFailedJob(ctx, job.Name, job.Payload, "max attempts exceeded"); err != nil {
+		return fmt.Errorf("failed to create failed job: %w", err)
+	}
+
+	if err := s.r.DeleteJob(ctx, job.ID); err != nil {
+		return fmt.Errorf("failed to delete job: %w", err)
+	}
+
+	return nil
 }

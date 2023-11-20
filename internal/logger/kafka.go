@@ -3,13 +3,11 @@ package logger
 import (
 	"fmt"
 
+	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 )
 
-//var _ kafka.Logger = (*KafkaAdapted)(nil)
-
-type KafkaOptions struct {
-}
+var _ kafka.Logger = (*KafkaAdapted)(nil)
 
 type KafkaAdapted struct {
 	Logger     *zap.Logger `option:"mandatory"`
@@ -18,11 +16,11 @@ type KafkaAdapted struct {
 
 func (k *KafkaAdapted) Printf(s string, i ...interface{}) {
 	if k.isErrorLvl {
-		k.Logger.Error(fmt.Sprintf(s, i))
+		k.Logger.Error(fmt.Sprintf(s, i...))
 		return
 	}
 
-	k.Logger.Info(fmt.Sprintf(s, i))
+	k.Logger.Info(fmt.Sprintf(s, i...))
 }
 
 func NewKafkaAdapted() *KafkaAdapted {
