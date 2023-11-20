@@ -95,7 +95,9 @@ func (s *UseCaseIntegrationSuite) TestPositiveScenario() {
 		s.NotEmpty(resp.MessageID)
 		s.NotEmpty(resp.CreatedAt)
 	}
-
+	all, err := s.Database.Problem(s.Ctx).Query().All(s.Ctx)
+	s.Require().NoError(err)
+	_ = all
 	// Assert.
 	s.Equal(1, s.Database.Chat(s.Ctx).Query().CountX(s.Ctx))
 	s.Equal(1, s.Database.Problem(s.Ctx).Query().CountX(s.Ctx))

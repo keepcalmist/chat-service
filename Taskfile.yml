@@ -221,4 +221,4 @@ tasks:
     cmds:
       - echo "- End-to-end tests..."
       # NOTE: It's important to run tests serial (without `-p` flag) – for correct `clientsPool` sharing.
-      - "{{.TOOLS_DIR}}/ginkgo --fail-fast --timeout=1m --tags e2e --tags tests {{.CLI_ARGS}} ./tests/e2e"
+      - "{{.TOOLS_DIR}}/ginkgo --fail-fast --timeout=1m --tags e2e {{.CLI_ARGS}} ./tests/e2e"

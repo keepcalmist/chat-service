@@ -2,21 +2,26 @@ package problemsrepo
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
-	"entgo.io/ent/dialect/sql"
+	entSql "entgo.io/ent/dialect/sql"
 
 	"github.com/keepcalmist/chat-service/internal/store/problem"
 	"github.com/keepcalmist/chat-service/internal/types"
 )
 
 func (r *Repo) CreateIfNotExists(ctx context.Context, chatID types.ChatID) (types.ProblemID, error) {
-	err := r.db.Problem(ctx).
+	id, err := r.db.Problem(ctx).
 		Create().
 		SetChatID(chatID).
-		OnConflict(sql.DoNothing()).
-		Exec(ctx)
-	if err != nil {
+		OnConflict(entSql.DoNothing()).DoNothing().ID(ctx)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return types.ProblemIDNil, err
+	}
+
+	if id != types.ProblemIDNil {
+		return id, nil
 	}
 
 	createdProblem, err := r.db.Problem(ctx).
@@ -24,7 +29,10 @@ func (r *Repo) CreateIfNotExists(ctx context.Context, chatID types.ChatID) (type
 		Unique(false).
 		Where(
 			problem.ChatID(chatID),
-		).First(ctx)
+			problem.ResolvedAtIsNil(),
+		).Order(problem.ByCreatedAt(func(options *entSql.OrderTermOptions) {
+		options.Desc = true
+	})).First(ctx)
 	if err != nil {
 		return types.ProblemIDNil, err
 	}

@@ -3,6 +3,7 @@ package schema_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
@@ -41,12 +42,13 @@ func TestChatServiceSchema(t *testing.T) {
 			client.Problem.
 				Create().
 				SetChatID(chat.ID).
-				SetManagerID(managerID),
+				SetManagerID(managerID).SetResolvedAt(time.Now().Add(time.Hour)),
 
 			client.Problem.
 				Create().
 				SetChatID(chat.ID).
-				SetManagerID(managerID),
+				SetManagerID(managerID).
+				SetResolvedAt(time.Now()),
 		).SaveX(ctx)
 
 	_ = client.Message.CreateBulk(

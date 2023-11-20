@@ -4,8 +4,10 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 
 	"github.com/keepcalmist/chat-service/internal/types"
 )
@@ -23,6 +25,16 @@ func (Problem) Fields() []ent.Field {
 		field.UUID("chat_id", types.ChatID{}).Immutable(),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("resolved_at").Nillable().Optional(),
+	}
+}
+
+func (Problem) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("chat_id").
+			Annotations(entsql.IndexWhere("(resolved_at IS NULL AND manager_id IS NULL)")).Unique(),
+		index.Fields("chat_id").
+			Annotations(entsql.IndexWhere("(resolved_at IS NULL AND manager_id IS NOT NULL)")).Unique().
+			StorageKey("problems_chat_id_idx"),
 	}
 }
 

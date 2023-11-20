@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -123,6 +124,24 @@ var (
 				Columns:    []*schema.Column{ProblemsColumns[4]},
 				RefColumns: []*schema.Column{ChatsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "problem_chat_id",
+				Unique:  true,
+				Columns: []*schema.Column{ProblemsColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "(resolved_at IS NULL AND manager_id IS NULL)",
+				},
+			},
+			{
+				Name:    "problems_chat_id_idx",
+				Unique:  true,
+				Columns: []*schema.Column{ProblemsColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "(resolved_at IS NULL AND manager_id IS NOT NULL)",
+				},
 			},
 		},
 	}

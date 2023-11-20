@@ -82,6 +82,8 @@ func (s *ProblemsRepoSuite) Test_CreateIfNotExists() {
 		s.Require().NoError(err)
 
 		problemID, err := s.repo.CreateIfNotExists(s.Ctx, chat.ID)
+		all, _ := s.Database.Problem(s.Ctx).Query().All(s.Ctx)
+		_ = all
 		s.Require().NoError(err)
 		s.NotEmpty(problemID)
 		s.Equal(problem.ID, problemID)

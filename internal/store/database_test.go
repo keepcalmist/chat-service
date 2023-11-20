@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 
@@ -49,6 +50,7 @@ func (s *StoreSuite) TestRollbackAfterPanic() {
 				_, err = s.Database.Problem(ctx).Create().
 					SetChatID(chat.ID).
 					SetManagerID(types.NewUserID()).
+					SetResolvedAt(time.Now().Add(time.Minute * time.Duration(i))).
 					Save(ctx)
 				if err != nil {
 					return fmt.Errorf("create problem #%d: %v", i, err)
@@ -125,6 +127,7 @@ func (s *StoreSuite) TestSuccessfulCommit() {
 			_, err = s.Database.Problem(ctx).Create().
 				SetChatID(chat.ID).
 				SetManagerID(types.NewUserID()).
+				SetResolvedAt(time.Now().Add(time.Minute * time.Duration(i))).
 				Save(ctx)
 			if err != nil {
 				return fmt.Errorf("create problem #%d: %v", i, err)

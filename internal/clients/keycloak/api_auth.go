@@ -1,4 +1,4 @@
-//go:build e2e || tests
+//go:build e2e || integration
 
 package keycloakclient
 

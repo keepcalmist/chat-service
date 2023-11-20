@@ -190,6 +190,7 @@ func (s *MsgRepoHistoryAPISuite) createMessages(
 			SetProblemID(problemID).
 			SetIsVisibleForClient(visibleForClient).
 			SetIsVisibleForManager(visibleForManager).
+			SetInitialRequestID(types.NewRequestID()).
 			SetIsService(isService).
 			SetBody(fmt.Sprintf("message #%d", i))
 		if !clientID.IsZero() {
