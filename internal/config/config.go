@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 type Config struct {
 	Global   GlobalConfig  `toml:"global"`
 	Log      LogConfig     `toml:"log"`
@@ -7,6 +9,25 @@ type Config struct {
 	Sentry   Sentry        `toml:"sentry"`
 	Clients  Clients       `toml:"clients"`
 	Postgres Postgres      `toml:"postgres"`
+	Services Services      `toml:"services"`
+}
+
+type Services struct {
+	MsgProducer MsgProducer `toml:"msg_producer"`
+	Outbox      Outbox      `toml:"outbox"`
+}
+
+type MsgProducer struct {
+	Brokers    []string `toml:"brokers" validate:"required,dive,hostname_port"`
+	Topic      string   `toml:"topic" validate:"required"`
+	BatchSize  int      `toml:"batch_size" validate:"required"`
+	EncryptKey string   `toml:"encrypt_key"`
+}
+
+type Outbox struct {
+	Workers    int           `toml:"workers" validate:"required"`
+	IdleTime   time.Duration `toml:"idle_time" validate:"required"`
+	ReserveFor time.Duration `toml:"reserve_for" validate:"required"`
 }
 
 type GlobalConfig struct {

@@ -14,6 +14,7 @@ allow_origins = ["http://localhost:3011", "http://localhost:3000"]
 resource = "chat-ui-client"
 role = "support-chat-client"
 
+
 [sentry]
 dsn = "http://654e05334c5f46aeb8689308b865f8c9@127.0.0.1:9000/2"
 
@@ -31,3 +32,16 @@ password = "qwerty"
 database = "chat"
 username = "postgres"
 debug = true
+
+[services]
+[services.msg_producer]
+brokers = ["localhost:9092"]
+topic = "chat.messages"
+batch_size = 1
+encrypt_key = "" # Leave it blank to disable encryption.
+
+[services.outbox]
+workers = 2
+idle_time = "1s"
+reserve_for = "5m"
+
