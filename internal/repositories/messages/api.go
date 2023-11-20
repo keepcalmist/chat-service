@@ -31,6 +31,19 @@ func (r *Repo) GetMessageByRequestID(ctx context.Context, reqID types.RequestID)
 	return pointer.Ptr(adaptStoreMessage(msg)), nil
 }
 
+func (r *Repo) GetMessageByID(ctx context.Context, msgID types.MessageID) (*Message, error) {
+	msg, err := r.db.Message(ctx).
+		Get(ctx, msgID)
+	if err != nil {
+		if store.IsNotFound(err) {
+			return nil, ErrMsgNotFound
+		}
+		return nil, err
+	}
+
+	return pointer.Ptr(adaptStoreMessage(msg)), nil
+}
+
 // CreateClientVisible creates a message that is visible only to the client.
 func (r *Repo) CreateClientVisible(
 	ctx context.Context,
