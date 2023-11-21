@@ -94,6 +94,10 @@ func run() (errReturned error) {
 		zap.L().Warn("keycloak debug mode enabled in production")
 	}
 
+	if cfg.Services.MsgProducer.EncryptKey == "" {
+		zap.L().Warn("msg producer encrypt disabled")
+	}
+
 	database := store.NewDatabase(psqlClient)
 
 	repoMsg, err := messagesrepo.New(messagesrepo.NewOptions(
