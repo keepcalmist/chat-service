@@ -17,6 +17,10 @@ type Message struct {
 	FromClient bool            `json:"fromClient"`
 }
 
+func (m Message) String() string {
+	return fmt.Sprintf("Message{ID: %s, ChatID: %s, Body: %s, FromClient: %t}", m.ID, m.ChatID, m.Body, m.FromClient)
+}
+
 func (s *Service) ProduceMessage(ctx context.Context, msg Message) error {
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
