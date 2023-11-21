@@ -1,7 +1,7 @@
 package errhandler
 
 import (
-	"github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"github.com/keepcalmist/chat-service/pkg/pointer"
 )
 

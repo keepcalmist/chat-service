@@ -9,8 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/keepcalmist/chat-service/internal/server/server-client/v1"
-	"github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -21,6 +19,8 @@ import (
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
 	serverdebug "github.com/keepcalmist/chat-service/internal/server-debug"
+	"github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	"github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
 	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
 	"github.com/keepcalmist/chat-service/internal/store"
 )
@@ -156,12 +156,18 @@ func run() (errReturned error) {
 		return fmt.Errorf("init outbox: %v", err)
 	}
 
-	go func() {
-		err = outbox.Run(ctx)
-		if err != nil {
-			zap.L().Error("outbox run error", zap.Error(err))
-		}
-	}()
+	srvManager, err := initServerManager(
+		cfg.Servers.Manager.Addr,
+		cfg.Servers.Manager.AllowOrigins,
+		cfg.Servers.Manager.RequiredAccess.Role,
+		cfg.Servers.Manager.RequiredAccess.Resource,
+		cfg.Clients.Keycloak,
+		cfg.Global.IsProduction(),
+		managerSwagger,
+	)
+	if err != nil {
+		return fmt.Errorf("init manager server: %v", err)
+	}
 
 	srvClient, err := initServerClient(
 		cfg.Servers.Client.Addr,
@@ -185,6 +191,8 @@ func run() (errReturned error) {
 	// Run servers.
 	eg.Go(func() error { return srvDebug.Run(ctx) })
 	eg.Go(func() error { return srvClient.Run(ctx) })
+	eg.Go(func() error { return srvManager.Run(ctx) })
+	eg.Go(func() error { return outbox.Run(ctx) })
 	// Run services.
 	// Ждут своего часа.
 	// ...

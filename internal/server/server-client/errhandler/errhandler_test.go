@@ -9,13 +9,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	errhandler2 "github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
 	internalerrors "github.com/keepcalmist/chat-service/internal/errors"
+	errhandler2 "github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
 )
 
 func TestHandler_Handle_InDevMode(t *testing.T) {

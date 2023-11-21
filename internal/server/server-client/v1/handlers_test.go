@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
-	"github.com/keepcalmist/chat-service/internal/server/server-client/v1/mocks"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/keepcalmist/chat-service/internal/middlewares"
+	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	"github.com/keepcalmist/chat-service/internal/server/server-client/v1/mocks"
 	"github.com/keepcalmist/chat-service/internal/testingh"
 	"github.com/keepcalmist/chat-service/internal/types"
 )

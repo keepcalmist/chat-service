@@ -10,13 +10,15 @@ import (
 	oapimdlwr "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/keepcalmist/chat-service/internal/middlewares"
-	"github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
-	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/keepcalmist/chat-service/internal/middlewares"
+	"github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	managerv1 "github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
 )
 
 const (
@@ -25,7 +27,7 @@ const (
 )
 
 type handlersToRegister interface {
-	clientv1.Handlers
+	clientv1.Handlers | managerv1.Handlers
 }
 
 //go:generate options-gen -out-filename=server_options.gen.go -from-struct=Options
@@ -82,6 +84,8 @@ func New[t handlersToRegister](opts Options, handlers t) (*Server, error) {
 	switch any(handlers).(type) {
 	case clientv1.Handlers:
 		clientv1.RegisterHandlers(v1, any(handlers).(clientv1.Handlers))
+	case managerv1.Handlers:
+		managerv1.RegisterHandlers(v1, any(handlers).(managerv1.Handlers))
 	default:
 		return nil, fmt.Errorf("handlers type is not supported")
 	}

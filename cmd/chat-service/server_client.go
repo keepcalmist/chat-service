@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/keepcalmist/chat-service/internal/server"
-	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"go.uber.org/zap"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -13,6 +11,8 @@ import (
 	chatsrepo "github.com/keepcalmist/chat-service/internal/repositories/chats"
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
+	"github.com/keepcalmist/chat-service/internal/server"
+	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"github.com/keepcalmist/chat-service/internal/services/outbox"
 	"github.com/keepcalmist/chat-service/internal/store"
 	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"

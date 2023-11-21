@@ -7,7 +7,7 @@ import (
 	"time"
 
 	internalerrors "github.com/keepcalmist/chat-service/internal/errors"
-	"github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"github.com/keepcalmist/chat-service/internal/types"
 	sendmessage "github.com/keepcalmist/chat-service/internal/usecases/client/send-message"
 )
