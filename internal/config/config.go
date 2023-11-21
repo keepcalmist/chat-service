@@ -15,6 +15,11 @@ type Config struct {
 type Services struct {
 	MsgProducer MsgProducer `toml:"msg_producer"`
 	Outbox      Outbox      `toml:"outbox"`
+	ManagerLoad ManagerLoad `toml:"manager_load"`
+}
+
+type ManagerLoad struct {
+	MaxProblemsAtSameTime int `toml:"max_problems_at_same_time" validate:"required,min=1,max=30"`
 }
 
 type MsgProducer struct {
