@@ -1,4 +1,4 @@
-package server_client //nolint
+package server
 
 import (
 	"context"
@@ -10,14 +10,13 @@ import (
 	oapimdlwr "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/keepcalmist/chat-service/internal/middlewares"
+	"github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-
-	"github.com/keepcalmist/chat-service/internal/middlewares"
-	"github.com/keepcalmist/chat-service/internal/server-client/errhandler"
-	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 )
 
 const (
@@ -25,13 +24,16 @@ const (
 	shutdownTimeout   = 3 * time.Second
 )
 
+type handlersToRegister interface {
+	clientv1.Handlers
+}
+
 //go:generate options-gen -out-filename=server_options.gen.go -from-struct=Options
 type Options struct {
 	logger       *zap.Logger              `option:"mandatory" validate:"required"`
 	addr         string                   `option:"mandatory" validate:"required,hostname_port"`
 	allowOrigins []string                 `option:"mandatory" validate:"min=1"`
 	v1Swagger    *openapi3.T              `option:"mandatory" validate:"required"`
-	v1Handlers   clientv1.ServerInterface `option:"mandatory" validate:"required"`
 	introspector middlewares.Introspector `option:"mandatory" validate:"required"`
 	role         string                   `option:"mandatory" validate:"required"`
 	resource     string                   `option:"mandatory" validate:"required"`
@@ -43,7 +45,7 @@ type Server struct {
 	srv *http.Server
 }
 
-func New(opts Options) (*Server, error) {
+func New[t handlersToRegister](opts Options, handlers t) (*Server, error) {
 	if err := opts.Validate(); err != nil {
 		return nil, err
 	}
@@ -76,7 +78,13 @@ func New(opts Options) (*Server, error) {
 			AuthenticationFunc:  openapi3filter.NoopAuthenticationFunc,
 		},
 	}))
-	clientv1.RegisterHandlers(v1, opts.v1Handlers)
+
+	switch any(handlers).(type) {
+	case clientv1.Handlers:
+		clientv1.RegisterHandlers(v1, any(handlers).(clientv1.Handlers))
+	default:
+		return nil, fmt.Errorf("handlers type is not supported")
+	}
 
 	return &Server{
 		lg: opts.logger,

@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	"github.com/keepcalmist/chat-service/internal/server/server-client/v1/mocks"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/keepcalmist/chat-service/internal/middlewares"
-	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
-	clientv1mocks "github.com/keepcalmist/chat-service/internal/server-client/v1/mocks"
 	"github.com/keepcalmist/chat-service/internal/testingh"
 	"github.com/keepcalmist/chat-service/internal/types"
 )
@@ -23,7 +23,7 @@ type HandlersSuite struct {
 	ctrl              *gomock.Controller
 	getHistoryUseCase *clientv1mocks.MockgetHistoryUseCase
 	sendMsgUseCase    *clientv1mocks.MocksendMessageUseCase
-	handlers          clientv1.Handlers
+	handlers          clientv12.Handlers
 
 	clientID types.UserID
 }
@@ -39,7 +39,7 @@ func (s *HandlersSuite) SetupTest() {
 	s.sendMsgUseCase = clientv1mocks.NewMocksendMessageUseCase(s.ctrl)
 	{
 		var err error
-		s.handlers, err = clientv1.NewHandlers(clientv1.NewOptions(s.getHistoryUseCase, s.sendMsgUseCase))
+		s.handlers, err = clientv12.NewHandlers(clientv12.NewOptions(s.getHistoryUseCase, s.sendMsgUseCase))
 		s.Require().NoError(err)
 	}
 	s.clientID = types.NewUserID()

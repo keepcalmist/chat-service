@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/keepcalmist/chat-service/internal/server"
+	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"go.uber.org/zap"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -11,8 +13,6 @@ import (
 	chatsrepo "github.com/keepcalmist/chat-service/internal/repositories/chats"
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
-	server_client "github.com/keepcalmist/chat-service/internal/server-client"
-	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	"github.com/keepcalmist/chat-service/internal/services/outbox"
 	"github.com/keepcalmist/chat-service/internal/store"
 	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
@@ -34,7 +34,7 @@ func initServerClient(
 	msgRepository *messagesrepo.Repo,
 	problemRepository *problemsrepo.Repo,
 	outboxService *outbox.Service,
-) (*server_client.Server, error) {
+) (*server.Server, error) {
 	getHistoryUsecase, err := gethistory.New(
 		gethistory.NewOptions(msgRepository),
 	)
@@ -55,8 +55,8 @@ func initServerClient(
 		return nil, fmt.Errorf("init send message usecase: %v", err)
 	}
 
-	v1Handlers, err := clientv1.NewHandlers(
-		clientv1.NewOptions(getHistoryUsecase, sendMessageUsecase),
+	v1Handlers, err := clientv12.NewHandlers(
+		clientv12.NewOptions(getHistoryUsecase, sendMessageUsecase),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create v1 handlers: %v", err)
@@ -75,17 +75,16 @@ func initServerClient(
 		return nil, fmt.Errorf("init keycloak client: %v", err)
 	}
 
-	srv, err := server_client.New(server_client.NewOptions(
+	srv, err := server.New(server.NewOptions(
 		zap.L().Named(nameServerClient),
 		addr,
 		allowOrigins,
 		swag,
-		v1Handlers,
 		keyCloakClient,
 		role,
 		resource,
 		isProduction,
-	))
+	), v1Handlers)
 	if err != nil {
 		return nil, fmt.Errorf("build server: %v", err)
 	}

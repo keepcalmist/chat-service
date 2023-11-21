@@ -9,13 +9,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	errhandler2 "github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
 	internalerrors "github.com/keepcalmist/chat-service/internal/errors"
-	"github.com/keepcalmist/chat-service/internal/server-client/errhandler"
 )
 
 func TestHandler_Handle_InDevMode(t *testing.T) {
@@ -48,7 +48,7 @@ func TestHandler_Handle_InDevMode(t *testing.T) {
 		},
 	}
 
-	h, err := errhandler.New(errhandler.NewOptions(zap.L(), productionMode, respBuilder))
+	h, err := errhandler2.New(errhandler2.NewOptions(zap.L(), productionMode, respBuilder))
 	require.NoError(t, err)
 
 	for _, tt := range cases {
@@ -94,7 +94,7 @@ func TestHandler_Handle_InProductionMode(t *testing.T) {
 		},
 	}
 
-	h, err := errhandler.New(errhandler.NewOptions(zap.L(), productionMode, respBuilder))
+	h, err := errhandler2.New(errhandler2.NewOptions(zap.L(), productionMode, respBuilder))
 	require.NoError(t, err)
 
 	for _, tt := range cases {

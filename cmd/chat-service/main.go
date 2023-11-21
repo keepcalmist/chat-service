@@ -9,7 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	managerv1 "github.com/keepcalmist/chat-service/internal/server-manager/v1"
+	"github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	"github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -19,7 +20,6 @@ import (
 	jobsrepo "github.com/keepcalmist/chat-service/internal/repositories/jobs"
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
-	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	serverdebug "github.com/keepcalmist/chat-service/internal/server-debug"
 	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
 	"github.com/keepcalmist/chat-service/internal/store"

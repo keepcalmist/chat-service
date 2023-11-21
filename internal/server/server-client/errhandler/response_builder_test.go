@@ -3,11 +3,10 @@ package errhandler_test
 import (
 	"testing"
 
+	"github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
+	"github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/keepcalmist/chat-service/internal/server-client/errhandler"
-	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 )
 
 func TestResponseBuilder(t *testing.T) {
