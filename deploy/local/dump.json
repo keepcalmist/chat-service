@@ -76,6 +76,15 @@
       "attributes" : { }
     } ],
     "client" : {
+      "chat-ui-manager" : [ {
+        "id" : "14057d0e-c339-405b-9d67-b5a10469ec8f",
+        "name" : "support-chat-manager",
+        "description" : "",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "463b29dc-c9ba-4096-9578-698cdd08c848",
+        "attributes" : { }
+      } ],
       "realm-management" : [ {
         "id" : "c3bd65a5-83c0-43b3-9a2e-4c93841517f2",
         "name" : "manage-realm",
@@ -244,6 +253,15 @@
         "containerId" : "540f5f11-5ed3-45db-89bd-e259924ce514",
         "attributes" : { }
       } ],
+      "e2e-testing" : [ {
+        "id" : "cacd3f89-70d0-47db-b0af-ac5e8d08d0d6",
+        "name" : "support-chat-client",
+        "description" : "",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "f06c1345-738d-42ec-903c-7d07d90dbe0d",
+        "attributes" : { }
+      } ],
       "security-admin-console" : [ ],
       "integration-testing" : [ ],
       "admin-cli" : [ ],
@@ -254,6 +272,15 @@
         "composite" : false,
         "clientRole" : true,
         "containerId" : "aae46875-80bf-467b-8000-84d0925ac846",
+        "attributes" : { }
+      } ],
+      "chat-service" : [ {
+        "id" : "a8f5694a-1d1a-46b6-beba-37b62eb8f5d6",
+        "name" : "support-chat-client",
+        "description" : "",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "dffcebee-578c-4891-999f-3ad54066c756",
         "attributes" : { }
       } ],
       "account-console" : [ ],
@@ -395,8 +422,8 @@
       "id" : "0033ee2d-5254-4245-81d0-723c09560360",
       "type" : "password",
       "userLabel" : "My password",
-      "createdDate" : 1697045788404,
-      "secretData" : "{\"value\":\"xUcF4pokDayx8dwr7klMw8XVNqZRhyTAb7IkmaCHJkY=\",\"salt\":\"KCx3bb+6d3PyavUCeKLGtQ==\",\"additionalParameters\":{}}",
+      "createdDate" : 1697749105641,
+      "secretData" : "{\"value\":\"GZcORSoq7gVYT6G0/ZyD8bv8/kib90qQtOmD/d3UPdM=\",\"salt\":\"L5yCm69fnAbACYe87xlhJg==\",\"additionalParameters\":{}}",
       "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
     } ],
     "disableableCredentialTypes" : [ ],
@@ -404,6 +431,60 @@
     "realmRoles" : [ "default-roles-bank" ],
     "clientRoles" : {
       "chat-ui-client" : [ "support-chat-client" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "7ceaeb3f-6b2f-4af2-9412-12c4b278dcb6",
+    "createdTimestamp" : 1699741660579,
+    "username" : "e2e_client_0",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "",
+    "lastName" : "",
+    "email" : "e2e_client_0@uk.com",
+    "credentials" : [ {
+      "id" : "2525986c-0ec1-436a-8a1f-9bda9817134e",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1699749984773,
+      "secretData" : "{\"value\":\"ngWe/Pukn43gwNnpO43Nm80vRc1DzxXQsAGC33SX4dM=\",\"salt\":\"pDN1lHhZH64YanH/cc0BdQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-bank" ],
+    "clientRoles" : {
+      "chat-ui-client" : [ "support-chat-client" ],
+      "chat-service" : [ "support-chat-client" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "b8db3bbe-73c0-4c17-bb9f-e345934f1349",
+    "createdTimestamp" : 1699742262993,
+    "username" : "e2e_client_1",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "",
+    "lastName" : "",
+    "email" : "e2e_client_1@uk.com",
+    "credentials" : [ {
+      "id" : "cfca4936-7186-437b-84fa-d25535de84d8",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1699750007182,
+      "secretData" : "{\"value\":\"jKVxnu6XCR/3tGlJ2GNtpY4NUdZeNd+z2ynBoVCmq8c=\",\"salt\":\"pyU97Tk3pM3tPANRAhxeZg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-bank" ],
+    "clientRoles" : {
+      "chat-ui-client" : [ "support-chat-client" ],
+      "chat-service" : [ "support-chat-client" ]
     },
     "notBefore" : 0,
     "groups" : [ ]
@@ -427,6 +508,31 @@
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-bank" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "7ae61f23-4dd1-492e-98d0-703d9d04cdd4",
+    "createdTimestamp" : 1700603486036,
+    "username" : "manager007",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "",
+    "lastName" : "",
+    "credentials" : [ {
+      "id" : "a8000506-44f9-4131-80a6-9bea958cb4d9",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1700603505416,
+      "secretData" : "{\"value\":\"ROlriizrIU+WN4oQ0P0tNOcyxcD1bdmvh4CZE5u4Pn0=\",\"salt\":\"WKIK9mXBEPuHND1+BWvdVg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-bank" ],
+    "clientRoles" : {
+      "chat-ui-manager" : [ "support-chat-manager" ]
+    },
     "notBefore" : 0,
     "groups" : [ ]
   } ],
@@ -566,6 +672,44 @@
     "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "email" ],
     "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
   }, {
+    "id" : "dffcebee-578c-4891-999f-3ad54066c756",
+    "clientId" : "chat-service",
+    "name" : "",
+    "description" : "",
+    "rootUrl" : "",
+    "adminUrl" : "",
+    "baseUrl" : "",
+    "surrogateAuthRequired" : false,
+    "enabled" : true,
+    "alwaysDisplayInConsole" : false,
+    "clientAuthenticatorType" : "client-secret",
+    "secret" : "nrGQTFniYqv8B5JICnxispADM99abzwp",
+    "redirectUris" : [ "http://localhost:3000/*", "http://localhost:3000" ],
+    "webOrigins" : [ "*" ],
+    "notBefore" : 0,
+    "bearerOnly" : false,
+    "consentRequired" : false,
+    "standardFlowEnabled" : true,
+    "implicitFlowEnabled" : false,
+    "directAccessGrantsEnabled" : true,
+    "serviceAccountsEnabled" : false,
+    "publicClient" : false,
+    "frontchannelLogout" : true,
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "oidc.ciba.grant.enabled" : "false",
+      "client.secret.creation.time" : "1697750154",
+      "backchannel.logout.session.required" : "true",
+      "oauth2.device.authorization.grant.enabled" : "false",
+      "display.on.consent.screen" : "false",
+      "backchannel.logout.revoke.offline.tokens" : "false"
+    },
+    "authenticationFlowBindingOverrides" : { },
+    "fullScopeAllowed" : true,
+    "nodeReRegistrationTimeout" : -1,
+    "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "email" ],
+    "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
+  }, {
     "id" : "aae46875-80bf-467b-8000-84d0925ac846",
     "clientId" : "chat-ui-client",
     "name" : "",
@@ -594,6 +738,79 @@
       "post.logout.redirect.uris" : "+",
       "oauth2.device.authorization.grant.enabled" : "false",
       "backchannel.logout.session.required" : "true",
+      "backchannel.logout.revoke.offline.tokens" : "false"
+    },
+    "authenticationFlowBindingOverrides" : { },
+    "fullScopeAllowed" : true,
+    "nodeReRegistrationTimeout" : -1,
+    "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "email" ],
+    "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
+  }, {
+    "id" : "463b29dc-c9ba-4096-9578-698cdd08c848",
+    "clientId" : "chat-ui-manager",
+    "name" : "support-chat-manager",
+    "description" : "",
+    "rootUrl" : "",
+    "adminUrl" : "",
+    "baseUrl" : "",
+    "surrogateAuthRequired" : false,
+    "enabled" : true,
+    "alwaysDisplayInConsole" : false,
+    "clientAuthenticatorType" : "client-secret",
+    "redirectUris" : [ "http://localhost:3001/*", "http://localhost:3001" ],
+    "webOrigins" : [ "*" ],
+    "notBefore" : 0,
+    "bearerOnly" : false,
+    "consentRequired" : false,
+    "standardFlowEnabled" : true,
+    "implicitFlowEnabled" : false,
+    "directAccessGrantsEnabled" : true,
+    "serviceAccountsEnabled" : false,
+    "publicClient" : true,
+    "frontchannelLogout" : true,
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "oidc.ciba.grant.enabled" : "false",
+      "oauth2.device.authorization.grant.enabled" : "false",
+      "backchannel.logout.session.required" : "true",
+      "backchannel.logout.revoke.offline.tokens" : "false"
+    },
+    "authenticationFlowBindingOverrides" : { },
+    "fullScopeAllowed" : true,
+    "nodeReRegistrationTimeout" : -1,
+    "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "email" ],
+    "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
+  }, {
+    "id" : "f06c1345-738d-42ec-903c-7d07d90dbe0d",
+    "clientId" : "e2e-testing",
+    "name" : "",
+    "description" : "",
+    "rootUrl" : "",
+    "adminUrl" : "",
+    "baseUrl" : "",
+    "surrogateAuthRequired" : false,
+    "enabled" : true,
+    "alwaysDisplayInConsole" : false,
+    "clientAuthenticatorType" : "client-secret",
+    "secret" : "kqjN3J1BDzJue6FbmWSolzzokh1rBCMV",
+    "redirectUris" : [ "http://localhost:3000/*", "http://localhost:3000" ],
+    "webOrigins" : [ "/*" ],
+    "notBefore" : 0,
+    "bearerOnly" : false,
+    "consentRequired" : false,
+    "standardFlowEnabled" : true,
+    "implicitFlowEnabled" : false,
+    "directAccessGrantsEnabled" : true,
+    "serviceAccountsEnabled" : false,
+    "publicClient" : false,
+    "frontchannelLogout" : true,
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "oidc.ciba.grant.enabled" : "false",
+      "client.secret.creation.time" : "1699741604",
+      "backchannel.logout.session.required" : "true",
+      "oauth2.device.authorization.grant.enabled" : "false",
+      "display.on.consent.screen" : "false",
       "backchannel.logout.revoke.offline.tokens" : "false"
     },
     "authenticationFlowBindingOverrides" : { },
