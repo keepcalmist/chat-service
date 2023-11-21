@@ -26,9 +26,10 @@ const (
 
 //go:generate options-gen -out-filename=server_options.gen.go -from-struct=Options
 type Options struct {
-	addr         string `option:"mandatory" validate:"required,hostname_port"`
-	lvlSetter    func(level zapcore.Level)
-	clientSchema *openapi3.T `option:"mandatory" validate:"required"`
+	addr          string `option:"mandatory" validate:"required,hostname_port"`
+	lvlSetter     func(level zapcore.Level)
+	clientSchema  *openapi3.T `option:"mandatory" validate:"required"`
+	managerSchema *openapi3.T `option:"mandatory" validate:"required"`
 }
 
 type Server struct {
@@ -68,11 +69,13 @@ func New(opts Options) (*Server, error) {
 	index.addPage("/debug/pprof/profile?seconds=30", "Takes half-minute profile")
 	index.addPage("/debug/sentry", "Heap profile")
 	index.addPage("/schema/client", "Swagger schema for client")
+	index.addPage("/schema/manager", "Swagger schema for manager")
 
 	// Обработка "/log/level"
 	e.PUT("/log/level", s.SetLogLvl)
 	e.GET("/debug/sentry", s.DebugSentry)
 	e.GET("/schema/client", s.ExposeSchema(opts.clientSchema))
+	e.GET("/schema/manager", s.ExposeSchema(opts.managerSchema))
 
 	// Обработка "/debug/pprof/" и связанных команд
 	pprof.Register(e)

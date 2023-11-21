@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	managerv1 "github.com/keepcalmist/chat-service/internal/server-manager/v1"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -77,13 +78,19 @@ func run() (errReturned error) {
 
 	clientSwagger, err := clientv1.GetSwagger()
 	if err != nil {
-		return fmt.Errorf("get swagger: %v", err)
+		return fmt.Errorf("get client swagger: %v", err)
+	}
+
+	managerSwagger, err := managerv1.GetSwagger()
+	if err != nil {
+		return fmt.Errorf("get manager swagger: %v", err)
 	}
 
 	srvDebug, err := serverdebug.New(
 		serverdebug.NewOptions(
 			cfg.Servers.Debug.Addr,
 			clientSwagger,
+			managerSwagger,
 			serverdebug.WithLvlSetter(setLevel)),
 	)
 	if err != nil {

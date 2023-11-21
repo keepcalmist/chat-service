@@ -15,6 +15,7 @@ type OptOptionsSetter func(o *Options)
 func NewOptions(
 	addr string,
 	clientSchema *openapi3.T,
+	managerSchema *openapi3.T,
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
@@ -23,6 +24,7 @@ func NewOptions(
 
 	o.addr = addr
 	o.clientSchema = clientSchema
+	o.managerSchema = managerSchema
 
 	for _, opt := range options {
 		opt(&o)
@@ -40,6 +42,7 @@ func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
 	errs.Add(errors461e464ebed9.NewValidationError("addr", _validate_Options_addr(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("clientSchema", _validate_Options_clientSchema(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("managerSchema", _validate_Options_managerSchema(o)))
 	return errs.AsError()
 }
 
@@ -53,6 +56,13 @@ func _validate_Options_addr(o *Options) error {
 func _validate_Options_clientSchema(o *Options) error {
 	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.clientSchema, "required"); err != nil {
 		return fmt461e464ebed9.Errorf("field `clientSchema` did not pass the test: %w", err)
+	}
+	return nil
+}
+
+func _validate_Options_managerSchema(o *Options) error {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.managerSchema, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `managerSchema` did not pass the test: %w", err)
 	}
 	return nil
 }
