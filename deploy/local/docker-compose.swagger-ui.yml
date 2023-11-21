@@ -2,12 +2,18 @@ version: "3.8"
 
 services:
   swagger-ui:
-    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    image: swaggerapi/swagger-ui:v5.9.0
     profiles:
       - all
     ports:
       - "3011:8080"
-    volumes:
-        - ../../api/client.v1.swagger.yml:/openapi.json
     environment:
-      SWAGGER_JSON: /openapi.json
+      URLS: '[
+      {name:"client-apiv1", url:"swagger-client-apiv1.yml"},
+      {name:"manager-apiv1", url:"swagger-manager-apiv1.yml"}
+      ]'
+    volumes:
+      - ../../api/client.v1.swagger.yml:/usr/share/nginx/html/swagger-client-apiv1.yml
+      - ../../api/manager.v1.swagger.yml:/usr/share/nginx/html/swagger-manager-apiv1.yml
+

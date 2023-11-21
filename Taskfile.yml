@@ -189,7 +189,7 @@ tasks:
   gen:api:
     cmds:
       - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package clientv1 -o ./internal/server-client/v1/server.gen.go --old-config-style ./api/client.v1.swagger.yml"
-
+      - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package managerv1 -o ./internal/server-manager/v1/server.gen.go --old-config-style ./api/manager.v1.swagger.yml"
   ent:new:
     cmds:
       - "{{.TOOLS_DIR}}/ent new --target {{.ENT_SCHEMA}} Chat Message Problem"
