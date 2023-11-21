@@ -79,6 +79,7 @@ func (s *Service) Run(ctx context.Context) error {
 		wg.Add(1)
 		go s.startWorker(ctx, wg)
 	}
+	wg.Wait()
 
 	return nil
 }

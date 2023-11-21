@@ -13,6 +13,7 @@ import (
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
 	server_client "github.com/keepcalmist/chat-service/internal/server-client"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
+	"github.com/keepcalmist/chat-service/internal/services/outbox"
 	"github.com/keepcalmist/chat-service/internal/store"
 	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
 	sendmessage "github.com/keepcalmist/chat-service/internal/usecases/client/send-message"
@@ -26,39 +27,30 @@ func initServerClient(
 	role string,
 	resource string,
 	keycloakConfig config.Keycloak,
-	database *store.Database,
 	isProduction bool,
 	swag *openapi3.T,
+	database *store.Database,
+	chatRepository *chatsrepo.Repo,
+	msgRepository *messagesrepo.Repo,
+	problemRepository *problemsrepo.Repo,
+	outboxService *outbox.Service,
 ) (*server_client.Server, error) {
-	repoMsg, err := messagesrepo.New(messagesrepo.NewOptions(
-		database,
-	))
-	if err != nil {
-		return nil, fmt.Errorf("init messages repo: %v", err)
-	}
-
-	repoChat, err := chatsrepo.New(chatsrepo.NewOptions(
-		database,
-	))
-	if err != nil {
-		return nil, fmt.Errorf("init chats repo: %v", err)
-	}
-
-	repoProblems, err := problemsrepo.New(problemsrepo.NewOptions(
-		database,
-	))
-	if err != nil {
-		return nil, fmt.Errorf("init problems repo: %v", err)
-	}
-
 	getHistoryUsecase, err := gethistory.New(
-		gethistory.NewOptions(repoMsg),
+		gethistory.NewOptions(msgRepository),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("init get history usecase: %v", err)
 	}
 
-	sendMessageUsecase, err := sendmessage.New(sendmessage.NewOptions(repoMsg, repoChat, repoProblems, database))
+	sendMessageUsecase, err := sendmessage.New(
+		sendmessage.NewOptions(
+			chatRepository,
+			msgRepository,
+			outboxService,
+			problemRepository,
+			database,
+		),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("init send message usecase: %v", err)
 	}

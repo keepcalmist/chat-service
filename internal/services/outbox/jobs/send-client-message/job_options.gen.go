@@ -13,7 +13,6 @@ import (
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
-	name string,
 	msgRepo messageRepository,
 	producer messageProducer,
 	options ...OptOptionsSetter,
@@ -22,7 +21,6 @@ func NewOptions(
 
 	// Setting defaults from field tag (if present)
 
-	o.name = name
 	o.msgRepo = msgRepo
 	o.producer = producer
 
@@ -52,17 +50,9 @@ func WithLogger(opt *zap.Logger) OptOptionsSetter {
 
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
-	errs.Add(errors461e464ebed9.NewValidationError("name", _validate_Options_name(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("msgRepo", _validate_Options_msgRepo(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("producer", _validate_Options_producer(o)))
 	return errs.AsError()
-}
-
-func _validate_Options_name(o *Options) error {
-	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.name, "required"); err != nil {
-		return fmt461e464ebed9.Errorf("field `name` did not pass the test: %w", err)
-	}
-	return nil
 }
 
 func _validate_Options_msgRepo(o *Options) error {

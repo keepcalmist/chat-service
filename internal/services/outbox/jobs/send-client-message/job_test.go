@@ -24,7 +24,7 @@ func TestJob_Handle(t *testing.T) {
 
 	msgProducer := sendclientmessagejobmocks.NewMockmessageProducer(ctrl)
 	msgRepo := sendclientmessagejobmocks.NewMockmessageRepository(ctrl)
-	job, err := sendclientmessagejob.New(sendclientmessagejob.NewOptions(msgProducer, msgRepo))
+	job, err := sendclientmessagejob.New(sendclientmessagejob.NewOptions(msgRepo, msgProducer))
 	require.NoError(t, err)
 
 	clientID := types.NewUserID()

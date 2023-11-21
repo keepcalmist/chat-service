@@ -14,8 +14,13 @@ import (
 
 	"github.com/keepcalmist/chat-service/internal/config"
 	"github.com/keepcalmist/chat-service/internal/logger"
+	chatsrepo "github.com/keepcalmist/chat-service/internal/repositories/chats"
+	jobsrepo "github.com/keepcalmist/chat-service/internal/repositories/jobs"
+	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
+	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	serverdebug "github.com/keepcalmist/chat-service/internal/server-debug"
+	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
 	"github.com/keepcalmist/chat-service/internal/store"
 )
 
@@ -89,15 +94,77 @@ func run() (errReturned error) {
 		zap.L().Warn("keycloak debug mode enabled in production")
 	}
 
+	database := store.NewDatabase(psqlClient)
+
+	repoMsg, err := messagesrepo.New(messagesrepo.NewOptions(
+		database,
+	))
+	if err != nil {
+		return fmt.Errorf("init messages repo: %v", err)
+	}
+
+	repoChat, err := chatsrepo.New(chatsrepo.NewOptions(
+		database,
+	))
+	if err != nil {
+		return fmt.Errorf("init chats repo: %v", err)
+	}
+
+	repoProblems, err := problemsrepo.New(problemsrepo.NewOptions(
+		database,
+	))
+	if err != nil {
+		return fmt.Errorf("init problems repo: %v", err)
+	}
+
+	repoJobs, err := jobsrepo.New(jobsrepo.NewOptions(
+		database,
+	))
+	if err != nil {
+		return fmt.Errorf("init jobs repo: %v", err)
+	}
+
+	kafkaWriter := msgproducer.NewKafkaWriter(
+		cfg.Services.MsgProducer.Brokers,
+		cfg.Services.MsgProducer.Topic,
+		cfg.Services.MsgProducer.BatchSize,
+	)
+
+	producer, err := msgproducer.New(
+		msgproducer.NewOptions(
+			kafkaWriter,
+			msgproducer.WithEncryptKey(cfg.Services.MsgProducer.EncryptKey),
+		),
+	)
+	if err != nil {
+		return fmt.Errorf("init msg producer: %v", err)
+	}
+
+	outbox, err := initOutbox(cfg.Services, database, repoJobs, repoMsg, producer)
+	if err != nil {
+		return fmt.Errorf("init outbox: %v", err)
+	}
+
+	go func() {
+		err = outbox.Run(ctx)
+		if err != nil {
+			zap.L().Error("outbox run error", zap.Error(err))
+		}
+	}()
+
 	srvClient, err := initServerClient(
 		cfg.Servers.Client.Addr,
 		cfg.Servers.Client.AllowOrigins,
 		cfg.Servers.Client.RequiredAccess.Role,
 		cfg.Servers.Client.RequiredAccess.Resource,
 		cfg.Clients.Keycloak,
-		store.NewDatabase(psqlClient),
 		cfg.Global.IsProduction(),
 		clientSwagger,
+		database,
+		repoChat,
+		repoMsg,
+		repoProblems,
+		outbox,
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)

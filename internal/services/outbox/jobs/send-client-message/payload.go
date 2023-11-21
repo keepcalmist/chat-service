@@ -1,16 +1,17 @@
 package sendclientmessagejob
 
 import (
+	"errors"
+
 	"github.com/keepcalmist/chat-service/internal/types"
 )
 
-// FIXME: Вероятно необходимо добавить приватных типов и функций.
+var ErrInvalidMessageID = errors.New("invalid message id")
 
 func MarshalPayload(messageID types.MessageID) (string, error) {
-	str, err := messageID.MarshalText()
-	if err != nil {
-		return "", err
+	if messageID == types.MessageIDNil {
+		return "", ErrInvalidMessageID
 	}
 
-	return string(str), nil
+	return messageID.String(), nil
 }

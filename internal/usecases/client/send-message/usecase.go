@@ -3,8 +3,11 @@ package sendmessage
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
+	sendclientmessagejob "github.com/keepcalmist/chat-service/internal/services/outbox/jobs/send-client-message"
 	"github.com/keepcalmist/chat-service/internal/types"
 )
 
@@ -40,10 +43,15 @@ type transactor interface {
 	RunInTx(ctx context.Context, f func(context.Context) error) error
 }
 
+type outboxService interface {
+	Put(ctx context.Context, name, payload string, availableAt time.Time) (types.JobID, error)
+}
+
 //go:generate options-gen -out-filename=usecase_options.gen.go -from-struct=Options
 type Options struct {
-	msgRepo     messagesRepository `option:"mandatory" validate:"required"`
 	chatRepo    chatsRepository    `option:"mandatory" validate:"required"`
+	msgRepo     messagesRepository `option:"mandatory" validate:"required"`
+	outbox      outboxService      `option:"mandatory" validate:"required"`
 	problemRepo problemsRepository `option:"mandatory" validate:"required"`
 	tx          transactor         `option:"mandatory" validate:"required"`
 }
@@ -93,6 +101,11 @@ func (u UseCase) Handle(ctx context.Context, req Request) (Response, error) {
 		)
 		if err != nil {
 			return err
+		}
+
+		_, err = u.outbox.Put(ctx, sendclientmessagejob.Name, msg.ID.String(), time.Now())
+		if err != nil {
+			return fmt.Errorf("failed to put job to outbox: %w", err)
 		}
 
 		resp = convertResponse(msg)
