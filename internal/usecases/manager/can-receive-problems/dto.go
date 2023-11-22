@@ -11,11 +11,7 @@ type Request struct {
 }
 
 func (r Request) Validate() error {
-	if err := validator.Validator.Struct(r); err != nil {
-		return err
-	}
-
-	return nil
+	return validator.Validator.Struct(r)
 }
 
 type Response struct {

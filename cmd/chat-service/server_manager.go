@@ -10,6 +10,9 @@ import (
 	"github.com/keepcalmist/chat-service/internal/config"
 	"github.com/keepcalmist/chat-service/internal/server"
 	managerv1 "github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
+	managerload "github.com/keepcalmist/chat-service/internal/services/manager-load"
+	managerpool "github.com/keepcalmist/chat-service/internal/services/manager-pool"
+	canreceiveproblems "github.com/keepcalmist/chat-service/internal/usecases/manager/can-receive-problems"
 )
 
 const nameServerManager = "server-manager"
@@ -22,6 +25,8 @@ func initServerManager(
 	keycloakConfig config.Keycloak,
 	isProduction bool,
 	swag *openapi3.T,
+	managerLoadService *managerload.Service,
+	managerPoolService managerpool.Pool,
 ) (*server.Server, error) {
 	keyCloakClient, err := keycloakclient.New(
 		keycloakclient.NewOptions(
@@ -36,6 +41,16 @@ func initServerManager(
 		return nil, fmt.Errorf("init keycloak client: %v", err)
 	}
 
+	useCaseCanRecievProblem, err := canreceiveproblems.New(canreceiveproblems.NewOptions(managerLoadService, managerPoolService))
+	if err != nil {
+		return nil, fmt.Errorf("init usecase can reciev problem: %v", err)
+	}
+
+	handlers, err := managerv1.NewHandlers(managerv1.NewOptions(useCaseCanRecievProblem))
+	if err != nil {
+		return nil, fmt.Errorf("init handlers: %v", err)
+	}
+
 	srv, err := server.New(server.NewOptions(
 		zap.L().Named(nameServerManager),
 		addr,
@@ -45,7 +60,7 @@ func initServerManager(
 		role,
 		resource,
 		isProduction,
-	), managerv1.Handlers{}) // TODO реализовать, как только будет возможно
+	), handlers)
 	if err != nil {
 		return nil, fmt.Errorf("build server: %v", err)
 	}

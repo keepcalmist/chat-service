@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/keepcalmist/chat-service/internal/types"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/keepcalmist/chat-service/internal/testingh"
+	"github.com/keepcalmist/chat-service/internal/types"
 	canreceiveproblems "github.com/keepcalmist/chat-service/internal/usecases/manager/can-receive-problems"
 	canreceiveproblemsmocks "github.com/keepcalmist/chat-service/internal/usecases/manager/can-receive-problems/mocks"
 )

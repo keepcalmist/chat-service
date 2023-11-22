@@ -8,6 +8,18 @@ servers:
     description: Development server
 
 paths:
+  /getFreeHandsBtnAvailability:
+    post:
+      description: Получение возможности нажатия на кнопку "Готов к проблемам"
+      parameters:
+        - $ref: "#/components/parameters/XRequestIDHeader"
+      responses:
+        '200':
+          description: Free hands button availability.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFreeHandsBtnAvailabilityResponse"
 
 security:
   - bearerAuth: [ ]
@@ -19,8 +31,32 @@ components:
       scheme: bearer
       bearerFormat: JWT
 
+  parameters:
+    XRequestIDHeader:
+      in: header
+      name: X-Request-ID
+      schema:
+        type: string
+        format: uuid
+        x-go-type: types.RequestID
+        x-go-import:
+          path: "github.com/keepcalmist/chat-service/internal/types"
+      required: true
+
   schemas:
     # Common.
+    GetFreeHandsBtnAvailabilityResponse:
+      properties:
+        data:
+          $ref: "#/components/schemas/GetFreeHandsBtnAvailability"
+        error:
+          $ref: "#/components/schemas/Error"
+
+    GetFreeHandsBtnAvailability:
+      required: [ available ]
+      properties:
+        available:
+          type: boolean
 
     Error:
       required: [ message, code ]

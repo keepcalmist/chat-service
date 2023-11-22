@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
-	"github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 )
 
 func TestResponseBuilder(t *testing.T) {

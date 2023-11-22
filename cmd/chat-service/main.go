@@ -19,8 +19,10 @@ import (
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
 	serverdebug "github.com/keepcalmist/chat-service/internal/server-debug"
-	"github.com/keepcalmist/chat-service/internal/server/server-client/v1"
-	"github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	managerv1 "github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
+	managerload "github.com/keepcalmist/chat-service/internal/services/manager-load"
+	inmemmanagerpool "github.com/keepcalmist/chat-service/internal/services/manager-pool/in-mem"
 	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
 	"github.com/keepcalmist/chat-service/internal/store"
 )
@@ -151,6 +153,13 @@ func run() (errReturned error) {
 		return fmt.Errorf("init msg producer: %v", err)
 	}
 
+	managerLoadService, err := managerload.New(managerload.NewOptions(cfg.Services.ManagerLoad.MaxProblemsAtSameTime, repoProblems))
+	if err != nil {
+		return fmt.Errorf("init manager load service: %v", err)
+	}
+
+	poolService := inmemmanagerpool.New()
+
 	outbox, err := initOutbox(cfg.Services, database, repoJobs, repoMsg, producer)
 	if err != nil {
 		return fmt.Errorf("init outbox: %v", err)
@@ -164,6 +173,8 @@ func run() (errReturned error) {
 		cfg.Clients.Keycloak,
 		cfg.Global.IsProduction(),
 		managerSwagger,
+		managerLoadService,
+		poolService,
 	)
 	if err != nil {
 		return fmt.Errorf("init manager server: %v", err)
