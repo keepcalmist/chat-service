@@ -20,6 +20,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GetFreeHandsBtnAvailabilityResponse"
+  /freeHands:
+    post:
+      description: Добавление менеджера в пул менеджеров для обработки проблем
+      parameters:
+        - $ref: "#/components/parameters/XRequestIDHeader"
+      responses:
+        '200':
+          description: Free hands button availability.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FreeHandsResponse"
 
 security:
   - bearerAuth: [ ]
@@ -45,6 +57,13 @@ components:
 
   schemas:
     # Common.
+    FreeHandsResponse:
+        properties:
+          data:
+            additionalProperties: true
+          error:
+            $ref: "#/components/schemas/Error"
+
     GetFreeHandsBtnAvailabilityResponse:
       properties:
         data:
