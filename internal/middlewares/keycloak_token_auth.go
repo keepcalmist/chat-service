@@ -34,7 +34,7 @@ func NewKeycloakTokenAuth(introspector Introspector, resource, role string) echo
 				return false, err
 			}
 			if !token.Active {
-				return false, nil
+				return false, errors.New("token is not active")
 			}
 
 			jwtToken, err := parse(tokenStr)
@@ -51,13 +51,8 @@ func NewKeycloakTokenAuth(introspector Introspector, resource, role string) echo
 				return false, err
 			}
 
-			roles, ok := tokenClaims.ResourceAccess[resource]
-			if !ok {
-				return false, ErrNoRequiredResourceRole
-			}
-
-			if !hasRole(roles["roles"], role) {
-				return false, ErrNoRequiredResourceRole
+			if !tokenClaims.ResourcesAccess.HasResourceRole(resource, role) {
+				return false, echo.ErrForbidden.WithInternal(ErrNoRequiredResourceRole)
 			}
 
 			eCtx.Set(tokenCtxKey, jwtToken)
@@ -95,26 +90,4 @@ func userID(eCtx echo.Context) (types.UserID, bool) {
 		return types.UserIDNil, false
 	}
 	return userIDProvider.UserID(), true
-}
-
-func hasRole(roles interface{}, role string) bool {
-	switch t := roles.(type) {
-	case []string:
-		for _, r := range t {
-			if r == role {
-				return true
-			}
-		}
-	case string:
-		return t == role
-	case []interface{}:
-		for _, r := range t {
-			if r == role {
-				return true
-			}
-		}
-	default:
-		return false
-	}
-	return false
 }

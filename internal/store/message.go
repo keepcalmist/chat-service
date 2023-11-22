@@ -29,7 +29,7 @@ type Message struct {
 	// Body holds the value of the "body" field.
 	Body string `json:"body,omitempty"`
 	// CheckedAt holds the value of the "checked_at" field.
-	CheckedAt *time.Time `json:"checked_at,omitempty"`
+	CheckedAt time.Time `json:"checked_at,omitempty"`
 	// IsBlocked holds the value of the "is_blocked" field.
 	IsBlocked bool `json:"is_blocked,omitempty"`
 	// IsService holds the value of the "is_service" field.
@@ -38,6 +38,8 @@ type Message struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// ChatID holds the value of the "chat_id" field.
 	ChatID types.ChatID `json:"chat_id,omitempty"`
+	// InitialRequestID holds the value of the "initial_request_id" field.
+	InitialRequestID types.RequestID `json:"initial_request_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MessageQuery when eager-loading is set.
 	Edges           MessageEdges `json:"edges"`
@@ -97,6 +99,8 @@ func (*Message) scanValues(columns []string) ([]any, error) {
 			values[i] = new(types.ChatID)
 		case message.FieldID:
 			values[i] = new(types.MessageID)
+		case message.FieldInitialRequestID:
+			values[i] = new(types.RequestID)
 		case message.FieldAuthorID:
 			values[i] = new(types.UserID)
 		case message.ForeignKeys[0]: // message_problem
@@ -150,8 +154,7 @@ func (m *Message) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field checked_at", values[i])
 			} else if value.Valid {
-				m.CheckedAt = new(time.Time)
-				*m.CheckedAt = value.Time
+				m.CheckedAt = value.Time
 			}
 		case message.FieldIsBlocked:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -176,6 +179,12 @@ func (m *Message) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field chat_id", values[i])
 			} else if value != nil {
 				m.ChatID = *value
+			}
+		case message.FieldInitialRequestID:
+			if value, ok := values[i].(*types.RequestID); !ok {
+				return fmt.Errorf("unexpected type %T for field initial_request_id", values[i])
+			} else if value != nil {
+				m.InitialRequestID = *value
 			}
 		case message.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -242,10 +251,8 @@ func (m *Message) String() string {
 	builder.WriteString("body=")
 	builder.WriteString(m.Body)
 	builder.WriteString(", ")
-	if v := m.CheckedAt; v != nil {
-		builder.WriteString("checked_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
+	builder.WriteString("checked_at=")
+	builder.WriteString(m.CheckedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("is_blocked=")
 	builder.WriteString(fmt.Sprintf("%v", m.IsBlocked))
@@ -258,6 +265,9 @@ func (m *Message) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("chat_id=")
 	builder.WriteString(fmt.Sprintf("%v", m.ChatID))
+	builder.WriteString(", ")
+	builder.WriteString("initial_request_id=")
+	builder.WriteString(fmt.Sprintf("%v", m.InitialRequestID))
 	builder.WriteByte(')')
 	return builder.String()
 }

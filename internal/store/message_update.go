@@ -84,9 +84,17 @@ func (mu *MessageUpdate) SetIsBlocked(b bool) *MessageUpdate {
 	return mu
 }
 
-// SetIsService sets the "is_service" field.
-func (mu *MessageUpdate) SetIsService(b bool) *MessageUpdate {
-	mu.mutation.SetIsService(b)
+// SetNillableIsBlocked sets the "is_blocked" field if the given value is not nil.
+func (mu *MessageUpdate) SetNillableIsBlocked(b *bool) *MessageUpdate {
+	if b != nil {
+		mu.SetIsBlocked(*b)
+	}
+	return mu
+}
+
+// ClearIsBlocked clears the value of the "is_blocked" field.
+func (mu *MessageUpdate) ClearIsBlocked() *MessageUpdate {
+	mu.mutation.ClearIsBlocked()
 	return mu
 }
 
@@ -162,6 +170,9 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if mu.mutation.AuthorIDCleared() {
+		_spec.ClearField(message.FieldAuthorID, field.TypeUUID)
+	}
 	if value, ok := mu.mutation.IsVisibleForClient(); ok {
 		_spec.SetField(message.FieldIsVisibleForClient, field.TypeBool, value)
 	}
@@ -177,8 +188,8 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.IsBlocked(); ok {
 		_spec.SetField(message.FieldIsBlocked, field.TypeBool, value)
 	}
-	if value, ok := mu.mutation.IsService(); ok {
-		_spec.SetField(message.FieldIsService, field.TypeBool, value)
+	if mu.mutation.IsBlockedCleared() {
+		_spec.ClearField(message.FieldIsBlocked, field.TypeBool)
 	}
 	if mu.mutation.ProblemCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -283,9 +294,17 @@ func (muo *MessageUpdateOne) SetIsBlocked(b bool) *MessageUpdateOne {
 	return muo
 }
 
-// SetIsService sets the "is_service" field.
-func (muo *MessageUpdateOne) SetIsService(b bool) *MessageUpdateOne {
-	muo.mutation.SetIsService(b)
+// SetNillableIsBlocked sets the "is_blocked" field if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableIsBlocked(b *bool) *MessageUpdateOne {
+	if b != nil {
+		muo.SetIsBlocked(*b)
+	}
+	return muo
+}
+
+// ClearIsBlocked clears the value of the "is_blocked" field.
+func (muo *MessageUpdateOne) ClearIsBlocked() *MessageUpdateOne {
+	muo.mutation.ClearIsBlocked()
 	return muo
 }
 
@@ -391,6 +410,9 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 			}
 		}
 	}
+	if muo.mutation.AuthorIDCleared() {
+		_spec.ClearField(message.FieldAuthorID, field.TypeUUID)
+	}
 	if value, ok := muo.mutation.IsVisibleForClient(); ok {
 		_spec.SetField(message.FieldIsVisibleForClient, field.TypeBool, value)
 	}
@@ -406,8 +428,8 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 	if value, ok := muo.mutation.IsBlocked(); ok {
 		_spec.SetField(message.FieldIsBlocked, field.TypeBool, value)
 	}
-	if value, ok := muo.mutation.IsService(); ok {
-		_spec.SetField(message.FieldIsService, field.TypeBool, value)
+	if muo.mutation.IsBlockedCleared() {
+		_spec.ClearField(message.FieldIsBlocked, field.TypeBool)
 	}
 	if muo.mutation.ProblemCleared() {
 		edge := &sqlgraph.EdgeSpec{

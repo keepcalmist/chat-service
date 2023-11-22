@@ -1,4 +1,4 @@
-//go:build integration
+//go:build e2e || tests
 
 package keycloakclient
 
@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+//nolint:tagliatelle
 type RPT struct {
 	AccessToken      string `json:"access_token"`
 	ExpiresIn        int    `json:"expires_in"`
@@ -23,7 +24,6 @@ func (c *Client) Auth(ctx context.Context, username, password string) (*RPT, err
 	url := fmt.Sprintf("realms/%s/protocol/openid-connect/token", c.realm)
 
 	var token RPT
-	// grant_type=password&username=kaunshch&password={password}&client_id=hub-backend-dev&client_secret=c01pmbeR4A2GjGUyfW7BvwAW0q6SYFdh&scope=hub-backend-dev
 	resp, err := c.auth(ctx).
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetFormData(map[string]string{

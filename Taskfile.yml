@@ -20,6 +20,7 @@ vars:
     entgo.io/ent/cmd/ent@v0.12.4
     github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0
     github.com/golang/mock/mockgen@v1.6.0
+    github.com/onsi/ginkgo/v2/ginkgo@v2.13.1
   DOCKER_COMPOSE_PATHS: |
     ./deploy/local/docker-compose.yml
     ./deploy/local/docker-compose.sentry.yml
@@ -28,8 +29,9 @@ vars:
     sh: echo '{{range $index, $element := (without (splitList "\n" .DOCKER_COMPOSE_PATHS) "") }} -f {{$element}} {{end}}'
   DOCKER_COMPOSE_CMD:
     sh: "which docker-compose"
+  DOCKER_COMPOSE_CMD_FILES: '{{ .DOCKER_COMPOSE_CMD }} {{ .DOCKER_COMPOSE_PATHS_WITH_FLAGS }}'
   SERVICES:
-    sh: "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql config --services"
+    sh: "{{.DOCKER_COMPOSE_CMD_FILES}} --profile all --profile psql config --services"
   TYPES: |
     ChatID
     MessageID
@@ -39,10 +41,14 @@ vars:
   TYPES_PKG: types
   TYPES_DST: ./internal/types/types.gen.go
   ENT_SCHEMA: ./internal/store/schema
+  ENT_TEMPLATES: ./internal/store/templates
   KEYCLOAK_BIN: /opt/keycloak/bin/
   CLIENT_V1_SRC: ./api/client.v1.swagger.yml
   CLIENT_V1_DST: ./internal/server-client/v1/server.gen.go
   CLIENT_V1_PKG: clientv1
+  ### E2E tests ###
+  E2E_CLIENT_V1_DST: ./tests/e2e/api/client/v1/client.gen.go
+  E2E_CLIENT_V1_PKG: apiclientv1
 
 
 tasks:
@@ -108,22 +114,23 @@ tasks:
       - task: gen:types
       - task: ent:gen
       - task: gen:api
+      - task: gen:e2e
     aliases: [gen]
 
   deps:
     desc: Стартует контейнеры с зависимостями (можно в detached-режиме).
     cmds:
-    - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql up -d"
+    - "{{.DOCKER_COMPOSE_CMD_FILES}}  --profile all --profile psql up -d"
 
   deps:cmd:
     desc: Дать произвольную команду "docker compose"-у.
     cmds:
-     - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} {{.CLI_ARGS}}"
+     - "{{.DOCKER_COMPOSE_CMD_FILES}}  {{.CLI_ARGS}}"
 
   deps:status:
     desc: Показывает статус запущенных контейнеров.
     cmds:
-    - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} ps"
+    - "{{.DOCKER_COMPOSE_CMD_FILES}} ps"
 
   deps:logs:
     desc: Показывает логи всех сервисов или одного сервиса.
@@ -136,7 +143,7 @@ tasks:
     cmds:
       - task: deps:cmd
         vars:
-          CLI_ARGS: " stop"
+          CLI_ARGS: "stop"
 
   deps:reset-psql:
     cmds:
@@ -164,13 +171,22 @@ tasks:
       vars: [SERVICE]
     cmds:
       - echo "Reset {{.SERVICE}}"
-      - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql  rm -fsv {{.SERVICE}}"
-      - "{{.DOCKER_COMPOSE_CMD}} {{.DOCKER_COMPOSE_PATHS_WITH_FLAGS}} --profile all --profile psql  up -d {{.SERVICE}}"
+      - "{{.DOCKER_COMPOSE_CMD_FILES}} --profile all --profile psql  rm -fsv {{.SERVICE}}"
+      - "{{.DOCKER_COMPOSE_CMD_FILES}} --profile all --profile psql  up -d {{.SERVICE}}"
 
   gen:types:
     cmds:
       - echo "Generate types..."
       - go run ./cmd/gen-types {{.TYPES_PKG}} {{ without (splitLines .TYPES) "" | join ","}} {{.TYPES_DST}}
+
+  gen:e2e:
+    cmds:
+      - echo "[E2E] Generate client API..."
+      - "{{.TOOLS_DIR}}/oapi-codegen --old-config-style -generate types,client -package {{.E2E_CLIENT_V1_PKG}} {{.CLIENT_V1_SRC}} > {{.E2E_CLIENT_V1_DST}}"
+
+  gen:api:
+    cmds:
+      - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package clientv1 -o ./internal/server-client/v1/server.gen.go --old-config-style ./api/client.v1.swagger.yml"
 
   ent:new:
     cmds:
@@ -179,17 +195,11 @@ tasks:
 
   ent:gen:
     cmds:
-      - "{{.TOOLS_DIR}}/ent generate {{.ENT_SCHEMA}}"
+      - "{{.TOOLS_DIR}}/ent generate --feature sql/upsert  --template {{.ENT_TEMPLATES}} {{.ENT_SCHEMA}}"
       - task: tidy
 
   tests:integration:
-    env:
-      TEST_LOG_LEVEL: info
-      TEST_KEYCLOAK_REALM: Bank
-      TEST_KEYCLOAK_CLIENT_ID:   integration-testing
-      TEST_KEYCLOAK_CLIENT_SECRET: WHlpfljPskw5CIh7g3Izr2g4SAxVgbAs
-      TEST_KEYCLOAK_TEST_USER: integration-testing
-      TEST_KEYCLOAK_TEST_PASSWORD: integration-testing
+    dotenv: ['.env']
     cmds:
       - echo "- Integration tests"
       - go test -tags integration -count 1 -race ./...
@@ -203,6 +213,10 @@ tasks:
       - task: deps:cmd
         vars:
           CLI_ARGS: "cp keycloak:{{.KEYCLOAK_BIN}}dump.json ./deploy/local/dump.json"
-  gen:api:
+
+  tests:e2e:
+    dotenv: [ '.env' ]
     cmds:
-      - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package clientv1 -o ./internal/server-client/v1/server.gen.go --old-config-style ./api/client.v1.swagger.yml"
+      - echo "- End-to-end tests..."
+      # NOTE: It's important to run tests serial (without `-p` flag) – for correct `clientsPool` sharing.
+      - "{{.TOOLS_DIR}}/ginkgo --fail-fast --timeout=1m --tags e2e --tags tests {{.CLI_ARGS}} ./tests/e2e"

@@ -16,8 +16,8 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/keepcalmist/chat-service/internal/middlewares"
+	"github.com/keepcalmist/chat-service/internal/server-client/errhandler"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
-	"github.com/keepcalmist/chat-service/internal/types"
 )
 
 const (
@@ -35,6 +35,7 @@ type Options struct {
 	introspector middlewares.Introspector `option:"mandatory" validate:"required"`
 	role         string                   `option:"mandatory" validate:"required"`
 	resource     string                   `option:"mandatory" validate:"required"`
+	isProduction bool                     `option:"mandatory"`
 }
 
 type Server struct {
@@ -46,53 +47,26 @@ func New(opts Options) (*Server, error) {
 	if err := opts.Validate(); err != nil {
 		return nil, err
 	}
+	errHandle, err := errhandler.New(errhandler.NewOptions(
+		opts.logger,
+		opts.isProduction,
+		errhandler.ResponseBuilder,
+	))
+	if err != nil {
+		return nil, fmt.Errorf("create err handler: %w", err)
+	}
 
 	e := echo.New()
+	e.HTTPErrorHandler = errHandle.Handle
 	e.Use(
-		middleware.Recover(),
+		middlewares.NewRecovery(opts.logger),
+		middlewares.NewRequestLogger(opts.logger),
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: opts.allowOrigins,
 			AllowMethods: []string{http.MethodPost},
 		}),
-		middleware.BodyLimit("1K"),
+		middleware.BodyLimit("3K"),
 		middlewares.NewKeycloakTokenAuth(opts.introspector, opts.resource, opts.role),
-
-		middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-			Skipper: func(c echo.Context) bool {
-				return c.Request().Method == http.MethodOptions
-			},
-			LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-				userID, _ := middlewares.GetUserID(c)
-				fields := []zap.Field{
-					zap.Duration("latency", v.Latency),
-					zap.String("remote_ip", v.RemoteIP),
-					zap.String("host", v.Host),
-					zap.String("method", v.Method),
-					zap.String("uri", v.URI),
-					zap.String("request_id", v.RequestID),
-					zap.String("user_agent", v.UserAgent),
-					zap.Int("status", v.Status),
-				}
-				if userID != types.UserIDNil {
-					fields = append(fields, zap.String("user_id", userID.String()))
-				} else {
-					fields = append(fields, zap.String("user_id", ""))
-				}
-
-				opts.logger.Debug("request",
-					fields...,
-				)
-				return nil
-			},
-			LogLatency:   true,
-			LogRemoteIP:  true,
-			LogHost:      true,
-			LogMethod:    true,
-			LogURI:       true,
-			LogRequestID: true,
-			LogUserAgent: true,
-			LogStatus:    true,
-		}),
 	)
 
 	v1 := e.Group("v1", oapimdlwr.OapiRequestValidatorWithOptions(opts.v1Swagger, &oapimdlwr.Options{

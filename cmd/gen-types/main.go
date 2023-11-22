@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -50,18 +49,9 @@ func main() {
 	}
 	pkg := os.Args[1]
 	out := os.Args[3]
-	f, err := os.OpenFile(out, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		if err != nil {
-			_ = os.Remove(out)
-		}
-	}()
 
 	types := strings.Split(os.Args[2], ",")
-	if err := run(pkg, types, f); err != nil {
+	if err := run(pkg, types, out); err != nil {
 		panic(err)
 	}
 
@@ -69,8 +59,17 @@ func main() {
 	log.Printf("%v generated\n", filepath.Join(p, out))
 }
 
-func run(pkg string, types []string, output io.WriteCloser) error {
-	defer output.Close()
+func run(pkg string, types []string, out string) (err error) {
+	output, err := os.OpenFile(out, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		output.Close()
+		if err != nil {
+			_ = os.Remove(out)
+		}
+	}()
 
 	tmplHeader, err := template.New("header").Funcs(template.FuncMap{
 		"join": func(sep string, list []string) string {

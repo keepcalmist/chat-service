@@ -1,11 +1,12 @@
 package config
 
 type Config struct {
-	Global  GlobalConfig  `toml:"global"`
-	Log     LogConfig     `toml:"log"`
-	Servers ServersConfig `toml:"servers"`
-	Sentry  Sentry        `toml:"sentry"`
-	Clients Clients       `toml:"clients"`
+	Global   GlobalConfig  `toml:"global"`
+	Log      LogConfig     `toml:"log"`
+	Servers  ServersConfig `toml:"servers"`
+	Sentry   Sentry        `toml:"sentry"`
+	Clients  Clients       `toml:"clients"`
+	Postgres Postgres      `toml:"postgres"`
 }
 
 type GlobalConfig struct {
@@ -37,7 +38,7 @@ type DebugServerConfig struct {
 }
 
 type Sentry struct {
-	DSN string `toml:"dsn" validate:"sentrydsn"`
+	DSN string `toml:"dsn" validate:"omitempty,url"`
 }
 
 type Clients struct {
@@ -50,6 +51,14 @@ type Keycloak struct {
 	ClientID     string `toml:"client_id" validate:"required"`
 	ClientSecret string `toml:"client_secret" validate:"required"`
 	DebugMode    bool   `toml:"debug_mode"`
+}
+
+type Postgres struct {
+	Address  string `toml:"address" validate:"required,hostname_port"`
+	Username string `toml:"username" validate:"required"`
+	Password string `toml:"password" validate:"required"`
+	Database string `toml:"database" validate:"required"`
+	Debug    bool   `toml:"debug" validate:""`
 }
 
 func (c GlobalConfig) IsProduction() bool {

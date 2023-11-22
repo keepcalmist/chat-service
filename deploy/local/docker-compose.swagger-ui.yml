@@ -11,4 +11,3 @@ services:
         - ../../api/client.v1.swagger.yml:/openapi.json
     environment:
       SWAGGER_JSON: /openapi.json
-

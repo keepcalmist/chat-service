@@ -116,6 +116,16 @@ func ManagerIDLTE(v types.UserID) predicate.Problem {
 	return predicate.Problem(sql.FieldLTE(FieldManagerID, v))
 }
 
+// ManagerIDIsNil applies the IsNil predicate on the "manager_id" field.
+func ManagerIDIsNil() predicate.Problem {
+	return predicate.Problem(sql.FieldIsNull(FieldManagerID))
+}
+
+// ManagerIDNotNil applies the NotNil predicate on the "manager_id" field.
+func ManagerIDNotNil() predicate.Problem {
+	return predicate.Problem(sql.FieldNotNull(FieldManagerID))
+}
+
 // ChatIDEQ applies the EQ predicate on the "chat_id" field.
 func ChatIDEQ(v types.ChatID) predicate.Problem {
 	return predicate.Problem(sql.FieldEQ(FieldChatID, v))

@@ -30,6 +30,26 @@ func (pu *ProblemUpdate) Where(ps ...predicate.Problem) *ProblemUpdate {
 	return pu
 }
 
+// SetManagerID sets the "manager_id" field.
+func (pu *ProblemUpdate) SetManagerID(ti types.UserID) *ProblemUpdate {
+	pu.mutation.SetManagerID(ti)
+	return pu
+}
+
+// SetNillableManagerID sets the "manager_id" field if the given value is not nil.
+func (pu *ProblemUpdate) SetNillableManagerID(ti *types.UserID) *ProblemUpdate {
+	if ti != nil {
+		pu.SetManagerID(*ti)
+	}
+	return pu
+}
+
+// ClearManagerID clears the value of the "manager_id" field.
+func (pu *ProblemUpdate) ClearManagerID() *ProblemUpdate {
+	pu.mutation.ClearManagerID()
+	return pu
+}
+
 // SetResolvedAt sets the "resolved_at" field.
 func (pu *ProblemUpdate) SetResolvedAt(t time.Time) *ProblemUpdate {
 	pu.mutation.SetResolvedAt(t)
@@ -120,6 +140,11 @@ func (pu *ProblemUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pu *ProblemUpdate) check() error {
+	if v, ok := pu.mutation.ManagerID(); ok {
+		if err := v.Validate(); err != nil {
+			return &ValidationError{Name: "manager_id", err: fmt.Errorf(`store: validator failed for field "Problem.manager_id": %w`, err)}
+		}
+	}
 	if _, ok := pu.mutation.ChatID(); pu.mutation.ChatCleared() && !ok {
 		return errors.New(`store: clearing a required unique edge "Problem.chat"`)
 	}
@@ -137,6 +162,12 @@ func (pu *ProblemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pu.mutation.ManagerID(); ok {
+		_spec.SetField(problem.FieldManagerID, field.TypeUUID, value)
+	}
+	if pu.mutation.ManagerIDCleared() {
+		_spec.ClearField(problem.FieldManagerID, field.TypeUUID)
 	}
 	if value, ok := pu.mutation.ResolvedAt(); ok {
 		_spec.SetField(problem.FieldResolvedAt, field.TypeTime, value)
@@ -207,6 +238,26 @@ type ProblemUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProblemMutation
+}
+
+// SetManagerID sets the "manager_id" field.
+func (puo *ProblemUpdateOne) SetManagerID(ti types.UserID) *ProblemUpdateOne {
+	puo.mutation.SetManagerID(ti)
+	return puo
+}
+
+// SetNillableManagerID sets the "manager_id" field if the given value is not nil.
+func (puo *ProblemUpdateOne) SetNillableManagerID(ti *types.UserID) *ProblemUpdateOne {
+	if ti != nil {
+		puo.SetManagerID(*ti)
+	}
+	return puo
+}
+
+// ClearManagerID clears the value of the "manager_id" field.
+func (puo *ProblemUpdateOne) ClearManagerID() *ProblemUpdateOne {
+	puo.mutation.ClearManagerID()
+	return puo
 }
 
 // SetResolvedAt sets the "resolved_at" field.
@@ -312,6 +363,11 @@ func (puo *ProblemUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (puo *ProblemUpdateOne) check() error {
+	if v, ok := puo.mutation.ManagerID(); ok {
+		if err := v.Validate(); err != nil {
+			return &ValidationError{Name: "manager_id", err: fmt.Errorf(`store: validator failed for field "Problem.manager_id": %w`, err)}
+		}
+	}
 	if _, ok := puo.mutation.ChatID(); puo.mutation.ChatCleared() && !ok {
 		return errors.New(`store: clearing a required unique edge "Problem.chat"`)
 	}
@@ -346,6 +402,12 @@ func (puo *ProblemUpdateOne) sqlSave(ctx context.Context) (_node *Problem, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.ManagerID(); ok {
+		_spec.SetField(problem.FieldManagerID, field.TypeUUID, value)
+	}
+	if puo.mutation.ManagerIDCleared() {
+		_spec.ClearField(problem.FieldManagerID, field.TypeUUID)
 	}
 	if value, ok := puo.mutation.ResolvedAt(); ok {
 		_spec.SetField(problem.FieldResolvedAt, field.TypeTime, value)

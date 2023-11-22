@@ -14,7 +14,9 @@ import (
 
 	"github.com/keepcalmist/chat-service/internal/config"
 	"github.com/keepcalmist/chat-service/internal/logger"
+	clientv1 "github.com/keepcalmist/chat-service/internal/server-client/v1"
 	serverdebug "github.com/keepcalmist/chat-service/internal/server-debug"
+	"github.com/keepcalmist/chat-service/internal/store"
 )
 
 var configPath = flag.String("config", "configs/config.toml", "Path to config file")
@@ -48,9 +50,35 @@ func run() (errReturned error) {
 	}
 	defer logger.Sync()
 
+	psqlClient, err := store.NewPSQLClient(store.NewPSQLOptions(
+		cfg.Postgres.Address,
+		cfg.Postgres.Username,
+		cfg.Postgres.Password,
+		cfg.Postgres.Database,
+		store.WithDebug(cfg.Postgres.Debug),
+	))
+	if err != nil {
+		return fmt.Errorf("init db driver: %v", err)
+	}
+	defer func() {
+		if err := psqlClient.Close(); err != nil {
+			errReturned = fmt.Errorf("close db connection: %v", err)
+		}
+	}()
+
+	if err = psqlClient.Schema.Create(ctx); err != nil {
+		return fmt.Errorf("migrate db: %v", err)
+	}
+
+	clientSwagger, err := clientv1.GetSwagger()
+	if err != nil {
+		return fmt.Errorf("get swagger: %v", err)
+	}
+
 	srvDebug, err := serverdebug.New(
 		serverdebug.NewOptions(
 			cfg.Servers.Debug.Addr,
+			clientSwagger,
 			serverdebug.WithLvlSetter(setLevel)),
 	)
 	if err != nil {
@@ -67,6 +95,9 @@ func run() (errReturned error) {
 		cfg.Servers.Client.RequiredAccess.Role,
 		cfg.Servers.Client.RequiredAccess.Resource,
 		cfg.Clients.Keycloak,
+		store.NewDatabase(psqlClient),
+		cfg.Global.IsProduction(),
+		clientSwagger,
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)
