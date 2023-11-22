@@ -90,4 +90,8 @@ components:
     ErrorCode:
       type: integer
       description: contains HTTP error codes and specific business logic error codes (the last must be >= 1000).
+      enum:
+        - 5000
+      x-enum-varnames:
+        - ErrorManagerCannotTakeMoreProblems
       minimum: 400
