@@ -13,6 +13,7 @@ import (
 	managerload "github.com/keepcalmist/chat-service/internal/services/manager-load"
 	managerpool "github.com/keepcalmist/chat-service/internal/services/manager-pool"
 	canreceiveproblems "github.com/keepcalmist/chat-service/internal/usecases/manager/can-receive-problems"
+	freehands "github.com/keepcalmist/chat-service/internal/usecases/manager/free-hands"
 )
 
 const nameServerManager = "server-manager"
@@ -41,12 +42,21 @@ func initServerManager(
 		return nil, fmt.Errorf("init keycloak client: %v", err)
 	}
 
-	useCaseCanRecievProblem, err := canreceiveproblems.New(canreceiveproblems.NewOptions(managerLoadService, managerPoolService))
+	useCaseCanReceiveProblem, err := canreceiveproblems.New(
+		canreceiveproblems.NewOptions(managerLoadService, managerPoolService),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("init usecase can reciev problem: %v", err)
 	}
 
-	handlers, err := managerv1.NewHandlers(managerv1.NewOptions(useCaseCanRecievProblem))
+	useCaseFreeHands, err := freehands.New(freehands.NewOptions(managerLoadService, managerPoolService))
+	if err != nil {
+		return nil, fmt.Errorf("init usecase free hands: %v", err)
+	}
+
+	handlers, err := managerv1.NewHandlers(
+		managerv1.NewOptions(useCaseCanReceiveProblem, useCaseFreeHands),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("init handlers: %v", err)
 	}

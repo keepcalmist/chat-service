@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/keepcalmist/chat-service/internal/testingh"
 	"github.com/keepcalmist/chat-service/internal/types"
 	freehands "github.com/keepcalmist/chat-service/internal/usecases/manager/free-hands"
 	freehandsmocks "github.com/keepcalmist/chat-service/internal/usecases/manager/free-hands/mocks"
-	"github.com/stretchr/testify/suite"
 )
 
 type UseCaseSuite struct {
@@ -105,7 +106,7 @@ func (s *UseCaseSuite) TestUseCaseHandle() {
 			ID:        types.NewRequestID(),
 			ManagerID: managerID,
 		})
-		s.Require().ErrorIs(err, freehands.ErrorManagerCannotTakeMoreProblems)
+		s.Require().ErrorIs(err, freehands.ErrManagerCannotTakeMoreProblems)
 	})
 
 	s.Run("successful case", func() {

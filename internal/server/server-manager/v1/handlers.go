@@ -4,6 +4,7 @@ import (
 	"context"
 
 	canreceiveproblems "github.com/keepcalmist/chat-service/internal/usecases/manager/can-receive-problems"
+	freehands "github.com/keepcalmist/chat-service/internal/usecases/manager/free-hands"
 )
 
 var _ ServerInterface = (*Handlers)(nil)
@@ -14,9 +15,14 @@ type canReceiveProblemsUseCase interface {
 	Handle(ctx context.Context, req canreceiveproblems.Request) (canreceiveproblems.Response, error)
 }
 
+type freeHandsUseCase interface {
+	Handle(ctx context.Context, req freehands.Request) error
+}
+
 //go:generate options-gen -out-filename=handlers_options.gen.go -from-struct=Options
 type Options struct {
 	canReceiveProblemsUseCase canReceiveProblemsUseCase `option:"mandatory" validate:"required"`
+	freeHandsUseCase          freeHandsUseCase          `option:"mandatory" validate:"required"`
 }
 
 type Handlers struct {

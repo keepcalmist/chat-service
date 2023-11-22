@@ -8,9 +8,7 @@ import (
 	"github.com/keepcalmist/chat-service/internal/types"
 )
 
-var (
-	ErrorManagerCannotTakeMoreProblems = errors.New("manager cannot take more problems")
-)
+var ErrManagerCannotTakeMoreProblems = errors.New("manager cannot take more problems")
 
 //go:generate mockgen -source=$GOFILE -destination=mocks/usecase_mock.gen.go -package=freehandsmocks
 
@@ -52,7 +50,7 @@ func (u UseCase) Handle(ctx context.Context, req Request) error {
 	}
 
 	if !canTakeProblem {
-		return ErrorManagerCannotTakeMoreProblems
+		return ErrManagerCannotTakeMoreProblems
 	}
 
 	return u.managerPool.Put(ctx, req.ManagerID)
