@@ -5,8 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
-
+	"github.com/keepcalmist/chat-service/internal/store"
 	"github.com/keepcalmist/chat-service/internal/store/chat"
 	"github.com/keepcalmist/chat-service/internal/store/message"
 	"github.com/keepcalmist/chat-service/internal/types"
@@ -23,8 +22,8 @@ var (
 )
 
 type Cursor struct {
-	LastCreatedAt time.Time `json:"LastCreatedAt,omitempty"` //nolint:tagliatelle
-	PageSize      int       `json:"PageSize,omitempty"`      //nolint:tagliatelle
+	LastCreatedAt time.Time
+	PageSize      int
 }
 
 // GetClientChatMessages returns Nth page of messages in the chat for client side.
@@ -63,9 +62,8 @@ func (r *Repo) GetClientChatMessages(
 			message.HasChatWith(chat.ClientIDEQ(clientID)),
 			message.IsVisibleForClientEQ(true),
 		).Unique(false).
-		Order(message.ByCreatedAt(func(options *sql.OrderTermOptions) {
-			options.Desc = true
-		})).Limit(size + 1)
+		Order(store.Desc(message.FieldCreatedAt)).
+		Limit(size + 1)
 	if createdAt != nil {
 		qb = qb.Where(message.CreatedAtLT(*createdAt))
 	}

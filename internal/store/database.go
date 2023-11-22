@@ -5,6 +5,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -38,7 +39,7 @@ func (db *Database) RunInTx(ctx context.Context, f func(context.Context) error) 
 		if v := recover(); v != nil {
 			err := tx.Rollback()
 			if err != nil {
-				panic(fmt.Errorf("tx error: %s\nrollback error: %w", v, err))
+				log.Println("rollback transaction error:", err)
 			}
 			panic(v)
 		}
