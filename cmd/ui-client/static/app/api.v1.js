@@ -25,7 +25,6 @@ class APIClient {
             },
             body: JSON.stringify(request),
         });
-        console.log(response)
         return await this.extractData(response);
     }
 
