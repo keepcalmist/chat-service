@@ -40,6 +40,7 @@ vars:
     RequestID
     JobID
     FailedJobID
+    EventID
   TYPES_PKG: types
   TYPES_DST: ./internal/types/types.gen.go
   ENT_SCHEMA: ./internal/store/schema
