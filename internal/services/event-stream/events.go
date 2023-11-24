@@ -32,7 +32,7 @@ type NewMessageEvent struct {
 	UserID      types.UserID    `validate:"required"`
 	CreatedAt   time.Time       `validate:"required"`
 	MessageBody string          `validate:"required"`
-	IsChecked   bool
+	IsService   bool
 }
 
 func (e NewMessageEvent) Validate() error {
@@ -47,7 +47,7 @@ func NewNewMessageEvent(
 	userID types.UserID,
 	createdAt time.Time,
 	messageBody string,
-	IsChecked bool,
+	IsService bool,
 ) *NewMessageEvent {
 	return &NewMessageEvent{
 		ID:          id,
@@ -57,6 +57,6 @@ func NewNewMessageEvent(
 		UserID:      userID,
 		CreatedAt:   createdAt,
 		MessageBody: messageBody,
-		IsChecked:   IsChecked,
+		IsService:   IsService,
 	}
 }
