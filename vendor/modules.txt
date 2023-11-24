@@ -136,6 +136,9 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
+# github.com/imkira/go-observer/v2 v2.0.0-20230629064422-8e0b61f11f1b
+## explicit; go 1.18
+github.com/imkira/go-observer/v2
 # github.com/invopop/yaml v0.2.0
 ## explicit; go 1.14
 github.com/invopop/yaml
