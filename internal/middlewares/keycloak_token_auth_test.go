@@ -43,7 +43,7 @@ func (s *KeycloakTokenAuthSuite) SetupTest() {
 	s.ctrl = gomock.NewController(s.T())
 
 	s.introspector = middlewaresmocks.NewMockIntrospector(s.ctrl)
-	s.authMdlwr = middlewares.NewKeycloakTokenAuth(s.introspector, requiredResource, requiredRole)
+	s.authMdlwr = middlewares.NewKeycloakTokenAuth(s.introspector, requiredResource, requiredRole, false)
 
 	s.req = httptest.NewRequest(http.MethodPost, "/getHistory",
 		bytes.NewBufferString(`{"pageSize": 100, "cursor": ""}`))

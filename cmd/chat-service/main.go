@@ -25,6 +25,7 @@ import (
 	inmemmanagerpool "github.com/keepcalmist/chat-service/internal/services/manager-pool/in-mem"
 	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
 	"github.com/keepcalmist/chat-service/internal/store"
+	"github.com/keepcalmist/chat-service/pkg/shutdown"
 )
 
 var configPath = flag.String("config", "configs/config.toml", "Path to config file")
@@ -160,7 +161,8 @@ func run() (errReturned error) {
 
 	poolService := inmemmanagerpool.New()
 
-	outbox, err := initOutbox(cfg.Services, database, repoJobs, repoMsg, producer)
+	shutdownChan := shutdown.NewShutDown()
+	outboxService, err := initOutbox(cfg.Services, database, repoJobs, repoMsg, producer)
 	if err != nil {
 		return fmt.Errorf("init outbox: %v", err)
 	}
@@ -175,6 +177,8 @@ func run() (errReturned error) {
 		managerSwagger,
 		managerLoadService,
 		poolService,
+		shutdownChan,
+		cfg.Servers.Manager.SecWSProtocol,
 	)
 	if err != nil {
 		return fmt.Errorf("init manager server: %v", err)
@@ -192,7 +196,9 @@ func run() (errReturned error) {
 		repoChat,
 		repoMsg,
 		repoProblems,
-		outbox,
+		outboxService,
+		shutdownChan,
+		cfg.Servers.Manager.SecWSProtocol,
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)
@@ -203,7 +209,7 @@ func run() (errReturned error) {
 	eg.Go(func() error { return srvDebug.Run(ctx) })
 	eg.Go(func() error { return srvClient.Run(ctx) })
 	eg.Go(func() error { return srvManager.Run(ctx) })
-	eg.Go(func() error { return outbox.Run(ctx) })
+	eg.Go(func() error { return outboxService.Run(ctx) })
 	// Run services.
 	// Ждут своего часа.
 	// ...

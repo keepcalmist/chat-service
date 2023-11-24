@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -24,11 +25,35 @@ type Introspector interface {
 
 // NewKeycloakTokenAuth returns a middleware that implements "active" authentication:
 // each request is verified by the Keycloak server.
-func NewKeycloakTokenAuth(introspector Introspector, resource, role string) echo.MiddlewareFunc {
+func NewKeycloakTokenAuth(
+	introspector Introspector, resource, role string,
+	isWebSocketAuth bool,
+) echo.MiddlewareFunc {
+	var (
+		keyLookup  string
+		authScheme string
+	)
+
+	if isWebSocketAuth {
+		keyLookup = "header:Sec-WebSocket-Protocol"
+	} else {
+		keyLookup = "header:Authorization"
+		authScheme = "Bearer"
+	}
+
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		KeyLookup:  "header:Authorization",
-		AuthScheme: "Bearer",
+		KeyLookup:  keyLookup,
+		AuthScheme: authScheme,
 		Validator: func(tokenStr string, eCtx echo.Context) (bool, error) {
+			if isWebSocketAuth {
+				protocols := strings.Split(tokenStr, ", ")
+				if len(protocols) != 2 {
+					return false, errors.New("invalid number of protocols")
+				}
+
+				tokenStr = protocols[1]
+			}
+
 			token, err := introspector.IntrospectToken(eCtx.Request().Context(), tokenStr)
 			if err != nil {
 				return false, err

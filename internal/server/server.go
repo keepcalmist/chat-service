@@ -19,6 +19,7 @@ import (
 	"github.com/keepcalmist/chat-service/internal/server/server-client/errhandler"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	managerv1 "github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
+	"github.com/keepcalmist/chat-service/pkg/shutdown"
 )
 
 const (
@@ -28,6 +29,10 @@ const (
 
 type handlersToRegister interface {
 	clientv1.Handlers | managerv1.Handlers
+}
+
+type wsHandler interface {
+	Serve(eCtx echo.Context) error
 }
 
 //go:generate options-gen -out-filename=server_options.gen.go -from-struct=Options
@@ -40,11 +45,14 @@ type Options struct {
 	role         string                   `option:"mandatory" validate:"required"`
 	resource     string                   `option:"mandatory" validate:"required"`
 	isProduction bool                     `option:"mandatory"`
+	wsHandler    wsHandler                `option:"mandatory" validate:"required"`
+	wsShutdown   *shutdown.ShutDown       `option:"mandatory" validate:"required"`
 }
 
 type Server struct {
-	lg  *zap.Logger
-	srv *http.Server
+	lg         *zap.Logger
+	srv        *http.Server
+	wsShutdown *shutdown.ShutDown
 }
 
 func New[t handlersToRegister](opts Options, handlers t) (*Server, error) {
@@ -61,6 +69,7 @@ func New[t handlersToRegister](opts Options, handlers t) (*Server, error) {
 	}
 
 	e := echo.New()
+
 	e.HTTPErrorHandler = errHandle.Handle
 	e.Use(
 		middlewares.NewRecovery(opts.logger),
@@ -70,16 +79,20 @@ func New[t handlersToRegister](opts Options, handlers t) (*Server, error) {
 			AllowMethods: []string{http.MethodPost},
 		}),
 		middleware.BodyLimit("3K"),
-		middlewares.NewKeycloakTokenAuth(opts.introspector, opts.resource, opts.role),
 	)
 
-	v1 := e.Group("v1", oapimdlwr.OapiRequestValidatorWithOptions(opts.v1Swagger, &oapimdlwr.Options{
-		Options: openapi3filter.Options{
-			ExcludeRequestBody:  false,
-			ExcludeResponseBody: true,
-			AuthenticationFunc:  openapi3filter.NoopAuthenticationFunc,
-		},
-	}))
+	v1 := e.Group("v1",
+		middlewares.NewKeycloakTokenAuth(opts.introspector, opts.resource, opts.role, false),
+		oapimdlwr.OapiRequestValidatorWithOptions(opts.v1Swagger, &oapimdlwr.Options{
+			Options: openapi3filter.Options{
+				ExcludeRequestBody:  false,
+				ExcludeResponseBody: true,
+				AuthenticationFunc:  openapi3filter.NoopAuthenticationFunc,
+			},
+		}))
+
+	ws := e.Group("ws", middlewares.NewKeycloakTokenAuth(opts.introspector, opts.resource, opts.role, true))
+	ws.GET("", opts.wsHandler.Serve)
 
 	switch any(handlers).(type) {
 	case clientv1.Handlers:
@@ -97,6 +110,7 @@ func New[t handlersToRegister](opts Options, handlers t) (*Server, error) {
 			Handler:           e,
 			ReadHeaderTimeout: readHeaderTimeout,
 		},
+		wsShutdown: opts.wsShutdown,
 	}, nil
 }
 
@@ -108,6 +122,11 @@ func (s *Server) Run(ctx context.Context) error {
 
 		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer cancel()
+
+		err := s.wsShutdown.Close()
+		if err != nil {
+			s.lg.Error("failed to close ws shutdown", zap.Error(err))
+		}
 
 		return s.srv.Shutdown(ctx)
 	})
