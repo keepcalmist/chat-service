@@ -30,6 +30,7 @@ type Options struct {
 	lvlSetter     func(level zapcore.Level)
 	clientSchema  *openapi3.T `option:"mandatory" validate:"required"`
 	managerSchema *openapi3.T `option:"mandatory" validate:"required"`
+	eventsSchema  *openapi3.T `option:"mandatory" validate:"required"`
 }
 
 type Server struct {
@@ -70,12 +71,14 @@ func New(opts Options) (*Server, error) {
 	index.addPage("/debug/sentry", "Heap profile")
 	index.addPage("/schema/client", "Swagger schema for client")
 	index.addPage("/schema/manager", "Swagger schema for manager")
+	index.addPage("/schema/events", "Swagger schema for client's events")
 
 	// Обработка "/log/level"
 	e.PUT("/log/level", s.SetLogLvl)
 	e.GET("/debug/sentry", s.DebugSentry)
 	e.GET("/schema/client", s.ExposeSchema(opts.clientSchema))
 	e.GET("/schema/manager", s.ExposeSchema(opts.managerSchema))
+	e.GET("/schema/events", s.ExposeSchema(opts.eventsSchema))
 
 	// Обработка "/debug/pprof/" и связанных команд
 	pprof.Register(e)

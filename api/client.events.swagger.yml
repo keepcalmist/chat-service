@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  title: Bank Support Chat Client Events
+  version: v1
+
+servers:
+  - url: ws://localhost:8080/ws
+    description: Development server
+
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        eventId:
+          type: string
+          format: uuid
+          description: Идентификатор события.
+        eventType:
+          type: string
+          description: Тип события.
+        requestId:
+          type: string
+          format: uuid
+          description: Идентификатор запроса.
+        authorId:
+          type: string
+          format: uuid
+          description: Идентификатор автора события.
+        body:
+          type: string
+          description: Тело события.
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания события.
+        isService:
+          type: boolean
+          description: Является ли событие системным.
+        messageId:
+          type: string
+          format: uuid
+          description: Идентификатор сообщения.
