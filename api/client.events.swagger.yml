@@ -10,11 +10,13 @@ servers:
 components:
   schemas:
     Event:
-      type: object
       properties:
         eventId:
           type: string
           format: uuid
+          x-go-type: types.EventID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
           description: Идентификатор события.
         eventType:
           type: string
@@ -22,7 +24,25 @@ components:
         requestId:
           type: string
           format: uuid
+          x-go-type: types.RequestID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
           description: Идентификатор запроса.
+        messageId:
+          type: string
+          format: uuid
+          x-go-type: types.MessageID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
+          description: Идентификатор сообщения.
+      oneOf:
+        - $ref: "#/components/schemas/NewMessageEvent"
+        - $ref: "#/components/schemas/MessageSentEvent"
+        - $ref: "#/components/schemas/MessageBlockedEvent"
+
+    NewMessageEvent:
+      type: object
+      properties:
         authorId:
           type: string
           format: uuid
@@ -37,7 +57,9 @@ components:
         isService:
           type: boolean
           description: Является ли событие системным.
-        messageId:
-          type: string
-          format: uuid
-          description: Идентификатор сообщения.
+
+    MessageSentEvent:
+      type: object
+
+    MessageBlockedEvent:
+      type: object

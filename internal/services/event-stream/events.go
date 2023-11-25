@@ -19,9 +19,47 @@ func (*event) eventMarker() {}
 // and was sent to the manager. Two gray ticks.
 type MessageSentEvent struct {
 	event
+
+	ID        types.EventID   `validate:"required"`
+	RequestID types.RequestID `validate:"required"`
+	MessageID types.MessageID `validate:"required"`
 }
 
-func (e MessageSentEvent) Validate() error { return nil }
+func (e MessageSentEvent) Validate() error { return validator.Validator.Struct(e) }
+
+func NewMessageSentEvent(
+	id types.EventID,
+	requestID types.RequestID,
+	messageID types.MessageID,
+) *MessageSentEvent {
+	return &MessageSentEvent{
+		ID:        id,
+		RequestID: requestID,
+		MessageID: messageID,
+	}
+}
+
+type MessageBlockedEvent struct {
+	event
+
+	ID        types.EventID   `validate:"required"`
+	RequestID types.RequestID `validate:"required"`
+	MessageID types.MessageID `validate:"required"`
+}
+
+func (e MessageBlockedEvent) Validate() error { return validator.Validator.Struct(e) }
+
+func NewMessageBlockedEvent(
+	id types.EventID,
+	requestID types.RequestID,
+	messageID types.MessageID,
+) *MessageSentEvent {
+	return &MessageSentEvent{
+		ID:        id,
+		RequestID: requestID,
+		MessageID: messageID,
+	}
+}
 
 type NewMessageEvent struct {
 	event
@@ -35,9 +73,7 @@ type NewMessageEvent struct {
 	IsService   bool
 }
 
-func (e NewMessageEvent) Validate() error {
-	return validator.Validator.Struct(e)
-}
+func (e NewMessageEvent) Validate() error { return validator.Validator.Struct(e) }
 
 func NewNewMessageEvent(
 	id types.EventID,
