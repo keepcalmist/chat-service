@@ -18,7 +18,7 @@ vars:
     mvdan.cc/gofumpt@v0.4.0
     github.com/kazhuravlev/options-gen/cmd/options-gen@v0.28.3
     entgo.io/ent/cmd/ent@v0.12.4
-    github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0
+    github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.16.2
     github.com/golang/mock/mockgen@v1.6.0
     github.com/onsi/ginkgo/v2/ginkgo@v2.13.1
   DOCKER_COMPOSE_PATHS: |
@@ -191,7 +191,7 @@ tasks:
     cmds:
       - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package clientv1 -o ./internal/server/server-client/v1/server.gen.go --old-config-style ./api/client.v1.swagger.yml"
       - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package managerv1 -o ./internal/server/server-manager/v1/server.gen.go --old-config-style ./api/manager.v1.swagger.yml"
-      - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package clientevents -o ./internal/server/server-client/events/events.gen.go --old-config-style ./api/client.events.swagger.yml"
+      - "{{.TOOLS_DIR}}/oapi-codegen -generate types,spec -package clientevents -o ./internal/server/server-client/events/events.gen.go --old-config-style ./api/client.events.swagger.yml"
   ent:new:
 
     cmds:

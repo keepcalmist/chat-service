@@ -107,7 +107,7 @@ func (s *ServiceSuite) TestEventIsMultiplexedToStreams() {
 		case <-time.After(time.Second):
 			s.FailNow("lost events")
 		}
-		msgs = append(msgs, event.(*eventstream.NewMessageEvent).MessageBody)
+		msgs = append(msgs, event.(*eventstream.NewMessageEvent).Body)
 	}
 	s.ElementsMatch(<-expectedCh, msgs)
 }
@@ -249,7 +249,7 @@ func readNewMessageEvents(stream <-chan eventstream.Event, n int) <-chan []strin
 	var msgs []string // No preallocation, n can be negative.
 	go func() {
 		for ev := range stream {
-			msg := ev.(*eventstream.NewMessageEvent).MessageBody
+			msg := ev.(*eventstream.NewMessageEvent).Body
 			msgs = append(msgs, msg)
 			if n != -1 && len(msgs) == n {
 				break

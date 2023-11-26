@@ -6,10 +6,39 @@ info:
 servers:
   - url: ws://localhost:8080/ws
     description: Development server
+paths:
+  /stub:
+    get:
+      description: It uses for generating events. Otherwise it doesn't.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Event'
 
 components:
   schemas:
     Event:
+      oneOf:
+      - $ref: "#/components/schemas/MessageSentEvent"
+      - $ref: "#/components/schemas/MessageBlockedEvent"
+      - $ref: "#/components/schemas/NewMessageEvent"
+      discriminator:
+        propertyName: eventType
+        mapping:
+          MessageSentEvent: '#/components/schemas/MessageSentEvent'
+          MessageBlockedEvent: '#/components/schemas/MessageBlockedEvent'
+          NewMessageEvent: '#/components/schemas/NewMessageEvent'
+    AllEventsHaveFields:
+      type: object
+      required:
+        - eventId
+        - eventType
+        - requestId
+        - messageId
       properties:
         eventId:
           type: string
@@ -35,31 +64,96 @@ components:
           x-go-import:
             path: "github.com/keepcalmist/chat-service/internal/types"
           description: Идентификатор сообщения.
-      oneOf:
-        - $ref: "#/components/schemas/NewMessageEvent"
-        - $ref: "#/components/schemas/MessageSentEvent"
-        - $ref: "#/components/schemas/MessageBlockedEvent"
-
     NewMessageEvent:
-      type: object
-      properties:
-        authorId:
-          type: string
-          format: uuid
-          description: Идентификатор автора события.
-        body:
-          type: string
-          description: Тело события.
-        createdAt:
-          type: string
-          format: date-time
-          description: Дата создания события.
-        isService:
-          type: boolean
-          description: Является ли событие системным.
-
+      allOf:
+      - $ref: "#/components/schemas/AllEventsHaveFields"
+      - type: object
+        required:
+          - body
+          - createdAt
+          - isService
+        properties:
+          authorId:
+            type: string
+            format: uuid
+            x-go-type: types.UserID
+            x-go-import:
+              path: "github.com/keepcalmist/chat-service/internal/types"
+            description: Идентификатор автора события.
+          body:
+            type: string
+            description: Тело события.
+          createdAt:
+            type: string
+            format: date-time
+            description: Дата создания события.
+          isService:
+            type: boolean
+            description: Является ли событие системным.
     MessageSentEvent:
-      type: object
-
+      allOf:
+      - $ref: "#/components/schemas/AllEventsHaveFields"
+      - type: object
     MessageBlockedEvent:
-      type: object
+      allOf:
+      - $ref: "#/components/schemas/AllEventsHaveFields"
+      - type: object
+
+
+#    Event:
+#      properties:
+#        eventId:
+#          type: string
+#          format: uuid
+#          x-go-type: types.EventID
+#          x-go-import:
+#            path: "github.com/keepcalmist/chat-service/internal/types"
+#          description: Идентификатор события.
+#        eventType:
+#          type: string
+#          description: Тип события.
+#        requestId:
+#          type: string
+#          format: uuid
+#          x-go-type: types.RequestID
+#          x-go-import:
+#            path: "github.com/keepcalmist/chat-service/internal/types"
+#          description: Идентификатор запроса.
+#        messageId:
+#          type: string
+#          format: uuid
+#          x-go-type: types.MessageID
+#          x-go-import:
+#            path: "github.com/keepcalmist/chat-service/internal/types"
+#          description: Идентификатор сообщения.
+#      oneOf:
+#        - $ref: "#/components/schemas/NewMessageEvent"
+#        - $ref: "#/components/schemas/MessageSentEvent"
+#        - $ref: "#/components/schemas/MessageBlockedEvent"
+
+#    NewMessageEvent:
+#      type: object
+#      properties:
+#        authorId:
+#          type: string
+#          format: uuid
+#          description: Идентификатор автора события.
+#        body:
+#          type: string
+#          description: Тело события.
+#        createdAt:
+#          type: string
+#          format: date-time
+#          description: Дата создания события.
+#        isService:
+#          type: boolean
+#          description: Является ли событие системным.
+#
+#    MessageSentEvent:
+#      type: object
+#
+#    MessageBlockedEvent:
+#      type: object
+
+
+
