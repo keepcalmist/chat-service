@@ -22,6 +22,7 @@ import (
 	clientevents "github.com/keepcalmist/chat-service/internal/server/server-client/events"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	managerv1 "github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
+	inmemeventstream "github.com/keepcalmist/chat-service/internal/services/event-stream/in-mem"
 	managerload "github.com/keepcalmist/chat-service/internal/services/manager-load"
 	inmemmanagerpool "github.com/keepcalmist/chat-service/internal/services/manager-pool/in-mem"
 	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
@@ -168,7 +169,17 @@ func run() (errReturned error) {
 	poolService := inmemmanagerpool.New()
 
 	shutdownChan := shutdown.NewShutDown()
-	outboxService, err := initOutbox(cfg.Services, database, repoJobs, repoMsg, producer)
+
+	inmemStream := inmemeventstream.New()
+
+	outboxService, err := initOutbox(
+		cfg.Services,
+		database,
+		repoJobs,
+		repoMsg,
+		producer,
+		inmemStream,
+	)
 	if err != nil {
 		return fmt.Errorf("init outbox: %v", err)
 	}
@@ -205,6 +216,7 @@ func run() (errReturned error) {
 		outboxService,
 		shutdownChan,
 		cfg.Servers.Manager.SecWSProtocol,
+		inmemStream,
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)
@@ -216,9 +228,6 @@ func run() (errReturned error) {
 	eg.Go(func() error { return srvClient.Run(ctx) })
 	eg.Go(func() error { return srvManager.Run(ctx) })
 	eg.Go(func() error { return outboxService.Run(ctx) })
-	// Run services.
-	// Ждут своего часа.
-	// ...
 
 	if err = eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return fmt.Errorf("wait app stop: %v", err)

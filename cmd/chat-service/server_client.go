@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	eventstream "github.com/keepcalmist/chat-service/internal/services/event-stream"
 	"go.uber.org/zap"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -12,6 +13,7 @@ import (
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
 	"github.com/keepcalmist/chat-service/internal/server"
+	clientevents "github.com/keepcalmist/chat-service/internal/server/server-client/events"
 	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	"github.com/keepcalmist/chat-service/internal/services/outbox"
 	"github.com/keepcalmist/chat-service/internal/store"
@@ -38,12 +40,13 @@ func initServerClient(
 	outboxService *outbox.Service,
 	shutdownChan *shutdown.ShutDown,
 	secWsProtocol string,
+	service eventstream.EventStream,
 ) (*server.Server, error) {
 	wsHandler, err := websocketstream.NewHTTPHandler(
 		websocketstream.NewOptions(
 			zap.L(),
-			dummyEventStream{},
-			dummyAdapter{},
+			service,
+			clientevents.Adapter{},
 			websocketstream.JSONEventWriter{},
 			websocketstream.NewUpgrader(allowOrigins, secWsProtocol),
 			shutdownChan.Done(),

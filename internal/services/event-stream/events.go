@@ -19,9 +19,9 @@ func (*event) eventMarker() {}
 // and was sent to the manager. Two gray ticks.
 type MessageSentEvent struct {
 	event
-	EventID   types.EventID   `validate:"required" json:"eventId"`
-	RequestID types.RequestID `validate:"required" json:"requestId"`
-	MessageID types.MessageID `validate:"required" json:"messageId"`
+	EventID   types.EventID   `validate:"required"`
+	RequestID types.RequestID `validate:"required"`
+	MessageID types.MessageID `validate:"required"`
 }
 
 func (e MessageSentEvent) Validate() error { return validator.Validator.Struct(e) }
@@ -62,14 +62,14 @@ func NewMessageBlockedEvent(
 
 type NewMessageEvent struct {
 	event
-	EventID   types.EventID   `json:"eventId,omitempty"  validate:"required" `
-	RequestID types.RequestID `json:"requestId,omitempty"  validate:"required" `
-	ChatID    types.ChatID    `json:"chatId,omitempty"  validate:"required" `
-	MessageID types.MessageID `json:"messageId,omitempty"  validate:"required" `
-	AuthorID  types.UserID    `json:"authorId,omitempty"  validate:"required_without=IsService" `
-	CreatedAt time.Time       `json:"createdAt"  validate:"required" `
-	Body      string          `json:"body,omitempty"  validate:"required" `
-	IsService bool            `json:"isService"`
+	EventID   types.EventID   `validate:"required" `
+	RequestID types.RequestID `validate:"required" `
+	ChatID    types.ChatID    `validate:"required" `
+	MessageID types.MessageID `validate:"required" `
+	AuthorID  types.UserID    `validate:"required_without=IsService" `
+	CreatedAt time.Time       `validate:"required" `
+	Body      string          `validate:"required" `
+	IsService bool
 }
 
 func (e NewMessageEvent) Validate() error { return validator.Validator.Struct(e) }
