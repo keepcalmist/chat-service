@@ -37,12 +37,11 @@ func (s *Service) Close() error {
 }
 
 func (s *Service) Get(_ context.Context) (types.UserID, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	select {
 	case managerID := <-s.ch:
+		s.mu.Lock()
 		delete(s.contains, managerID)
+		s.mu.Unlock()
 		return managerID, nil
 	default:
 		return types.UserIDNil, managerpool.ErrNoAvailableManagers
@@ -64,15 +63,16 @@ func (s *Service) Put(_ context.Context, managerID types.UserID) error {
 
 func (s *Service) Contains(_ context.Context, managerID types.UserID) (bool, error) {
 	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	_, ok := s.contains[managerID]
+	s.mu.Unlock()
+
 	return ok, nil
 }
 
 func (s *Service) Size() int {
 	s.mu.Lock()
-	defer s.mu.Unlock()
+	length := len(s.contains)
+	s.mu.Unlock()
 
-	return len(s.contains)
+	return length
 }

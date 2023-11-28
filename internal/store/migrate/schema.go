@@ -41,8 +41,8 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "payload", Type: field.TypeString, Size: 2147483647},
 		{Name: "attempts", Type: field.TypeInt, Default: 0},
-		{Name: "available_at", Type: field.TypeTime, Nullable: true},
-		{Name: "reserved_until", Type: field.TypeTime, Nullable: true},
+		{Name: "available_at", Type: field.TypeTime},
+		{Name: "reserved_until", Type: field.TypeTime},
 		{Name: "created_at", Type: field.TypeTime},
 	}
 	// JobsTable holds the schema information for the "jobs" table.

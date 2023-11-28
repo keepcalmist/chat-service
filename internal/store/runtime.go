@@ -66,6 +66,14 @@ func init() {
 	job.DefaultAttempts = jobDescAttempts.Default.(int)
 	// job.AttemptsValidator is a validator for the "attempts" field. It is called by the builders before save.
 	job.AttemptsValidator = jobDescAttempts.Validators[0].(func(int) error)
+	// jobDescAvailableAt is the schema descriptor for available_at field.
+	jobDescAvailableAt := jobFields[4].Descriptor()
+	// job.DefaultAvailableAt holds the default value on creation for the available_at field.
+	job.DefaultAvailableAt = jobDescAvailableAt.Default.(func() time.Time)
+	// jobDescReservedUntil is the schema descriptor for reserved_until field.
+	jobDescReservedUntil := jobFields[5].Descriptor()
+	// job.DefaultReservedUntil holds the default value on creation for the reserved_until field.
+	job.DefaultReservedUntil = jobDescReservedUntil.Default.(func() time.Time)
 	// jobDescCreatedAt is the schema descriptor for created_at field.
 	jobDescCreatedAt := jobFields[6].Descriptor()
 	// job.DefaultCreatedAt holds the default value on creation for the created_at field.

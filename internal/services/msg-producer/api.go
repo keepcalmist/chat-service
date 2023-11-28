@@ -11,6 +11,13 @@ import (
 )
 
 type Message struct {
+	ID         types.MessageID
+	ChatID     types.ChatID
+	Body       string
+	FromClient bool
+}
+
+type transportMsg struct {
 	ID         types.MessageID `json:"id"`
 	ChatID     types.ChatID    `json:"chatId"`
 	Body       string          `json:"body"`
@@ -22,10 +29,11 @@ func (m Message) String() string {
 }
 
 func (s *Service) ProduceMessage(ctx context.Context, msg Message) error {
-	jsonData, err := json.Marshal(msg)
+	jsonData, err := json.Marshal(transportMsg(msg))
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
+
 	if s.cipher != nil {
 		nonce, err := s.nonceFactory(s.cipher.NonceSize())
 		if err != nil {

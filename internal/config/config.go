@@ -25,14 +25,14 @@ type ManagerLoad struct {
 type MsgProducer struct {
 	Brokers    []string `toml:"brokers" validate:"required,dive,hostname_port"`
 	Topic      string   `toml:"topic" validate:"required"`
-	BatchSize  int      `toml:"batch_size" validate:"required"`
+	BatchSize  int      `toml:"batch_size" validate:"required,min=1,max=100"`
 	EncryptKey string   `toml:"encrypt_key"`
 }
 
 type Outbox struct {
-	Workers    int           `toml:"workers" validate:"required"`
-	IdleTime   time.Duration `toml:"idle_time" validate:"required"`
-	ReserveFor time.Duration `toml:"reserve_for" validate:"required"`
+	Workers    int           `toml:"workers" validate:"required,min=1,max=100"`
+	IdleTime   time.Duration `toml:"idle_time" validate:"required,min=1s,max=10s"`
+	ReserveFor time.Duration `toml:"reserve_for" validate:"required,min=1s,max=10m"`
 }
 
 type GlobalConfig struct {

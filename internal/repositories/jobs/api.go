@@ -3,6 +3,7 @@ package jobsrepo
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -28,18 +29,18 @@ func (r *Repo) FindAndReserveJob(ctx context.Context, until time.Time) (Job, err
 			Unique(false).
 			Where(
 				job.And(
+					job.ReservedUntilLT(time.Now()),
 					job.AvailableAtLTE(time.Now()),
-					job.Or(
-						job.ReservedUntilIsNil(),
-						job.ReservedUntilLT(time.Now()),
-					),
 				),
 			).
 			Order(job.ByCreatedAt()).
 			ForUpdate(sql.WithLockAction(sql.SkipLocked)). // нет смысла ждать анлока записи, т.к. она уже выбрана
 			First(ctx)
 		if err != nil {
-			return err
+			if store.IsNotFound(err) {
+				return ErrNoJobs
+			}
+			return fmt.Errorf("find job err: %w", err)
 		}
 
 		j, err = j.Update().
@@ -47,7 +48,7 @@ func (r *Repo) FindAndReserveJob(ctx context.Context, until time.Time) (Job, err
 			SetReservedUntil(until).
 			Save(ctx)
 		if err != nil {
-			return err
+			return fmt.Errorf("update job err: %w", err)
 		}
 		retJob = Job{
 			ID:       j.ID,
@@ -59,11 +60,11 @@ func (r *Repo) FindAndReserveJob(ctx context.Context, until time.Time) (Job, err
 		return nil
 	})
 	if err != nil {
-		if store.IsNotFound(err) {
-			return Job{}, ErrNoJobs
+		if errors.Is(err, ErrNoJobs) {
+			return Job{}, fmt.Errorf("find and reserve job err: %w", ErrNoJobs)
 		}
 
-		return Job{}, err
+		return Job{}, fmt.Errorf("find and reserve job err: %w", err)
 	}
 
 	return retJob, nil
@@ -75,24 +76,31 @@ func (r *Repo) CreateJob(ctx context.Context, name, payload string, availableAt 
 		SetName(name).
 		SetPayload(payload).
 		SetAvailableAt(availableAt).
-		SetReservedUntil(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return types.JobIDNil, err
+		return types.JobIDNil, fmt.Errorf("create job err: %w", err)
 	}
 
 	return j.ID, nil
 }
 
 func (r *Repo) CreateFailedJob(ctx context.Context, name, payload, reason string) error {
-	return r.db.FailedJob(ctx).
+	if err := r.db.FailedJob(ctx).
 		Create().
 		SetName(name).
 		SetPayload(payload).
 		SetReason(reason).
-		Exec(ctx)
+		Exec(ctx); err != nil {
+		return fmt.Errorf("create failed job err: %w", err)
+	}
+
+	return nil
 }
 
 func (r *Repo) DeleteJob(ctx context.Context, jobID types.JobID) error {
-	return r.db.Job(ctx).DeleteOneID(jobID).Exec(ctx)
+	if err := r.db.Job(ctx).DeleteOneID(jobID).Exec(ctx); err != nil {
+		return fmt.Errorf("delete job err: %w", err)
+	}
+
+	return nil
 }
