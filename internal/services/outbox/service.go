@@ -60,7 +60,7 @@ func New(opts Options) (*Service, error) {
 
 func (s *Service) RegisterJob(job Job) error {
 	if _, ok := s.jobs[job.Name()]; ok {
-		return ErrJobAlreadyRegistered
+		return fmt.Errorf("%w: %s", ErrJobAlreadyRegistered, job.Name())
 	}
 	s.jobs[job.Name()] = job
 	return nil
@@ -74,38 +74,36 @@ func (s *Service) MustRegisterJob(job Job) {
 
 func (s *Service) Run(ctx context.Context) error {
 	wg := new(sync.WaitGroup)
-	s.logger.Info("starting worker", zap.Int("worker_id", s.workers))
 	for i := 0; i < s.workers; i++ {
 		wg.Add(1)
-		go s.startWorker(ctx, wg)
+
+		s.logger.Info("starting worker", zap.Int("worker_id", i))
+		go func() {
+			s.startWorker(ctx)
+			defer wg.Done()
+		}()
 	}
 	wg.Wait()
 
 	return nil
 }
 
-func (s *Service) startWorker(ctx context.Context, group *sync.WaitGroup) {
-	defer func() {
-		group.Done()
-	}()
-
+func (s *Service) startWorker(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			s.logger.Error("context done", zap.Error(ctx.Err()))
+			s.logger.Debug("context done")
 			return
 		default:
 			reservedJob, err := s.r.FindAndReserveJob(ctx, time.Now().Add(s.reserveFor))
 			if err != nil {
 				if errors.Is(err, jobsrepo.ErrNoJobs) {
 					s.logger.Info("sleeping", zap.Duration("idle_time", s.idleTime))
-					timer := time.NewTimer(s.idleTime)
 					select {
 					case <-ctx.Done():
 						s.logger.Error("context done", zap.Error(ctx.Err()))
 						return
-					case <-timer.C:
-						timer.Stop()
+					case <-time.After(s.idleTime):
 					}
 					continue
 				}
@@ -113,81 +111,94 @@ func (s *Service) startWorker(ctx context.Context, group *sync.WaitGroup) {
 				continue
 			}
 
-			err = s.t.RunInTx(ctx, func(ctx context.Context) error {
-				s.logger.Info("job found, start processing...", zap.String("job_id", reservedJob.ID.String()))
-				j, ok := s.jobs[reservedJob.Name]
-				if !ok || j == nil {
-					err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
-					if err != nil {
-						s.logger.Error("failed to create failed job", zap.Error(err),
-							zap.String("job_id", reservedJob.ID.String()))
-						return err
-					}
+			s.logger.Info("job found, start processing...", zap.String("job_id", reservedJob.ID.String()))
 
-					return nil
-				}
-
-				if reservedJob.Attempts > j.MaxAttempts() {
-					err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
-					if err != nil {
-						s.logger.Error("failed to create failed job", zap.Error(err),
-							zap.String("job_id", reservedJob.ID.String()))
-						return err
-					}
-					return nil
-				}
-
-				ctxWithCancel, cancel := context.WithTimeout(ctx, j.ExecutionTimeout())
-				go func() {
-					select {
-					case <-ctx.Done():
-						cancel()
-					case <-ctxWithCancel.Done():
-						cancel()
-					}
-				}()
-
-				err = j.Handle(ctxWithCancel, reservedJob.Payload)
+			j, ok := s.jobs[reservedJob.Name]
+			if !ok {
+				err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
 				if err != nil {
-					s.logger.Error("failed to handle job", zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
-
-					if j.MaxAttempts() < reservedJob.Attempts {
-						err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
-						if err != nil {
-							s.logger.Error("failed to create failed job", zap.Error(err),
-								zap.String("job_id", reservedJob.ID.String()))
-							return err
-						}
-
-						return nil
-					}
-					return nil
+					s.logger.Error("failed to create failed job", zap.Error(err),
+						zap.String("job_id", reservedJob.ID.String()))
+					continue
 				}
 
-				if err := s.r.DeleteJob(ctx, reservedJob.ID); err != nil {
-					s.logger.With().Error("failed to delete job", zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
-					return err
+				continue
+			}
+
+			if reservedJob.Attempts > j.MaxAttempts() {
+				err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
+				if err != nil {
+					s.logger.Error("failed to create failed job", zap.Error(err),
+						zap.String("job_id", reservedJob.ID.String()))
+					continue
 				}
+				continue
+			}
 
-				s.logger.Info("job processed", zap.String("job_id", reservedJob.ID.String()))
-
-				return nil
-			})
+			err = s.handleJob(ctx, reservedJob, j)
 			if err != nil {
-				s.logger.Error("failed to run transaction", zap.Error(err))
+				s.logger.Error("failed to handle job", zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
+				if j.MaxAttempts() < reservedJob.Attempts {
+					err = s.CreateFailedAndDeleteMainJob(ctx, reservedJob)
+					if err != nil {
+						s.logger.Error("failed to create failed job", zap.Error(err),
+							zap.String("job_id", reservedJob.ID.String()))
+						continue
+					}
+
+					continue
+				}
 			}
 		}
 	}
 }
 
-func (s *Service) CreateFailedAndDeleteMainJob(ctx context.Context, job jobsrepo.Job) error {
-	if err := s.r.CreateFailedJob(ctx, job.Name, job.Payload, "max attempts exceeded"); err != nil {
-		return fmt.Errorf("failed to create failed job: %w", err)
+func (s *Service) handleJob(ctx context.Context, reservedJob jobsrepo.Job, j Job) error {
+	ctxWithCancel, cancel := context.WithTimeout(ctx, j.ExecutionTimeout())
+	defer cancel()
+
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- j.Handle(ctxWithCancel, reservedJob.Payload)
+	}()
+
+	select {
+	case <-ctxWithCancel.Done():
+		s.logger.Error("context done", zap.Error(ctxWithCancel.Err()))
+		return ctxWithCancel.Err()
+	case err := <-errChan:
+		if err != nil {
+			return err
+		}
 	}
 
-	if err := s.r.DeleteJob(ctx, job.ID); err != nil {
-		return fmt.Errorf("failed to delete job: %w", err)
+	if err := s.r.DeleteJob(ctx, reservedJob.ID); err != nil {
+		s.logger.With().Error("failed to delete job", zap.Error(err), zap.String("job_id", reservedJob.ID.String()))
+		return err
 	}
+
+	s.logger.Info("job successfully handled", zap.String("job_id", reservedJob.ID.String()))
+
+	return nil
+}
+
+func (s *Service) CreateFailedAndDeleteMainJob(ctx context.Context, job jobsrepo.Job) error {
+	err := s.t.RunInTx(ctx, func(ctx context.Context) error {
+		if err := s.r.CreateFailedJob(ctx, job.Name, job.Payload, "max attempts exceeded"); err != nil {
+			return fmt.Errorf("failed to create failed job: %w", err)
+		}
+
+		if err := s.r.DeleteJob(ctx, job.ID); err != nil {
+			return fmt.Errorf("failed to delete job: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to run transaction: %w", err)
+	}
+
+	s.logger.Info("job failed and deleted", zap.String("job_id", job.ID.String()))
 
 	return nil
 }

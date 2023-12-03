@@ -23,8 +23,8 @@ func (Job) Fields() []ent.Field {
 		field.Text("name").NotEmpty().Immutable(),
 		field.Text("payload").NotEmpty().Immutable(),
 		field.Int("attempts").Default(0).Max(jobMaxAttempts),
-		field.Time("available_at").Optional().Immutable(),
-		field.Time("reserved_until").Optional(),
+		field.Time("available_at").Default(time.Now).Immutable(),
+		field.Time("reserved_until").Default(time.Now),
 		field.Time("created_at").Immutable().Default(time.Now),
 	}
 }
