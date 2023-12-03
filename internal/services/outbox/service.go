@@ -77,7 +77,7 @@ func (s *Service) Run(ctx context.Context) error {
 	for i := 0; i < s.workers; i++ {
 		wg.Add(1)
 
-		s.logger.Info("starting worker", zap.Int("worker_id", s.workers))
+		s.logger.Info("starting worker", zap.Int("worker_id", i))
 		go func() {
 			s.startWorker(ctx)
 			defer wg.Done()
