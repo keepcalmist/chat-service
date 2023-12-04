@@ -18,6 +18,7 @@ import (
 
 const (
 	writeTimeout = time.Second
+	pongWait     = 10 * time.Second
 )
 
 type eventStream interface {
@@ -68,12 +69,6 @@ func (h *HTTPHandler) Serve(eCtx echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to subscribe to events: %w", err)
 	}
-	ws.SetPongHandler(nil)
-	defaultPong := ws.PongHandler()
-	ws.SetPongHandler(func(appData string) error {
-		h.logger.Debug("pong")
-		return defaultPong(appData)
-	})
 
 	eg, egCtx := errgroup.WithContext(ctx)
 
@@ -110,15 +105,17 @@ func (h *HTTPHandler) Serve(eCtx echo.Context) error {
 
 // readLoop listen PONGs.
 func (h *HTTPHandler) readLoop(_ context.Context, ws Websocket) error {
+	ws.SetPongHandler(func(appData string) error {
+		ws.SetReadDeadline(time.Now().Add(pongWait))
+		h.logger.Debug("pong")
+		return nil
+	})
+
 	for {
 		select {
 		case <-h.shutdownCh:
 			return nil
 		default:
-			err := ws.SetReadDeadline(time.Now().Add(time.Hour))
-			if err != nil {
-				return fmt.Errorf("failed to set read deadline: %w", err)
-			}
 			t, reader, err := ws.NextReader()
 			if err != nil {
 				return fmt.Errorf("failed to get next reader: %w", err)
