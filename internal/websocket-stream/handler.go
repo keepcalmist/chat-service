@@ -106,7 +106,10 @@ func (h *HTTPHandler) Serve(eCtx echo.Context) error {
 // readLoop listen PONGs.
 func (h *HTTPHandler) readLoop(_ context.Context, ws Websocket) error {
 	ws.SetPongHandler(func(appData string) error {
-		ws.SetReadDeadline(time.Now().Add(pongWait))
+		err := ws.SetReadDeadline(time.Now().Add(pongWait))
+		if err != nil {
+			return fmt.Errorf("SetReadDeadline: %w", err)
+		}
 		h.logger.Debug("pong")
 		return nil
 	})
