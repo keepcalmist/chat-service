@@ -39,10 +39,7 @@ vars:
     JobID
     MessageID
     ProblemID
-    UserID
     RequestID
-    JobID
-    FailedJobID
     UserID
 
   TYPES_PKG: types

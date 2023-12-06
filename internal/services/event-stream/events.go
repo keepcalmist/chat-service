@@ -52,8 +52,8 @@ func NewMessageBlockedEvent(
 	id types.EventID,
 	requestID types.RequestID,
 	messageID types.MessageID,
-) *MessageSentEvent {
-	return &MessageSentEvent{
+) *MessageBlockedEvent {
+	return &MessageBlockedEvent{
 		EventID:   id,
 		RequestID: requestID,
 		MessageID: messageID,

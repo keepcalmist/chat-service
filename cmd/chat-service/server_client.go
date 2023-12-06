@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	eventstream "github.com/keepcalmist/chat-service/internal/services/event-stream"
 	"go.uber.org/zap"
 
 	keycloakclient "github.com/keepcalmist/chat-service/internal/clients/keycloak"
@@ -15,6 +14,7 @@ import (
 	"github.com/keepcalmist/chat-service/internal/server"
 	clientevents "github.com/keepcalmist/chat-service/internal/server/server-client/events"
 	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	eventstream "github.com/keepcalmist/chat-service/internal/services/event-stream"
 	"github.com/keepcalmist/chat-service/internal/services/outbox"
 	"github.com/keepcalmist/chat-service/internal/store"
 	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
