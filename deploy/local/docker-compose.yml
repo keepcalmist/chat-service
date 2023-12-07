@@ -70,21 +70,22 @@ services:
       AFC_BROKER_ADDR: kafka:29092
       AFC_MESSAGES_TOPIC: "chat.messages"
       AFC_VERDICTS_TOPIC: "afc.msg-verdicts"
+      AFC_MSG_DECRYPTION_KEY: "51655468576D5A7134743777397A2443"
       AFC_VERDICTS_SIGN_PRIVATE_KEY: |
         -----BEGIN RSA PRIVATE KEY-----
-        MIICXQIBAAKBgQDVaE2fXyKjmTNOJaw/7k+qtJlIgyS+tFoJRXkoAUjqIcIp4K7U
-        smcSvDnhXvhv+HdyZSVMXubkz16dIuf2dk7oLWKRwa4Jab0hFgWN+h8Ba1+mXHzM
-        K1P/gtNiMOr4RRzjrQ9WOm6LfruFeIqFEfL/xCOe0uHqM3Wpf+wt5WjFuQIDAQAB
-        AoGBAKkvC3qxfVCdf+MQUsJMN7RpgKvP7C2T5V08SpTAkAGtybRRf8j3tmdP+cMF
-        +4cpP+jc7vjgs8Pp8mQ47BSkLmDIA4V+enCKwFw9lMi/PEjKSu5bcDYn/SCWtMR9
-        tp7qtTSNZpK6Ei1wcXnXd7NdVzRh8SgG++IyP9K5oEtsSXlBAkEA73wy7B7exFGV
-        D9UkHo/R3UdbE35whT2HLA2ozzMnQfGlW40ocp/6Abhc0NKZDyZQJJTHhEOa2VUr
-        LN8AxhN4JQJBAOQfvGIGh24hx/0yX3iOVpDvMpkJ8GQ5UA36+1Xgl1tnywcXeUhO
-        Fn3JTTr58+i7S1GP2zBnq7y9oN38JHyrqQUCQFquvNmMFu5ftgH4w2SPMPiJPIN1
-        LUZGthiIU5Oh2wutZN/144sD6LceCIdKN4r1BwPTEnmS39/L0D19c92NIcECQQC9
-        w9ycmpvMNJO9f0rF6Xn/ZMttXUQ4yyhaCN9Mx+CAq+3LP26nhDXXez4ggk6w2iTE
-        e2u1b3gAMKqCHr5naxDVAkAw/nkfpoi/dTU0hKsFtPXAZbVkhGI4liFtzdJd5R9O
-        X/IxeJPJYn1QCwvzqim5xOVX7DCYUuFApT6TEbeaNA3m
+        MIICXQIBAAKBgQClo5ZMkzqYf290prGoy3LWj9eAO1RID0LpQTODlFzqhL0pGvRp
+        GAZWGncd3+g0ADnJnK06hmre83jOfj47xziuVBkaVZmMBL/tuDxpShXM7fWBFccG
+        HNkj821Eojt54Rc7ivHXplXwiqVwguEIuF8VeSIbu/BF2lE3m26vhaJ7mQIDAQAB
+        AoGAJxYgPHetpxjDS0qet88yjTEqUEcvz0VSq8pIBq+28VxbatzCeh5COIVMQI96
+        svKusEW5lwrrIytfAZNGykJrvE5HmPxy8pZlI1gnUKC0iJJ9he6wtEwF70fcDb5Q
+        Vi+EZWHoVJe54YKraKD1eSj0opX0Qi5h8tnBjnJz1BUiK8UCQQDRJFbNiISkVlMZ
+        RkoY/vlaLstnrwq6c/CRqlGH16pkf88xJ+QPWXCNMQe+5XmhSUeVmAZX/2z7jpFa
+        cXJialybAkEAysARz/Fk+ySHz7NZPpxXrIFtH1vaAB0BfjYisDbgQf++v8NjV3I1
+        Qicy4LfFNopMg26rMGQa+SPQrivtaqB52wJBAJeeB4uzV62no1CkY11hozWczPsa
+        q+Vl3dZMKhUX5UA8Y+FX8P6rsWu6Sso6pAWoEUxCzP6IfuKThY6SxgDQ6NcCQCI0
+        74xmzMO2cRdwyeDPXddj6rY8t/YG7saNeaLDT2izLkqKO4t4YFXt6R6Swrol8SzH
+        kihS614XVdDc5mxz8LsCQQDFMEXiS0qY/xLksv8nhtm0o405mIO83Nc2j0Oi6Lhp
+        tXP9fPvBP2JmIWrn46Jdq/V1sEa8jouSfEDwwV9/+fNl
         -----END RSA PRIVATE KEY-----
 
 volumes:
