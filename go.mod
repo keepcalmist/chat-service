@@ -7,6 +7,7 @@ require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/TheZeroSlave/zapsentry v1.18.0
 	github.com/deepmap/oapi-codegen v1.15.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/getkin/kin-openapi v0.120.0
 	github.com/getsentry/sentry-go v0.20.0
 	github.com/go-playground/validator/v10 v10.14.1
