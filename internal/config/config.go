@@ -13,9 +13,10 @@ type Config struct {
 }
 
 type Services struct {
-	MsgProducer MsgProducer `toml:"msg_producer"`
-	Outbox      Outbox      `toml:"outbox"`
-	ManagerLoad ManagerLoad `toml:"manager_load"`
+	MsgProducer          MsgProducer          `toml:"msg_producer"`
+	Outbox               Outbox               `toml:"outbox"`
+	ManagerLoad          ManagerLoad          `toml:"manager_load"`
+	AfcVerdictsProcessor AfcVerdictsProcessor `toml:"afc_verdicts_processor"`
 }
 
 type ManagerLoad struct {
@@ -94,6 +95,17 @@ type Postgres struct {
 	Password string `toml:"password" validate:"required"`
 	Database string `toml:"database" validate:"required"`
 	Debug    bool   `toml:"debug" validate:""`
+}
+
+type AfcVerdictsProcessor struct {
+	backoffInitialInterval time.Duration `toml:"backoff_initial_interval" validate:"min=50ms,max=1s"`
+	backoffMaxElapsedTime  time.Duration `toml:"backoff_max_elapsed_time" validate:"min=500ms,max=1m"`
+
+	brokers         []string `toml:"brokers" validate:"min=1"`
+	consumers       int      `toml:"consumers" validate:"min=1,max=16"`
+	consumerGroup   string   `toml:"consumer_group" validate:"required"`
+	verdictsTopic   string   `toml:"verdicts_topic" validate:"required"`
+	verdictsSignKey string   `toml:"verdicts_sign_key"`
 }
 
 func (c GlobalConfig) IsProduction() bool {

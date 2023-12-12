@@ -43,12 +43,6 @@ database = "chat"
 username = "postgres"
 debug = true
 
-[services]
-[services.msg_producer]
-brokers = ["localhost:9092"]
-topic = "chat.messages"
-batch_size = 1
-encrypt_key = "" # Leave it blank to disable encryption.
 
 [services.outbox]
 workers = 2
@@ -57,3 +51,26 @@ reserve_for = "5m"
 
 [services.manager_load]
 max_problems_at_same_time = 5
+
+[services.afc_verdicts_processor]
+backoff_initial_interval = "100ms"
+backoff_max_elapsed_time = "5s"
+brokers = ["localhost:9092"]
+consumers = 3
+consumer_group = "afc-verdicts-processor"
+verdicts_topic = "afc.verdicts"
+verdicts_signing_public_key = """
+-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQClo5ZMkzqYf290prGoy3LWj9eA
+O1RID0LpQTODlFzqhL0pGvRpGAZWGncd3+g0ADnJnK06hmre83jOfj47xziuVBka
+VZmMBL/tuDxpShXM7fWBFccGHNkj821Eojt54Rc7ivHXplXwiqVwguEIuF8VeSIb
+u/BF2lE3m26vhaJ7mQIDAQAB
+-----END PUBLIC KEY-----
+"""
+
+
+[services.msg_producer]
+brokers = ["localhost:9092"]
+topic = "chat.messages"
+batch_size = 1
+encrypt_key = "51655468576D5A7134743777397A2443"

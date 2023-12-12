@@ -22,16 +22,15 @@ paths:
 components:
   schemas:
     Event:
+      required: [ eventType, eventId, requestId ]
       oneOf:
-      - $ref: "#/components/schemas/MessageSentEvent"
-      - $ref: "#/components/schemas/MessageBlockedEvent"
-      - $ref: "#/components/schemas/NewMessageEvent"
+        - $ref: "#/components/schemas/MessageSentEvent"
+        - $ref: "#/components/schemas/MessageBlockedEvent"
+        - $ref: "#/components/schemas/NewMessageEvent"
+        - $ref: "#/components/schemas/MessageId"
       discriminator:
         propertyName: eventType
-        mapping:
-          MessageSentEvent: '#/components/schemas/MessageSentEvent'
-          MessageBlockedEvent: '#/components/schemas/MessageBlockedEvent'
-          NewMessageEvent: '#/components/schemas/NewMessageEvent'
+
     AllEventsHaveFields:
       type: object
       required:
@@ -98,6 +97,12 @@ components:
       allOf:
       - $ref: "#/components/schemas/AllEventsHaveFields"
       - type: object
+
+    MessageId:
+      allOf:
+        - $ref: "#/components/schemas/AllEventsHaveFields"
+        - type: object
+
 
 
 #    Event:

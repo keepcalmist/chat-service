@@ -55,9 +55,16 @@ vars:
   MANAGER_V1_SRC: ./api/manager.v1.swagger.yml
   MANAGER_V1_DST: ./internal/server/server-manager/v1/server.gen.go
   MANAGER_V1_PKG: managerv1
+
+  CLIENT_EVENTS_SRC: ./api/client.events.swagger.yml
+  CLIENT_EVENTS_PKG: clientevents
+  CLIENT_EVENTS_DST: ./internal/server/server-client/events/events.gen.go
   ### E2E tests ###
   E2E_CLIENT_V1_DST: ./tests/e2e/api/client/v1/client.gen.go
   E2E_CLIENT_V1_PKG: apiclientv1
+
+  E2E_CLIENT_EVENTS_DST: ./tests/e2e/api/client/events/events.gen.go
+  E2E_CLIENT_EVENTS_PKG: apiclientevents
 
 
 tasks:
@@ -192,12 +199,13 @@ tasks:
     cmds:
       - echo "[E2E] Generate client API..."
       - "{{.TOOLS_DIR}}/oapi-codegen --old-config-style -generate types,client -package {{.E2E_CLIENT_V1_PKG}} {{.CLIENT_V1_SRC}} > {{.E2E_CLIENT_V1_DST}}"
+      - "{{.TOOLS_DIR}}/oapi-codegen --old-config-style -generate types,client -package {{.E2E_CLIENT_EVENTS_PKG}} {{.CLIENT_EVENTS_SRC}} > {{.E2E_CLIENT_EVENTS_DST}}"
 
   gen:api:
     cmds:
       - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package {{.CLIENT_V1_PKG}} -o {{.CLIENT_V1_DST}} --old-config-style {{.CLIENT_V1_SRC}}"
       - "{{.TOOLS_DIR}}/oapi-codegen -generate types,server,spec -package {{.MANAGER_V1_PKG}} -o {{.MANAGER_V1_DST}} --old-config-style {{.MANAGER_V1_SRC}}"
-      - "{{.TOOLS_DIR}}/oapi-codegen -generate types,spec -package clientevents -o ./internal/server/server-client/events/events.gen.go --old-config-style ./api/client.events.swagger.yml"
+      - "{{.TOOLS_DIR}}/oapi-codegen -generate types,spec -package {{.CLIENT_EVENTS_PKG}} -o {{.CLIENT_EVENTS_DST}} --old-config-style {{.CLIENT_EVENTS_SRC}}"
   ent:new:
 
     cmds:
