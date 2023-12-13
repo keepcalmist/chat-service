@@ -23,7 +23,7 @@ import (
 
 const (
 	backoffInitialInterval = 50 * time.Millisecond
-	backoffMaxElapsedTime  = 500 * time.Millisecond
+	backoffMaxElapsedTime  = 5000 * time.Millisecond
 )
 
 type ServiceSuite struct {

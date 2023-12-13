@@ -167,6 +167,9 @@ func (h *HTTPHandler) writeLoop(_ context.Context, ws Websocket, events <-chan e
 			if err != nil {
 				return fmt.Errorf("failed to write event: %w", err)
 			}
+
+			h.logger.Info("event written", zap.Any("event", adaptedEvent))
+
 			ticker.Reset(h.pingPeriod)
 		case <-ticker.C:
 			h.logger.Debug("ping")

@@ -54,23 +54,24 @@ func unmarshalVerdictWithKey(pubKey *rsa.PublicKey, data []byte) (*verdict, erro
 }
 
 func unmarshalVerdictFromClaims(data jwt.MapClaims) (*verdict, error) {
-	v := new(verdict)
-	chatID, ok := data["chatId"]
+	value, ok := data["chatId"]
 	if !ok {
 		return nil, fmt.Errorf("chatId is invalid")
 	}
-	v.ChatID, ok = chatID.(types.ChatID)
-	if !ok || v.ChatID == types.ChatIDNil {
+
+	chatID := &types.ChatID{}
+	err := chatID.Scan(value)
+	if err != nil || chatID.IsZero() {
 		return nil, fmt.Errorf("chatId is invalid")
 	}
 
-	messageID, ok := data["messageId"]
+	value, ok = data["messageId"]
 	if !ok {
 		return nil, fmt.Errorf("messageId is invalid")
 	}
-
-	v.MessageID, ok = messageID.(types.MessageID)
-	if !ok || v.MessageID == types.MessageIDNil {
+	messageID := &types.MessageID{}
+	err = messageID.Scan(value)
+	if err != nil || messageID.IsZero() {
 		return nil, fmt.Errorf("messageId is invalid")
 	}
 
@@ -78,17 +79,22 @@ func unmarshalVerdictFromClaims(data jwt.MapClaims) (*verdict, error) {
 	if !ok {
 		return nil, fmt.Errorf("status is invalid")
 	}
-	v.Status, ok = status.(VerdictStatus)
+
+	transformedStatus, ok := status.(string)
 	if !ok {
 		return nil, fmt.Errorf("status is invalid")
 	}
 
-	return v, nil
+	return &verdict{
+		ChatID:    *chatID,
+		MessageID: *messageID,
+		Status:    VerdictStatus(transformedStatus),
+	}, nil
 }
 
 func unmarshalVerdictFromJSON(data []byte) (*verdict, error) {
-	var v *verdict
-	if err := json.Unmarshal(data, v); err != nil {
+	var v verdict
+	if err := json.Unmarshal(data, &v); err != nil {
 		return nil, fmt.Errorf("unmarshal verdict: %w", err)
 	}
 
@@ -96,5 +102,5 @@ func unmarshalVerdictFromJSON(data []byte) (*verdict, error) {
 		return nil, fmt.Errorf("validate verdict: %w", err)
 	}
 
-	return v, nil
+	return &v, nil
 }

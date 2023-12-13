@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/segmentio/kafka-go"
-	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -121,47 +121,47 @@ func (s *Service) runConsumer(ctx context.Context) error {
 
 		msg, err := consumer.FetchMessage(ctx)
 		if err != nil {
+			if errors.Is(err, io.EOF) || errors.Is(err, context.Canceled) {
+				s.logger.Warn("stopping afc_verdicts_processor", zap.Error(err))
+				return nil
+			}
+
 			return fmt.Errorf("failed to fetch message: %w", err)
 		}
 
-		var retryErr error
+		s.logger.Info("processing message", zap.String("message_id", string(msg.Key)))
 
-		retry := func() {
-			ticker := backoff.NewTicker(exponentialBackOff)
-			defer ticker.Stop()
-
-			for range ticker.C {
-				processingErr := s.processMessage(ctx, msg)
-				if processingErr != nil {
-					retryErr = multierr.Append(retryErr, processingErr)
-					if errors.Is(err, errConst) {
-						s.logger.Error("failed to processMessage message", zap.Error(processingErr))
-						break
-					}
-
+		retry := func() error {
+			processingErr := s.processMessage(ctx, msg)
+			if processingErr != nil {
+				if errors.Is(processingErr, errConst) {
 					s.logger.Error("failed to processMessage message", zap.Error(processingErr))
-					continue
+					return &backoff.PermanentError{Err: processingErr}
 				}
 
-				break
+				s.logger.Error("failed to processMessage message", zap.Error(processingErr))
+
+				return processingErr
 			}
+			return nil
 		}
 
-		retry()
-
-		if retryErr != nil {
-			dlqMsg := msg
-
-			dlqMsg.Headers = append(msg.Headers, kafka.Header{
-				Key:   "LAST_ERROR",
-				Value: []byte(retryErr.Error()),
-			})
-			dlqMsg.Headers = append(msg.Headers, kafka.Header{
-				Key:   "ORIGINAL_PARTITION",
-				Value: []byte(strconv.Itoa(msg.Partition)),
-			})
-
-			if err := s.dlqWriter.WriteMessages(ctx, dlqMsg); err != nil {
+		err = backoff.Retry(retry, exponentialBackOff)
+		if err != nil {
+			if err := s.dlqWriter.WriteMessages(ctx, kafka.Message{
+				Key:   msg.Key,
+				Value: msg.Value,
+				Headers: append(msg.Headers, []kafka.Header{
+					{
+						Key:   "LAST_ERROR",
+						Value: []byte(err.Error()),
+					},
+					{
+						Key:   "ORIGINAL_PARTITION",
+						Value: []byte(strconv.Itoa(msg.Partition)),
+					},
+				}...),
+			}); err != nil {
 				return fmt.Errorf("failed to write to dlq: %w", err)
 			}
 		}

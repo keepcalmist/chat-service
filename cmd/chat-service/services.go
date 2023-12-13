@@ -9,6 +9,8 @@ import (
 	eventstream "github.com/keepcalmist/chat-service/internal/services/event-stream"
 	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
 	"github.com/keepcalmist/chat-service/internal/services/outbox"
+	clientmessageblockedjob "github.com/keepcalmist/chat-service/internal/services/outbox/jobs/client-message-blocked"
+	clientmessagesentjob "github.com/keepcalmist/chat-service/internal/services/outbox/jobs/client-message-sent"
 	sendclientmessagejob "github.com/keepcalmist/chat-service/internal/services/outbox/jobs/send-client-message"
 	"github.com/keepcalmist/chat-service/internal/store"
 )
@@ -37,9 +39,29 @@ func initOutbox(
 		return nil, fmt.Errorf("init send client message job: %v", err)
 	}
 
+	clientMessageSentJob, err := clientmessagesentjob.New(clientmessagesentjob.NewOptions(repoMsg, stream))
+	if err != nil {
+		return nil, fmt.Errorf("init client message sent job: %v", err)
+	}
+
+	clientMessageBlockedJob, err := clientmessageblockedjob.New(clientmessageblockedjob.NewOptions(repoMsg, stream))
+	if err != nil {
+		return nil, fmt.Errorf("init client message blocked job: %v", err)
+	}
+
 	err = outboxService.RegisterJob(sendClientMsgJob)
 	if err != nil {
 		return nil, fmt.Errorf("register send client message job: %v", err)
+	}
+
+	err = outboxService.RegisterJob(clientMessageSentJob)
+	if err != nil {
+		return nil, fmt.Errorf("register client send message job: %v", err)
+	}
+
+	err = outboxService.RegisterJob(clientMessageBlockedJob)
+	if err != nil {
+		return nil, fmt.Errorf("register client blocked message job: %v", err)
 	}
 
 	return outboxService, nil
