@@ -95,3 +95,12 @@ func NewNewMessageEvent(
 		IsService: IsService,
 	}
 }
+
+type MessageID struct {
+	event
+	EventID   types.EventID   `validate:"required" `
+	RequestID types.RequestID `validate:"required" `
+	MessageID types.MessageID `validate:"required" `
+}
+
+func (e MessageID) Validate() error { return validator.Validator.Struct(e) }

@@ -28,44 +28,16 @@ components:
         - $ref: "#/components/schemas/MessageBlockedEvent"
         - $ref: "#/components/schemas/NewMessageEvent"
         - $ref: "#/components/schemas/MessageId"
-      discriminator:
-        propertyName: eventType
-
-    AllEventsHaveFields:
-      type: object
-      required:
-        - eventId
-        - eventType
-        - requestId
-        - messageId
       properties:
-        eventId:
-          type: string
-          format: uuid
-          x-go-type: types.EventID
-          x-go-import:
-            path: "github.com/keepcalmist/chat-service/internal/types"
-          description: Идентификатор события.
         eventType:
           type: string
           description: Тип события.
-        requestId:
-          type: string
-          format: uuid
-          x-go-type: types.RequestID
-          x-go-import:
-            path: "github.com/keepcalmist/chat-service/internal/types"
-          description: Идентификатор запроса.
-        messageId:
-          type: string
-          format: uuid
-          x-go-type: types.MessageID
-          x-go-import:
-            path: "github.com/keepcalmist/chat-service/internal/types"
-          description: Идентификатор сообщения.
+      discriminator:
+        propertyName: eventType
+
     NewMessageEvent:
       allOf:
-      - $ref: "#/components/schemas/AllEventsHaveFields"
+      - $ref: "#/components/schemas/MessageId"
       - type: object
         required:
           - body
@@ -89,76 +61,41 @@ components:
           isService:
             type: boolean
             description: Является ли событие системным.
+
     MessageSentEvent:
-      allOf:
-      - $ref: "#/components/schemas/AllEventsHaveFields"
-      - type: object
+      $ref: "#/components/schemas/MessageId"
+
     MessageBlockedEvent:
-      allOf:
-      - $ref: "#/components/schemas/AllEventsHaveFields"
-      - type: object
+      $ref: "#/components/schemas/MessageId"
 
     MessageId:
-      allOf:
-        - $ref: "#/components/schemas/AllEventsHaveFields"
-        - type: object
-
-
-
-#    Event:
-#      properties:
-#        eventId:
-#          type: string
-#          format: uuid
-#          x-go-type: types.EventID
-#          x-go-import:
-#            path: "github.com/keepcalmist/chat-service/internal/types"
-#          description: Идентификатор события.
-#        eventType:
-#          type: string
-#          description: Тип события.
-#        requestId:
-#          type: string
-#          format: uuid
-#          x-go-type: types.RequestID
-#          x-go-import:
-#            path: "github.com/keepcalmist/chat-service/internal/types"
-#          description: Идентификатор запроса.
-#        messageId:
-#          type: string
-#          format: uuid
-#          x-go-type: types.MessageID
-#          x-go-import:
-#            path: "github.com/keepcalmist/chat-service/internal/types"
-#          description: Идентификатор сообщения.
-#      oneOf:
-#        - $ref: "#/components/schemas/NewMessageEvent"
-#        - $ref: "#/components/schemas/MessageSentEvent"
-#        - $ref: "#/components/schemas/MessageBlockedEvent"
-
-#    NewMessageEvent:
-#      type: object
-#      properties:
-#        authorId:
-#          type: string
-#          format: uuid
-#          description: Идентификатор автора события.
-#        body:
-#          type: string
-#          description: Тело события.
-#        createdAt:
-#          type: string
-#          format: date-time
-#          description: Дата создания события.
-#        isService:
-#          type: boolean
-#          description: Является ли событие системным.
-#
-#    MessageSentEvent:
-#      type: object
-#
-#    MessageBlockedEvent:
-#      type: object
+      type: object
+      required:
+        - eventId
+        - requestId
+        - messageId
+      properties:
+        eventId:
+          type: string
+          format: uuid
+          x-go-type: types.EventID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
+          description: Идентификатор события.
+        requestId:
+          type: string
+          format: uuid
+          x-go-type: types.RequestID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
+          description: Идентификатор запроса.
+        messageId:
+          type: string
+          format: uuid
+          x-go-type: types.MessageID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
+          description: Идентификатор сообщения.
 
 
 

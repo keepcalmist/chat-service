@@ -20,48 +20,20 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
-// AllEventsHaveFields defines model for AllEventsHaveFields.
-type AllEventsHaveFields struct {
-	// EventId Идентификатор события.
-	EventId types.EventID `json:"eventId"`
-
-	// EventType Тип события.
-	EventType string `json:"eventType"`
-
-	// MessageId Идентификатор сообщения.
-	MessageId types.MessageID `json:"messageId"`
-
-	// RequestId Идентификатор запроса.
-	RequestId types.RequestID `json:"requestId"`
-}
-
 // Event defines model for Event.
 type Event struct {
-	union json.RawMessage
+	// EventType Тип события.
+	EventType string `json:"eventType"`
+	union     json.RawMessage
 }
 
 // MessageBlockedEvent defines model for MessageBlockedEvent.
-type MessageBlockedEvent struct {
-	// EventId Идентификатор события.
-	EventId types.EventID `json:"eventId"`
-
-	// EventType Тип события.
-	EventType string `json:"eventType"`
-
-	// MessageId Идентификатор сообщения.
-	MessageId types.MessageID `json:"messageId"`
-
-	// RequestId Идентификатор запроса.
-	RequestId types.RequestID `json:"requestId"`
-}
+type MessageBlockedEvent = MessageId
 
 // MessageId defines model for MessageId.
 type MessageId struct {
 	// EventId Идентификатор события.
 	EventId types.EventID `json:"eventId"`
-
-	// EventType Тип события.
-	EventType string `json:"eventType"`
 
 	// MessageId Идентификатор сообщения.
 	MessageId types.MessageID `json:"messageId"`
@@ -71,19 +43,7 @@ type MessageId struct {
 }
 
 // MessageSentEvent defines model for MessageSentEvent.
-type MessageSentEvent struct {
-	// EventId Идентификатор события.
-	EventId types.EventID `json:"eventId"`
-
-	// EventType Тип события.
-	EventType string `json:"eventType"`
-
-	// MessageId Идентификатор сообщения.
-	MessageId types.MessageID `json:"messageId"`
-
-	// RequestId Идентификатор запроса.
-	RequestId types.RequestID `json:"requestId"`
-}
+type MessageSentEvent = MessageId
 
 // NewMessageEvent defines model for NewMessageEvent.
 type NewMessageEvent struct {
@@ -98,9 +58,6 @@ type NewMessageEvent struct {
 
 	// EventId Идентификатор события.
 	EventId types.EventID `json:"eventId"`
-
-	// EventType Тип события.
-	EventType string `json:"eventType"`
 
 	// IsService Является ли событие системным.
 	IsService bool `json:"isService"`
@@ -121,7 +78,8 @@ func (t Event) AsMessageSentEvent() (MessageSentEvent, error) {
 
 // FromMessageSentEvent overwrites any union data inside the Event as the provided MessageSentEvent
 func (t *Event) FromMessageSentEvent(v MessageSentEvent) error {
-	v.EventType = "MessageSentEvent"
+	t.EventType = "MessageSentEvent"
+
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
@@ -129,7 +87,8 @@ func (t *Event) FromMessageSentEvent(v MessageSentEvent) error {
 
 // MergeMessageSentEvent performs a merge with any union data inside the Event, using the provided MessageSentEvent
 func (t *Event) MergeMessageSentEvent(v MessageSentEvent) error {
-	v.EventType = "MessageSentEvent"
+	t.EventType = "MessageSentEvent"
+
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -149,7 +108,8 @@ func (t Event) AsMessageBlockedEvent() (MessageBlockedEvent, error) {
 
 // FromMessageBlockedEvent overwrites any union data inside the Event as the provided MessageBlockedEvent
 func (t *Event) FromMessageBlockedEvent(v MessageBlockedEvent) error {
-	v.EventType = "MessageBlockedEvent"
+	t.EventType = "MessageBlockedEvent"
+
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
@@ -157,7 +117,8 @@ func (t *Event) FromMessageBlockedEvent(v MessageBlockedEvent) error {
 
 // MergeMessageBlockedEvent performs a merge with any union data inside the Event, using the provided MessageBlockedEvent
 func (t *Event) MergeMessageBlockedEvent(v MessageBlockedEvent) error {
-	v.EventType = "MessageBlockedEvent"
+	t.EventType = "MessageBlockedEvent"
+
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -177,7 +138,8 @@ func (t Event) AsNewMessageEvent() (NewMessageEvent, error) {
 
 // FromNewMessageEvent overwrites any union data inside the Event as the provided NewMessageEvent
 func (t *Event) FromNewMessageEvent(v NewMessageEvent) error {
-	v.EventType = "NewMessageEvent"
+	t.EventType = "NewMessageEvent"
+
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
@@ -185,7 +147,8 @@ func (t *Event) FromNewMessageEvent(v NewMessageEvent) error {
 
 // MergeNewMessageEvent performs a merge with any union data inside the Event, using the provided NewMessageEvent
 func (t *Event) MergeNewMessageEvent(v NewMessageEvent) error {
-	v.EventType = "NewMessageEvent"
+	t.EventType = "NewMessageEvent"
+
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -205,7 +168,8 @@ func (t Event) AsMessageId() (MessageId, error) {
 
 // FromMessageId overwrites any union data inside the Event as the provided MessageId
 func (t *Event) FromMessageId(v MessageId) error {
-	v.EventType = "MessageId"
+	t.EventType = "MessageId"
+
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
@@ -213,7 +177,8 @@ func (t *Event) FromMessageId(v MessageId) error {
 
 // MergeMessageId performs a merge with any union data inside the Event, using the provided MessageId
 func (t *Event) MergeMessageId(v MessageId) error {
-	v.EventType = "MessageId"
+	t.EventType = "MessageId"
+
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -253,31 +218,64 @@ func (t Event) ValueByDiscriminator() (interface{}, error) {
 
 func (t Event) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	object := make(map[string]json.RawMessage)
+	if t.union != nil {
+		err = json.Unmarshal(b, &object)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	object["eventType"], err = json.Marshal(t.EventType)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'eventType': %w", err)
+	}
+
+	b, err = json.Marshal(object)
 	return b, err
 }
 
 func (t *Event) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
+	if err != nil {
+		return err
+	}
+	object := make(map[string]json.RawMessage)
+	err = json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["eventType"]; found {
+		err = json.Unmarshal(raw, &t.EventType)
+		if err != nil {
+			return fmt.Errorf("error reading 'eventType': %w", err)
+		}
+	}
+
 	return err
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8xWzW7bRhB+FWJaoBdaVNpLwFsS98coGgN1ewp8WJEjaePlLrs7lGsYBGKjlyIHX3ro",
-	"uS9QNYgQoU6UVxi+UbFLJpJiopBbBMlJy/2Zb75vZj7oHDJTlEajJgfpObhsioUIy3tKfTnz+9+IGX4l",
-	"UeVhu7SmREsSwxf6Gwe5X+boMitLkkZDCvw7P+cFv2ouedn8wkv+m+fNJa+aJ1FzwSv+q3kajq4GEMPY",
-	"2EIQpFBVMocY6KxESMGRlXoCMfy8NzF7siiNpZCCoCmkMJE0rUaDzBTJCWKZCVVIR0k2FbTn0M5khonU",
-	"hFYLlfiQDuouVgcQNgeB5cG+Pwx0fgiHNwj9wUt+3ZP8drJ1DAU6Jyb4X1TxoX/1Fz4OZb7rmARtLP5U",
-	"obttsfkFz/l184RXzQXPPzyl7zsW+1B3nKTFHNJHb1t5sws2WW8W9vht2mb0GDPyWKGNgjbSa1NILcjY",
-	"jZE5eygK/2Qdvo7BaDwcQ/roHD61OIYUPknWE5l045h0hThCTS1MHe/04L4y2Qnmu715iKfds1thHORQ",
-	"H/dI2Qm4lnUt5XEdQ1+G6TkIpXbQo8+bfLrvFGUDp23b9xV9XZj3AfJuYf43xraHi4qmxt52ruf8rF3y",
-	"/KNz9B8d2ta0RiY/6/XyBV/zahc3zywKwvwe9YT5LcjR8X/Bz3neOve/CZILwj2SBfaBSXfU0uwB+5Of",
-	"8XVzxYvmsrloriK+5uUWEC/857K5aC55wS/5VfOUX25wGhmjUOgbxhc02iS6mcdNpzuufQCpx8YnSZKU",
-	"P70v9El0VJW+otGDqaDogZKoKWobEGKYoXUtldmd4HwlalFKSOGLwZ3BEOLQBaEjE0fVyC8m2CP7AUWV",
-	"QxeNjY0mqNEKknoSBaNxg+iQpmhPpcNIUpQbdPoz8ir4lhc+hO90+BrpyIN4KVxptGtn4fPh0P9kRtOb",
-	"SStLJbPwMHnsfAJv/iXtPoedn7bKbZM5/BbqOuz7BkfrQrDtO/s4Q2XKwsvZ3oIYKqsghVOXJokymVBT",
-	"4yi9O7w7TE6dh/onAAD//1s/i3PaCQAA",
+	"H4sIAAAAAAAC/+xXwW7bRhD9FWJaoBdaVNpLwFsTF4VQJAbq9hT4sCJH4sbkLrs7lGsYBGKjlyIHX3ro",
+	"uT9QNYgQoU6UXxj+UbFLKZJtopVODQKdPF7Ozrz39g20ewGJLkqtUJGF+AJskmEhfPjNBBW5IJU2MbKQ",
+	"SpA2bqE0ukRD509FgRADusQfzkuEOgSt8GgE8bML+NzgCGL4LFp3iJbloydorRjjMSpq29ThVhse5To5",
+	"xXS7PU/xbLltpx6DFOqTcEVSohdjzdEJgk6QkqRWEAP/wXN+HzSXvOC/mpfNFc+b6x6EQD4dLBmpxlDX",
+	"IRj8qZIGU4ifbVQM23iQQpuB1sUndQhdrNf6b0IbpB3AfufXPON3HtEvPOe/edpc8aJ50QF2pE0hCGKo",
+	"KpneAx/CzwdjfSCLUpsWgqAMYhhLyqphL9FFdIpYJiIvpKUoyQQdWDQTmWAkFaFRIo9cSes84mstG/jF",
+	"nqc2OHQfiw+nsDMhR+lXl/BxkFr5ydNaH+wutPgNT/l984IXzSVP/39K3y9ZHHbb+Y6FNw/z5ANUPXyO",
+	"iZtGeLJ51HtT7039CZl6/dO29/be25+It+/eqOILEHm+/X3PXa3Cu+MgKsq02VXnKb9qQ55+dMPxo0XT",
+	"mmio0/POG+OMb3jx33fGEBKDgjD9mjrK/OblWPJ/w6952k7SvwmSCsIDkgV2NZP2uKXZ0exPfsU3zTXP",
+	"mqvmsrkO+IbntxrxzP07by6bK57xW37XvOS3G5yGWuco1D0jeo02iW7iuO/Ck9oVkGqkHUiSlLuvj4Q6",
+	"DY6r0p1o8DgTFDzOJSoKvFEthDBBY1sqkwf+oVKiEqWEGL7qPej1IfQu8I6MLFVDF4yxQ/YBBZVFG4y0",
+	"Ccao0AiSahz4ebK94IgyNGfSYiApSDVa9QU5FZzlhSvhnA7fIh27Jk4KW2pl21n4st93fxKtaDVfZZnL",
+	"xG+MnlsHYPVI2376ls+fVrnbZI6+g7r2687gaKwvdjvnECeY67JwcrZZEEJlcojhzMZRlOtE5Jm2FD/s",
+	"P+xHZ9a1+icAAP//2ekE+VkOAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

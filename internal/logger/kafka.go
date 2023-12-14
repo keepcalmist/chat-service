@@ -20,7 +20,7 @@ func (k *KafkaAdapted) Printf(s string, i ...interface{}) {
 		return
 	}
 
-	k.Logger.Info(fmt.Sprintf(s, i...))
+	k.Logger.Debug(fmt.Sprintf(s, i...))
 }
 
 func NewKafkaAdapted() *KafkaAdapted {

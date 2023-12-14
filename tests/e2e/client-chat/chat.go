@@ -248,7 +248,7 @@ func (c *Chat) HandleEvent(_ context.Context, data []byte) error {
 			return fmt.Errorf("unknown message: %v", vv.MessageId)
 		}
 
-		switch vv.EventType {
+		switch event.EventType {
 		case "MessageSentEvent":
 			msg.IsReceived = true
 
