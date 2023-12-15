@@ -105,7 +105,7 @@ type AfcVerdictsProcessor struct {
 	Consumers       int      `toml:"consumers" validate:"min=1,max=16"`
 	ConsumerGroup   string   `toml:"consumer_group" validate:"required"`
 	VerdictsTopic   string   `toml:"verdicts_topic" validate:"required"`
-	VerdictsSignKey string   `toml:"verdicts_sign_key"`
+	VerdictsSignKey string   `toml:"verdicts_signing_public_key"`
 
 	DLQTopic string `toml:"dlq_topic" validate:"required"`
 }
