@@ -151,3 +151,23 @@ func (s *ProblemsRepoSuite) createChatWithProblemAssignedTo(managerID types.User
 
 	return chat.ID, p.ID
 }
+
+func (s *ProblemsRepoSuite) Test_GetUnassignedProblems() {
+	for i := 0; i < 10; i++ {
+		chat, err := s.Database.Chat(s.Ctx).Create().SetClientID(types.NewUserID()).Save(s.Ctx)
+		s.Require().NoError(err)
+
+		_, err = s.Database.Problem(s.Ctx).
+			Create().
+			SetCreatedAt(time.Now().Add(time.Hour * time.Duration(i+1))).
+			SetChatID(chat.ID).
+			Save(s.Ctx)
+		s.Require().NoError(err)
+	}
+	problems, err := s.repo.GetUnassignedProblems(s.Ctx)
+	s.Require().NoError(err)
+
+	for i := 1; i < 10; i++ {
+		s.Require().True(problems[i-1].CreatedAt.Before(problems[i].CreatedAt))
+	}
+}

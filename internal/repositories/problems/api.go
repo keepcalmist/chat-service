@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	entSql "entgo.io/ent/dialect/sql"
+	"github.com/keepcalmist/chat-service/internal/store"
 
 	"github.com/keepcalmist/chat-service/internal/store/problem"
 	"github.com/keepcalmist/chat-service/internal/types"
@@ -48,4 +50,19 @@ func (r *Repo) GetManagerOpenProblemsCount(ctx context.Context, managerID types.
 			problem.ManagerID(managerID),
 			problem.ResolvedAtIsNil(),
 		).Count(ctx)
+}
+
+func (r *Repo) GetUnassignedProblems(ctx context.Context) ([]*Problem, error) {
+	problems, err := r.db.Problem(ctx).
+		Query().
+		Where(
+			problem.ManagerIDIsNil(),
+			problem.ResolvedAtIsNil(),
+		).Order(store.Asc(problem.FieldCreatedAt)).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get unassigned problems: %w", err)
+	}
+
+	return adaptStoreProblems(problems), nil
 }
