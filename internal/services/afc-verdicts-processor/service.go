@@ -211,7 +211,6 @@ func (s *Service) commitBatch(ctx context.Context, consumer KafkaReader, msgChan
 			}
 		}
 	}
-
 }
 
 func (s *Service) processMessage(ctx context.Context, msg kafka.Message) (err error) {
