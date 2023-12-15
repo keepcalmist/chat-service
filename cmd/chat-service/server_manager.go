@@ -14,6 +14,8 @@ import (
 	managerpool "github.com/keepcalmist/chat-service/internal/services/manager-pool"
 	canreceiveproblems "github.com/keepcalmist/chat-service/internal/usecases/manager/can-receive-problems"
 	freehands "github.com/keepcalmist/chat-service/internal/usecases/manager/free-hands"
+	websocketstream "github.com/keepcalmist/chat-service/internal/websocket-stream"
+	"github.com/keepcalmist/chat-service/pkg/shutdown"
 )
 
 const nameServerManager = "server-manager"
@@ -28,7 +30,23 @@ func initServerManager(
 	swag *openapi3.T,
 	managerLoadService *managerload.Service,
 	managerPoolService managerpool.Pool,
+	shutdownChan *shutdown.ShutDown,
+	secWsProtocol string,
 ) (*server.Server, error) {
+	wsHandler, err := websocketstream.NewHTTPHandler(
+		websocketstream.NewOptions(
+			zap.L(),
+			dummyEventStream{},
+			dummyAdapter{},
+			websocketstream.JSONEventWriter{},
+			websocketstream.NewUpgrader(allowOrigins, secWsProtocol),
+			shutdownChan.Done(),
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("init ws handler: %v", err)
+	}
+
 	keyCloakClient, err := keycloakclient.New(
 		keycloakclient.NewOptions(
 			keycloakConfig.BasePath,
@@ -70,6 +88,8 @@ func initServerManager(
 		role,
 		resource,
 		isProduction,
+		wsHandler,
+		shutdownChan,
 	), handlers)
 	if err != nil {
 		return nil, fmt.Errorf("build server: %v", err)

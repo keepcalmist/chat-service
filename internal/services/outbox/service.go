@@ -98,7 +98,7 @@ func (s *Service) startWorker(ctx context.Context) {
 			reservedJob, err := s.r.FindAndReserveJob(ctx, time.Now().Add(s.reserveFor))
 			if err != nil {
 				if errors.Is(err, jobsrepo.ErrNoJobs) {
-					s.logger.Info("sleeping", zap.Duration("idle_time", s.idleTime))
+					s.logger.Debug("sleeping", zap.Duration("idle_time", s.idleTime))
 					select {
 					case <-ctx.Done():
 						s.logger.Error("context done", zap.Error(ctx.Err()))

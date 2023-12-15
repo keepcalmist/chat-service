@@ -12,11 +12,15 @@ import (
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
 	"github.com/keepcalmist/chat-service/internal/server"
+	clientevents "github.com/keepcalmist/chat-service/internal/server/server-client/events"
 	clientv12 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
+	eventstream "github.com/keepcalmist/chat-service/internal/services/event-stream"
 	"github.com/keepcalmist/chat-service/internal/services/outbox"
 	"github.com/keepcalmist/chat-service/internal/store"
 	gethistory "github.com/keepcalmist/chat-service/internal/usecases/client/get-history"
 	sendmessage "github.com/keepcalmist/chat-service/internal/usecases/client/send-message"
+	websocketstream "github.com/keepcalmist/chat-service/internal/websocket-stream"
+	"github.com/keepcalmist/chat-service/pkg/shutdown"
 )
 
 const nameServerClient = "server-client"
@@ -34,7 +38,24 @@ func initServerClient(
 	msgRepository *messagesrepo.Repo,
 	problemRepository *problemsrepo.Repo,
 	outboxService *outbox.Service,
+	shutdownChan *shutdown.ShutDown,
+	secWsProtocol string,
+	service eventstream.EventStream,
 ) (*server.Server, error) {
+	wsHandler, err := websocketstream.NewHTTPHandler(
+		websocketstream.NewOptions(
+			zap.L(),
+			service,
+			clientevents.Adapter{},
+			websocketstream.JSONEventWriter{},
+			websocketstream.NewUpgrader(allowOrigins, secWsProtocol),
+			shutdownChan.Done(),
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("init ws handler: %v", err)
+	}
+
 	getHistoryUsecase, err := gethistory.New(
 		gethistory.NewOptions(msgRepository),
 	)
@@ -84,6 +105,8 @@ func initServerClient(
 		role,
 		resource,
 		isProduction,
+		wsHandler,
+		shutdownChan,
 	), v1Handlers)
 	if err != nil {
 		return nil, fmt.Errorf("build server: %v", err)

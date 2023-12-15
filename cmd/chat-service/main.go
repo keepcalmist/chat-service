@@ -19,12 +19,16 @@ import (
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
 	problemsrepo "github.com/keepcalmist/chat-service/internal/repositories/problems"
 	serverdebug "github.com/keepcalmist/chat-service/internal/server-debug"
+	clientevents "github.com/keepcalmist/chat-service/internal/server/server-client/events"
 	clientv1 "github.com/keepcalmist/chat-service/internal/server/server-client/v1"
 	managerv1 "github.com/keepcalmist/chat-service/internal/server/server-manager/v1"
+	afcverdictsprocessor "github.com/keepcalmist/chat-service/internal/services/afc-verdicts-processor"
+	inmemeventstream "github.com/keepcalmist/chat-service/internal/services/event-stream/in-mem"
 	managerload "github.com/keepcalmist/chat-service/internal/services/manager-load"
 	inmemmanagerpool "github.com/keepcalmist/chat-service/internal/services/manager-pool/in-mem"
 	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
 	"github.com/keepcalmist/chat-service/internal/store"
+	"github.com/keepcalmist/chat-service/pkg/shutdown"
 )
 
 var configPath = flag.String("config", "configs/config.toml", "Path to config file")
@@ -87,12 +91,17 @@ func run() (errReturned error) {
 	if err != nil {
 		return fmt.Errorf("get manager swagger: %v", err)
 	}
+	eventsSchema, err := clientevents.GetSwagger()
+	if err != nil {
+		return fmt.Errorf("get events swagger: %v", err)
+	}
 
 	srvDebug, err := serverdebug.New(
 		serverdebug.NewOptions(
 			cfg.Servers.Debug.Addr,
 			clientSwagger,
 			managerSwagger,
+			eventsSchema,
 			serverdebug.WithLvlSetter(setLevel)),
 	)
 	if err != nil {
@@ -160,9 +169,41 @@ func run() (errReturned error) {
 
 	poolService := inmemmanagerpool.New()
 
-	outbox, err := initOutbox(cfg.Services, database, repoJobs, repoMsg, producer)
+	shutdownChan := shutdown.NewShutDown()
+
+	inmemStream := inmemeventstream.New()
+
+	outboxService, err := initOutbox(
+		cfg.Services,
+		database,
+		repoJobs,
+		repoMsg,
+		producer,
+		inmemStream,
+	)
 	if err != nil {
 		return fmt.Errorf("init outbox: %v", err)
+	}
+
+	afcProceessor, err := afcverdictsprocessor.New(afcverdictsprocessor.NewOptions(
+		cfg.Services.AfcVerdictsProcessor.Brokers,
+		cfg.Services.AfcVerdictsProcessor.Consumers,
+		cfg.Services.AfcVerdictsProcessor.ConsumerGroup,
+		cfg.Services.AfcVerdictsProcessor.VerdictsTopic,
+		afcverdictsprocessor.NewKafkaReader,
+		afcverdictsprocessor.NewKafkaDLQWriter(
+			cfg.Services.AfcVerdictsProcessor.Brokers,
+			cfg.Services.AfcVerdictsProcessor.DLQTopic,
+		),
+		database,
+		repoMsg,
+		outboxService,
+		afcverdictsprocessor.WithVerdictsSignKey(cfg.Services.AfcVerdictsProcessor.VerdictsSignKey),
+		afcverdictsprocessor.WithBackoffInitialInterval(cfg.Services.AfcVerdictsProcessor.BackoffInitialInterval),
+		afcverdictsprocessor.WithBackoffMaxElapsedTime(cfg.Services.AfcVerdictsProcessor.BackoffMaxElapsedTime),
+	))
+	if err != nil {
+		return fmt.Errorf("init afc processor: %v", err)
 	}
 
 	srvManager, err := initServerManager(
@@ -175,6 +216,8 @@ func run() (errReturned error) {
 		managerSwagger,
 		managerLoadService,
 		poolService,
+		shutdownChan,
+		cfg.Servers.Manager.SecWSProtocol,
 	)
 	if err != nil {
 		return fmt.Errorf("init manager server: %v", err)
@@ -192,7 +235,10 @@ func run() (errReturned error) {
 		repoChat,
 		repoMsg,
 		repoProblems,
-		outbox,
+		outboxService,
+		shutdownChan,
+		cfg.Servers.Manager.SecWSProtocol,
+		inmemStream,
 	)
 	if err != nil {
 		return fmt.Errorf("init client server: %v", err)
@@ -203,10 +249,8 @@ func run() (errReturned error) {
 	eg.Go(func() error { return srvDebug.Run(ctx) })
 	eg.Go(func() error { return srvClient.Run(ctx) })
 	eg.Go(func() error { return srvManager.Run(ctx) })
-	eg.Go(func() error { return outbox.Run(ctx) })
-	// Run services.
-	// Ждут своего часа.
-	// ...
+	eg.Go(func() error { return outboxService.Run(ctx) })
+	eg.Go(func() error { return afcProceessor.Run(ctx) })
 
 	if err = eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return fmt.Errorf("wait app stop: %v", err)

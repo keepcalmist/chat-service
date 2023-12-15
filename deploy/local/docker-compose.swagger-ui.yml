@@ -11,9 +11,11 @@ services:
     environment:
       URLS: '[
       {name:"client-apiv1", url:"swagger-client-apiv1.yml"},
-      {name:"manager-apiv1", url:"swagger-manager-apiv1.yml"}
+      {name:"manager-apiv1", url:"swagger-manager-apiv1.yml"},
+      {name:"client-events", url:"swagger-client-events-apiv1.yml"}
       ]'
     volumes:
       - ../../api/client.v1.swagger.yml:/usr/share/nginx/html/swagger-client-apiv1.yml
       - ../../api/manager.v1.swagger.yml:/usr/share/nginx/html/swagger-manager-apiv1.yml
+      - ../../api/client.events.swagger.yml:/usr/share/nginx/html/swagger-client-events-apiv1.yml
 

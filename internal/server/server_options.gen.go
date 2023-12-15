@@ -8,6 +8,7 @@ import (
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 	"github.com/keepcalmist/chat-service/internal/middlewares"
+	"github.com/keepcalmist/chat-service/pkg/shutdown"
 	"go.uber.org/zap"
 )
 
@@ -22,6 +23,8 @@ func NewOptions(
 	role string,
 	resource string,
 	isProduction bool,
+	wsHandler wsHandler,
+	wsShutdown *shutdown.ShutDown,
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
@@ -36,6 +39,8 @@ func NewOptions(
 	o.role = role
 	o.resource = resource
 	o.isProduction = isProduction
+	o.wsHandler = wsHandler
+	o.wsShutdown = wsShutdown
 
 	for _, opt := range options {
 		opt(&o)
@@ -52,6 +57,8 @@ func (o *Options) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("introspector", _validate_Options_introspector(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("role", _validate_Options_role(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("resource", _validate_Options_resource(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("wsHandler", _validate_Options_wsHandler(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("wsShutdown", _validate_Options_wsShutdown(o)))
 	return errs.AsError()
 }
 
@@ -100,6 +107,20 @@ func _validate_Options_role(o *Options) error {
 func _validate_Options_resource(o *Options) error {
 	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.resource, "required"); err != nil {
 		return fmt461e464ebed9.Errorf("field `resource` did not pass the test: %w", err)
+	}
+	return nil
+}
+
+func _validate_Options_wsHandler(o *Options) error {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.wsHandler, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `wsHandler` did not pass the test: %w", err)
+	}
+	return nil
+}
+
+func _validate_Options_wsShutdown(o *Options) error {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.wsShutdown, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `wsShutdown` did not pass the test: %w", err)
 	}
 	return nil
 }

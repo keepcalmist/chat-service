@@ -43,6 +43,7 @@ class App {
 
                 this.apiClient = new APIClient(this.clientToken);
 
+                initWsStream(this.clientToken);
                 App.GetLastMessages();
                 App.InitListeners();
             })
@@ -54,7 +55,6 @@ class App {
     static GetLastMessages() {
         this.apiClient.getHistory(this.historyCursor)
             .then((result) => {
-                console.log("-----------",result)
                 this.historyCursor = result.next;
 
                 for (const m of result.messages.reverse()) {

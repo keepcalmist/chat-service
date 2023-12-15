@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	messagesrepo "github.com/keepcalmist/chat-service/internal/repositories/messages"
+	eventstream "github.com/keepcalmist/chat-service/internal/services/event-stream"
 	msgproducer "github.com/keepcalmist/chat-service/internal/services/msg-producer"
 	"github.com/keepcalmist/chat-service/internal/services/outbox"
 	"github.com/keepcalmist/chat-service/internal/types"
@@ -25,6 +26,10 @@ type messageRepository interface {
 	GetMessageByID(ctx context.Context, msgID types.MessageID) (*messagesrepo.Message, error)
 }
 
+type eventStream interface {
+	Publish(ctx context.Context, userID types.UserID, event eventstream.Event) error
+}
+
 //go:generate options-gen -out-filename=job_options.gen.go -from-struct=Options
 type Options struct {
 	msgRepo          messageRepository `option:"mandatory"  validate:"required"`
@@ -32,6 +37,7 @@ type Options struct {
 	executionTimeout time.Duration     `option:"default=0"`
 	maxAttempts      int               `option:"default=0"`
 	logger           *zap.Logger
+	eventStream      eventStream `option:"mandatory" validate:"required"`
 }
 
 type Job struct {
@@ -87,6 +93,20 @@ func (j *Job) Handle(ctx context.Context, payload string) error {
 	}
 
 	j.logger.Info("message produced", zap.Stringer("message", msgToProduce))
+
+	err = j.eventStream.Publish(ctx, msg.AuthorID, eventstream.NewNewMessageEvent(
+		types.NewEventID(),
+		msg.RequestID,
+		msg.ChatID,
+		msg.ID,
+		msg.AuthorID,
+		msg.CreatedAt,
+		msg.Body,
+		msg.IsService,
+	))
+	if err != nil {
+		return fmt.Errorf("failed to publish event in <%s> job: %w", Name, err)
+	}
 
 	return nil
 }

@@ -13,9 +13,10 @@ type Config struct {
 }
 
 type Services struct {
-	MsgProducer MsgProducer `toml:"msg_producer"`
-	Outbox      Outbox      `toml:"outbox"`
-	ManagerLoad ManagerLoad `toml:"manager_load"`
+	MsgProducer          MsgProducer          `toml:"msg_producer"`
+	Outbox               Outbox               `toml:"outbox"`
+	ManagerLoad          ManagerLoad          `toml:"manager_load"`
+	AfcVerdictsProcessor AfcVerdictsProcessor `toml:"afc_verdicts_processor"`
 }
 
 type ManagerLoad struct {
@@ -52,12 +53,14 @@ type ServersConfig struct {
 type ManagerServerConfig struct {
 	Addr           string         `toml:"addr" validate:"required,hostname_port"`
 	AllowOrigins   []string       `toml:"allow_origins" validate:"required,dive,url"`
+	SecWSProtocol  string         `toml:"sec_ws_protocol" validate:"required"`
 	RequiredAccess RequiredAccess `toml:"required_access" validate:"required,dive"`
 }
 
 type ClientServerConfig struct {
 	Addr           string         `toml:"addr" validate:"required,hostname_port"`
 	AllowOrigins   []string       `toml:"allow_origins" validate:"required,dive,url"`
+	SecWSProtocol  string         `toml:"sec_ws_protocol" validate:"required"`
 	RequiredAccess RequiredAccess `toml:"required_access" validate:"required,dive"`
 }
 
@@ -92,6 +95,19 @@ type Postgres struct {
 	Password string `toml:"password" validate:"required"`
 	Database string `toml:"database" validate:"required"`
 	Debug    bool   `toml:"debug" validate:""`
+}
+
+type AfcVerdictsProcessor struct {
+	BackoffInitialInterval time.Duration `toml:"backoff_initial_interval" validate:"min=50ms,max=1s"`
+	BackoffMaxElapsedTime  time.Duration `toml:"backoff_max_elapsed_time" validate:"min=500ms,max=1m"`
+
+	Brokers         []string `toml:"brokers" validate:"min=1"`
+	Consumers       int      `toml:"consumers" validate:"min=1,max=16"`
+	ConsumerGroup   string   `toml:"consumer_group" validate:"required"`
+	VerdictsTopic   string   `toml:"verdicts_topic" validate:"required"`
+	VerdictsSignKey string   `toml:"verdicts_signing_public_key"`
+
+	DLQTopic string `toml:"dlq_topic" validate:"required"`
 }
 
 func (c GlobalConfig) IsProduction() bool {

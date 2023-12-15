@@ -1,0 +1,101 @@
+openapi: 3.1.0
+info:
+  title: Bank Support Chat Client Events
+  version: v1
+
+servers:
+  - url: ws://localhost:8080/ws
+    description: Development server
+paths:
+  /stub:
+    get:
+      description: It uses for generating events. Otherwise it doesn't.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Event'
+
+components:
+  schemas:
+    Event:
+      required: [ eventType, eventId, requestId ]
+      oneOf:
+        - $ref: "#/components/schemas/MessageSentEvent"
+        - $ref: "#/components/schemas/MessageBlockedEvent"
+        - $ref: "#/components/schemas/NewMessageEvent"
+        - $ref: "#/components/schemas/MessageId"
+      properties:
+        eventType:
+          type: string
+          description: Тип события.
+      discriminator:
+        propertyName: eventType
+
+    NewMessageEvent:
+      allOf:
+      - $ref: "#/components/schemas/MessageId"
+      - type: object
+        required:
+          - body
+          - createdAt
+          - isService
+        properties:
+          authorId:
+            type: string
+            format: uuid
+            x-go-type: types.UserID
+            x-go-import:
+              path: "github.com/keepcalmist/chat-service/internal/types"
+            description: Идентификатор автора события.
+          body:
+            type: string
+            description: Тело события.
+          createdAt:
+            type: string
+            format: date-time
+            description: Дата создания события.
+          isService:
+            type: boolean
+            description: Является ли событие системным.
+
+    MessageSentEvent:
+      $ref: "#/components/schemas/MessageId"
+
+    MessageBlockedEvent:
+      $ref: "#/components/schemas/MessageId"
+
+    MessageId:
+      type: object
+      required:
+        - eventId
+        - requestId
+        - messageId
+      properties:
+        eventId:
+          type: string
+          format: uuid
+          x-go-type: types.EventID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
+          description: Идентификатор события.
+        requestId:
+          type: string
+          format: uuid
+          x-go-type: types.RequestID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
+          description: Идентификатор запроса.
+        messageId:
+          type: string
+          format: uuid
+          x-go-type: types.MessageID
+          x-go-import:
+            path: "github.com/keepcalmist/chat-service/internal/types"
+          description: Идентификатор сообщения.
+
+
+
