@@ -127,7 +127,7 @@ func (s *ServiceIntegrationSuite) SetupTest() {
 		msgRepo,
 		outboxSvc,
 		afcverdictsprocessor.WithVerdictsSignKey(s.SignPubKey),
-		// afcverdictsprocessor.WithProcessBatchSize(4),
+		afcverdictsprocessor.WithProcessBatchSize(4),
 	))
 	s.Require().NoError(err)
 }
@@ -239,7 +239,7 @@ func (s *ServiceIntegrationSuite) runProcessor() (context.CancelFunc, <-chan err
 	go func() { errCh <- s.svc.Run(ctx) }()
 
 	// Waiting for rebalance.
-	time.Sleep(2 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	return cancel, errCh
 }

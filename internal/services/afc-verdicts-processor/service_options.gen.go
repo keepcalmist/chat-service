@@ -28,6 +28,7 @@ func NewOptions(
 	// Setting defaults from field tag (if present)
 	o.backoffInitialInterval, _ = time.ParseDuration("100ms")
 	o.backoffMaxElapsedTime, _ = time.ParseDuration("5s")
+	o.processBatchSize = 1
 
 	o.brokers = brokers
 	o.consumers = consumers
@@ -63,6 +64,12 @@ func WithVerdictsSignKey(opt string) OptOptionsSetter {
 	}
 }
 
+func WithProcessBatchSize(opt int) OptOptionsSetter {
+	return func(o *Options) {
+		o.processBatchSize = opt
+	}
+}
+
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
 	errs.Add(errors461e464ebed9.NewValidationError("backoffInitialInterval", _validate_Options_backoffInitialInterval(o)))
@@ -76,6 +83,7 @@ func (o *Options) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("txtor", _validate_Options_txtor(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("msgRepo", _validate_Options_msgRepo(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("outBox", _validate_Options_outBox(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("processBatchSize", _validate_Options_processBatchSize(o)))
 	return errs.AsError()
 }
 
@@ -152,6 +160,13 @@ func _validate_Options_msgRepo(o *Options) error {
 func _validate_Options_outBox(o *Options) error {
 	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.outBox, "required"); err != nil {
 		return fmt461e464ebed9.Errorf("field `outBox` did not pass the test: %w", err)
+	}
+	return nil
+}
+
+func _validate_Options_processBatchSize(o *Options) error {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.processBatchSize, "min=1,max=100"); err != nil {
+		return fmt461e464ebed9.Errorf("field `processBatchSize` did not pass the test: %w", err)
 	}
 	return nil
 }

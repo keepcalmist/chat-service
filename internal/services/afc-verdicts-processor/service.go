@@ -50,9 +50,10 @@ type Options struct {
 	readerFactory KafkaReaderFactory `option:"mandatory" validate:"required"`
 	dlqWriter     KafkaDLQWriter     `option:"mandatory" validate:"required"`
 
-	txtor   transactor         `option:"mandatory" validate:"required"`
-	msgRepo messagesRepository `option:"mandatory" validate:"required"`
-	outBox  outboxService      `option:"mandatory" validate:"required"`
+	txtor            transactor         `option:"mandatory" validate:"required"`
+	msgRepo          messagesRepository `option:"mandatory" validate:"required"`
+	outBox           outboxService      `option:"mandatory" validate:"required"`
+	processBatchSize int                `default:"1" validate:"min=1,max=100"`
 }
 
 type Service struct {
@@ -107,9 +108,13 @@ func (s *Service) runConsumer(ctx context.Context) error {
 	consumer := s.readerFactory(s.brokers, s.consumerGroup, s.verdictsTopic)
 	defer consumer.Close()
 
-	exponentialBackOff := backoff.NewExponentialBackOff()
+	exponentialBackOff := backoff.NewExponentialBackOff() //Implementation is not thread-safe.
 	exponentialBackOff.InitialInterval = s.backoffInitialInterval
 	exponentialBackOff.MaxElapsedTime = s.backoffMaxElapsedTime
+
+	msgToCommitChan := make(chan kafka.Message, s.processBatchSize)
+
+	go func() { s.commitBatch(ctx, consumer, msgToCommitChan) }()
 
 	for {
 		select {
@@ -166,10 +171,47 @@ func (s *Service) runConsumer(ctx context.Context) error {
 			}
 		}
 
-		if err = consumer.CommitMessages(ctx, msg); err != nil {
-			return fmt.Errorf("failed to commit message: %w", err)
+		msgToCommitChan <- msg
+	}
+}
+
+func (s *Service) commitBatch(ctx context.Context, consumer KafkaReader, msgChan <-chan kafka.Message) {
+	msgs := make([]kafka.Message, 0, s.processBatchSize)
+	defer func() {
+		if len(msgs) > 0 {
+			if err := consumer.CommitMessages(ctx, msgs...); err != nil {
+				s.logger.Error("failed to commit messages", zap.Error(err))
+			}
+		}
+	}()
+
+	commitWithClear := func(msg ...kafka.Message) {
+		if err := consumer.CommitMessages(ctx, msgs...); err != nil {
+			s.logger.Error("failed to commit messages", zap.Error(err))
+		}
+
+		msgs = msgs[:0]
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			s.logger.Info("context done, stopping afc_verdicts_processor")
+			return
+		case msg := <-msgChan:
+			msgs = append(msgs, msg)
+
+			if len(msgs) == s.processBatchSize {
+				commitWithClear(msgs...)
+			}
+
+		case <-time.After(200 * time.Millisecond):
+			if len(msgs) > 0 {
+				commitWithClear(msgs...)
+			}
 		}
 	}
+
 }
 
 func (s *Service) processMessage(ctx context.Context, msg kafka.Message) (err error) {
