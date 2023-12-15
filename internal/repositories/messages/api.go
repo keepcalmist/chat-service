@@ -68,3 +68,25 @@ func (r *Repo) CreateClientVisible(
 
 	return r.GetMessageByRequestID(ctx, reqID)
 }
+
+func (r *Repo) CreateServiceMessage(
+	ctx context.Context,
+	requestID types.RequestID,
+	chatID types.ChatID,
+	problemID types.ProblemID,
+	msgBody string,
+) (*Message, error) {
+	err := r.db.Message(ctx).Create().
+		SetChatID(chatID).
+		SetInitialRequestID(requestID).
+		SetProblemID(problemID).
+		SetBody(msgBody).
+		SetIsVisibleForClient(true).
+		SetIsService(true).
+		OnConflict(sql.DoNothing()).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.GetMessageByRequestID(ctx, requestID)
+}

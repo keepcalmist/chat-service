@@ -188,3 +188,16 @@ func (s *MsgRepoAPISuite) createProblemAndChat(clientID types.UserID) (types.Pro
 
 	return problem.ID, chat.ID
 }
+
+func (s *MsgRepoAPISuite) Test_CreateClientVisible_ServiceMessage() {
+	authorID := types.NewUserID()
+
+	// Create chat and problem.
+	problemID, chatID := s.createProblemAndChat(authorID)
+
+	initialRequestID := types.NewRequestID()
+
+	msg, err := s.repo.CreateServiceMessage(s.Ctx, initialRequestID, chatID, problemID, msgBody)
+	s.Require().NoError(err)
+	s.Require().Equal(msgBody, msg.Body)
+}
