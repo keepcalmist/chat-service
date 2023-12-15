@@ -108,7 +108,7 @@ func (s *Service) runConsumer(ctx context.Context) error {
 	consumer := s.readerFactory(s.brokers, s.consumerGroup, s.verdictsTopic)
 	defer consumer.Close()
 
-	exponentialBackOff := backoff.NewExponentialBackOff() //Implementation is not thread-safe.
+	exponentialBackOff := backoff.NewExponentialBackOff() // Implementation is not thread-safe.
 	exponentialBackOff.InitialInterval = s.backoffInitialInterval
 	exponentialBackOff.MaxElapsedTime = s.backoffMaxElapsedTime
 
