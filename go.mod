@@ -1,6 +1,6 @@
 module github.com/keepcalmist/chat-service
 
-go 1.20
+go 1.21
 
 require (
 	entgo.io/ent v0.12.4
