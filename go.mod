@@ -32,6 +32,7 @@ require (
 	github.com/segmentio/kafka-go v0.4.45
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/goleak v1.3.0
+	go.uber.org/mock v0.4.0
 	go.uber.org/multierr v1.10.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/sync v0.4.0
