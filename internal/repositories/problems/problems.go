@@ -13,13 +13,13 @@ type Problem struct {
 	CreatedAt time.Time
 }
 
-func adaptStoreProblems(ps []*store.Problem) []*Problem {
-	problems := make([]*Problem, 0, len(ps))
-	for _, p := range ps {
-		problems = append(problems, adaptStoreProblem(p))
+func adaptStoreProblems(problems []*store.Problem) []*Problem {
+	adapted := make([]*Problem, 0, len(problems))
+	for _, problem := range problems {
+		adapted = append(adapted, adaptStoreProblem(problem))
 	}
 
-	return problems
+	return adapted
 }
 
 func adaptStoreProblem(p *store.Problem) *Problem {
