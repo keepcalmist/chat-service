@@ -8,6 +8,8 @@ import (
 
 	entSql "entgo.io/ent/dialect/sql"
 	"github.com/keepcalmist/chat-service/internal/store"
+	"github.com/keepcalmist/chat-service/internal/store/chat"
+	"github.com/keepcalmist/chat-service/internal/store/message"
 
 	"github.com/keepcalmist/chat-service/internal/store/problem"
 	"github.com/keepcalmist/chat-service/internal/types"
@@ -65,4 +67,64 @@ func (r *Repo) GetUnassignedProblems(ctx context.Context) ([]*Problem, error) {
 	}
 
 	return adaptStoreProblems(problems), nil
+}
+
+func (r *Repo) SetManagerForProblem(
+	ctx context.Context,
+	problemID types.ProblemID,
+	managerID types.UserID,
+) error {
+	err := r.db.Problem(ctx).UpdateOneID(problemID).SetManagerID(managerID).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to set manager for problem: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Repo) GetManagerID(ctx context.Context, problemID types.ProblemID) (types.UserID, error) {
+	p, err := r.db.Problem(ctx).Get(ctx, problemID)
+	if err != nil {
+		return types.UserIDNil, fmt.Errorf("failed to set manager for problem: %w", err)
+	}
+
+	return *p.ManagerID, nil
+}
+
+func (r *Repo) GetClientId(ctx context.Context, problemID types.ProblemID) (types.UserID, error) {
+	chatWithProblem, err := r.db.Chat(ctx).
+		Query().
+		Where(chat.HasProblemsWith(problem.IDEQ(problemID))).
+		Only(ctx)
+	if err != nil {
+		return types.UserIDNil, fmt.Errorf("failed to set manager for problem: %w", err)
+	}
+
+	return chatWithProblem.ClientID, nil
+}
+
+func (r *Repo) GetRequestID(
+	ctx context.Context,
+	problemID types.ProblemID,
+) (types.RequestID, error) {
+	p, err := r.db.Problem(ctx).Query().Where(problem.ID(problemID)).Only(ctx)
+	if err != nil {
+		return types.RequestIDNil, fmt.Errorf("failed to get problem: %w", err)
+	}
+	chat, err := r.db.Chat(ctx).Get(ctx, p.ChatID)
+	if err != nil {
+		return types.RequestIDNil, fmt.Errorf("failed to get chat: %w", err)
+	}
+
+	msg, err := r.db.Message(ctx).
+		Query().
+		Unique(true).
+		Where(message.ChatIDEQ(chat.ID)).
+		Order(store.Desc(message.FieldID)).
+		First(ctx)
+	if err != nil {
+		return types.RequestIDNil, fmt.Errorf("failed to get messages: %w", err)
+	}
+
+	return msg.InitialRequestID, nil
 }
