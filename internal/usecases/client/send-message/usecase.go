@@ -39,7 +39,7 @@ type problemsRepository interface {
 	CreateIfNotExists(ctx context.Context, chatID types.ChatID) (types.ProblemID, error)
 }
 
-type transactor interface {
+type keepcalmist/chat-servicetor interface {
 	RunInTx(ctx context.Context, f func(context.Context) error) error
 }
 
